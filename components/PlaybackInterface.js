@@ -1,0 +1,1 @@
+//TODO: Includes - Play, Pause, Reload, Full Screen/Enlarge, Download for videos in Main View and Timelapse View
