@@ -36,9 +36,7 @@ export default class MainNav extends Component {
     render() {
         return (
           <View style={styles.container}>
-            <View style={styles.overlay}>
-                <Text style={styles.alert}>{this.state.alert}</Text>
-            </View>
+            <View style={styles.overlay}></View>
             <View style={styles.nav}>
                 <View style={styles.touchContainer} >
                     <NavButton call={this.timelapse} title={'Create Timelapse'} />
@@ -60,6 +58,7 @@ const styles = StyleSheet.create({
      position: 'absolute',
      bottom: 0,
      left: 0,
+     width
     },
     overlay: {
         backgroundColor: 'rgba(0,0,0,0.5)',
@@ -69,11 +68,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.9)',
         borderTopWidth: 0.8,
         borderColor: 'lightgrey',
-        height: 380,
+        height: 350,
     },
     alert: {
-        color: '#ADF5FF',
-        fontSize: 20,
+        color: 'white',
+        fontSize: 26,
     },
     touchContainer: {
         marginTop: 20,

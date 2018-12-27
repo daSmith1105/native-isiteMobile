@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: 'lightgrey',
         height: 46,
-        width: 96,
+        width: 98,
     },
     innerContent: {
         flexDirection: 'row'

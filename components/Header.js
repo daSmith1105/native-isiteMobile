@@ -31,16 +31,16 @@ const styles = StyleSheet.create({
         height: 120, 
         alignItems: 'flex-start',
         backgroundColor: 'white',
-        paddingTop: 26,
         width
     },
     logosContainer: {
         flexDirection: 'row',
-        alignItems: 'space-evenly',
+        alignItems: 'flex-start',
+        paddingTop: 20,
     },
     companyLogo: {
         width: 220,
-        height: 50,
+        height: 60,
         marginRight: 22,
         flex: 3,
     },
