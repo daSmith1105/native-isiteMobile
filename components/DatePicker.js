@@ -1,1 +1,0 @@
-// TODO: Used to select date on MainScreen and TimelapseScreen

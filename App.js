@@ -1,20 +1,19 @@
-import React from 'react';
-import { StyleSheet, View, StatusBar } from 'react-native';
-import MainNav from './navigation/MainNav';
-import MainScreen from './screens/MainScreen';
+//TODO: implement navigation to handle login and redirect to main screen
 
-export default class App extends React.Component {
-  state = {
-    loading: false
-  };
+import React from 'react';
+import { StyleSheet, StatusBar, View } from 'react-native';
+import MainScreen from './src/screens/MainScreen';
+
+class App extends React.Component {
 
   render() {
       return (
-        <View style={styles.container}>
-          <StatusBar hidden={true} style={styles.statusBar}/>
-          <MainScreen />
-          {/* <MainNav /> */}
-        </View>
+            <View style={ styles.container }>
+              {/* Main app view */}
+              <MainScreen />
+              {/* Hide the top status bar on ios */}
+              <StatusBar hidden={ true } style={ styles.statusBar }/>
+            </View>
       );
     }
   }
@@ -27,3 +26,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0)',
   },
 });
+
+
+export default App;

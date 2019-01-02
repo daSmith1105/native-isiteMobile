@@ -1,21 +1,24 @@
 
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Text, Image } from 'react-native';
+import { StyleSheet, View, TouchableHighlight, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const width = '100%';
 
 export default function MediaElementHeader (props) {
 
+    const { date, time, download } = props;
+
     return (
-        <View style={styles.mediaHeader}>
-            <View style={styles.dateTime}>
-                <Text style={styles.date}>{props.date}</Text>
-                <Text style={styles.time}>{props.time}</Text>
+        <View style={ styles.mediaHeader }>
+            
+            <View style={ styles.dateTime }>
+                <Text style={ styles.date }>{ date }</Text>
+                <Text style={ styles.time }>{ time }</Text>
             </View>
-            <TouchableHighlight onPress={props.download} style={styles.download}>
+            <TouchableHighlight onPress={ download } style={ styles.download}>
                 <Icon name="arrow-circle-down" size={ 20 } color="white" />
             </TouchableHighlight>
+
         </View>
     );
   }
@@ -24,7 +27,6 @@ export default function MediaElementHeader (props) {
 const styles = StyleSheet.create({
   mediaHeader: {
     height: 30,
-    width: 280,
     backgroundColor: 'rgba(0,0,0,.6)',
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
@@ -32,6 +34,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingRight: 10,
     paddingLeft: 10,
+    position: 'absolute',
+    top: -30,
+    left: 0,
+    width: '100%',
   },
   dateTime: {
     flexDirection: 'row',
@@ -50,10 +56,7 @@ const styles = StyleSheet.create({
   },
   download: {
     justifyContent: 'center',
-  },
-  image: {
-    width: 280,
-    height: 170,
-    
+    paddingLeft: 5,
+    paddingRight: 5,
   },
 });

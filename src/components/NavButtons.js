@@ -1,30 +1,36 @@
 //TODO: Setup basic parameters for all nav buttons
 
 import React from 'react';
-import { StyleSheet, Text, TouchableHighlight } from 'react-native';
+import { StyleSheet, Text, TouchableHighlight, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const width = '90%';
 
    const NavButton = ( props => {
         return (
-            <TouchableHighlight onPress={ props.call } style={styles.navButton}>
-                <Text style={styles.navButtonText}>{props.title}</Text>
+            <TouchableHighlight onPress={ props.call } style={ styles.navButton }>
+                <Text style={ styles.navButtonText }>{ props.title }</Text>
             </TouchableHighlight>
         )
     });
 
     const NavCloseButton = ( props => {
         return (
-            <TouchableHighlight onPress={ props.call } style={styles.navClose}>
-                <Text style={styles.navCloseText}>{props.title}</Text>
+            <TouchableHighlight onPress={ props.call } style={ styles.navClose }>
+                <Text style={ styles.navCloseText }>{ props.title }</Text>
             </TouchableHighlight>
         )
     });
 
-   
+    const Hamburger = ( props => {
+        return (
+            <TouchableOpacity onPress={ props.call } style={ styles.hamburger }>
+                <Icon name="bars" size={ 34 } color="black" style={ styles.hambergerIcon } />
+            </TouchableOpacity>
+        )
+    });
 
-    export { NavButton, NavCloseButton};
+    export { NavButton, NavCloseButton, Hamburger };
 
 const styles = StyleSheet.create({
     navButton: {
@@ -50,5 +56,8 @@ const styles = StyleSheet.create({
     navCloseText: {
         fontSize: 32,
         color: 'white',
+    },
+    hamburger: {
+        marginTop: -16,
     },
 });
