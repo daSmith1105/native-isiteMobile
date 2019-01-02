@@ -7,19 +7,34 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import Touchable from '@appandflow/touchable';
 import QuickPicker from 'quick-picker';
+import PickerTopRow from './PickerTopRow';
 
 function DateSelect (props) {
+
+    confirmDate = () => {
+        console.log('date confirmed')
+        QuickPicker.close()
+    }
+
+    closeDate = () => {
+        QuickPicker.close()
+    }
    
     const { date, setDate } = props;
+
     _onPress = () => {
         const today = new Date;
 
         QuickPicker.open({ 
             pickerType: "date",
             mode: 'date',
-            doneButtonText: 'SELECT DATE',
-            selectedValue: new Date,
-            maximumDate: new Date,
+            topRow: <PickerTopRow   pickerTitle={'Select Date'} 
+                                    pickerConfirm={'SELECT'}
+                                    close={ closeDate }
+                                    confirm={ confirmDate }
+                                    confirmText={'CONFIRM'} />,
+            selectedValue: today,
+            maximumDate: today,
             onValueChange: (selectedValueFromPicker) => setDate( selectedValueFromPicker.toString().slice(0,15) ),
         });
     }
@@ -27,8 +42,6 @@ function DateSelect (props) {
     _onClose = () => {
         QuickPicker.close()
     }
-
-    const today = (new Date).toString().slice(6);
 
     return (
         <View style={ styles.dateSelect }>

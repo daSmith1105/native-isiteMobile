@@ -50,15 +50,14 @@ export default class MainScreen extends React.Component {
     this.fetchNewByDate()
   }
 
-
 // Fetch all events by date and save filtered results to state
   fetchNewByDate() {
     this.setState({
         loading: true,
         error: false
     });
-
-    // let proxy = 'https://cors-anywhere.herokuapp.com/';
+              // May need this proxy:
+              // let proxy = 'https://cors-anywhere.herokuapp.com/';
 
     fetch( this.state.siteURL + `ajax.php?action=getEvents&date=` + this.state.date)
     .then( response => {

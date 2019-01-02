@@ -3,6 +3,7 @@ import { StyleSheet, View, Text } from 'react-native';
 import { WebBrowser } from 'expo';
 import { NavButton, NavCloseButton } from '../components/NavButtons';
 import QuickPicker from 'quick-picker';
+import PickerTopRow from '../components/PickerTopRow';
 
 const width = '100%';
 
@@ -30,12 +31,25 @@ export default function MainNav (props) {
         WebBrowser.openBrowserAsync('http://www.dividia.net');
     }
 
+    confirmCamSelect = () => {
+        console.log('camera selection confirmed')
+        QuickPicker.close()
+    }
+
+    closeCamSelect = () => {
+        QuickPicker.close()
+    }
+
     const _onPress = () => {
         console.log('Cam Select clicked!');
         toggleNav();
         QuickPicker.open({ 
             items: availableCams, 
-            doneButtonText: 'SELECT CAMERA',
+            topRow: <PickerTopRow   pickerTitle={'Select Camera'} 
+                                    pickerConfirm={'SELECT'}
+                                    close={ closeCamSelect }
+                                    confirm={ confirmCamSelect }
+                                    confirmText={'CONFIRM'} />,
             selectedValue: selectedCam,
             onValueChange: ( selectedValueFromPicker ) => updateCam( selectedValueFromPicker ),
         });

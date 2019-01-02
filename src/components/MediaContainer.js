@@ -139,6 +139,7 @@ export default class MediaContainer extends React.Component {
           this.mapImages();
           break;
         case ( 'VIDEOS' ):
+        console.log( 'Filtering VIDEO events' )
           this.mapVideos();
           break;
         default:

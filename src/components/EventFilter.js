@@ -6,16 +6,30 @@ import { StyleSheet, View, Text } from 'react-native';
 import Touchable from '@appandflow/touchable';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import QuickPicker from 'quick-picker';
+import PickerTopRow from './PickerTopRow';
 
 
  function EventFilter (props) {
  
     const { currentEventType, eventTypes, updateEventType } = props;
 
+    confirmFilter = () => {
+        console.log('filter confirmed')
+        QuickPicker.close()
+    }
+
+    closeFilter = () => {
+        QuickPicker.close()
+    }
+
     _onPress = () => {
         QuickPicker.open({ 
             items: eventTypes, 
-            doneButtonText: 'SELECT FILTER TYPE',
+            topRow: <PickerTopRow   pickerTitle={'Select Filter'} 
+                                    pickerConfirm={'SELECT'}
+                                    close={ closeFilter }
+                                    confirm={ confirmFilter }
+                                    confirmText={'CONFIRM'} />,
             selectedValue: currentEventType,
             onValueChange: (selectedValueFromPicker) => updateEventType( selectedValueFromPicker ),
         });
