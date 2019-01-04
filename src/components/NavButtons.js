@@ -58,6 +58,6 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     hamburger: {
-        marginTop: -16,
+        marginTop: -10,
     },
 });

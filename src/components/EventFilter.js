@@ -1,5 +1,4 @@
 //TODO: add custom header with 'select' and cancel buttons to set state values on select (curently selection is firing onchange)
-//      figure out how to move switch statement for eventTypes out of render function ( keeps rerendering selection )
 
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
@@ -9,50 +8,59 @@ import QuickPicker from 'quick-picker';
 import PickerTopRow from './PickerTopRow';
 
 
- function EventFilter (props) {
- 
-    const { currentEventType, eventTypes, updateEventType } = props;
+class EventFilter extends React.Component {
+    constructor (props) {
+        super(props);
 
-    confirmFilter = () => {
-        console.log('filter confirmed')
+        this.state = {
+            selectedFilter: ''
+        }
+
+        this.confirmFilter = this.confirmFilter.bind(this);
+        this.closeFilter = this.closeFilter.bind(this);
+    }
+
+    confirmFilter() {
+        this.props.updateEventType(this.state.selectedFilter);
         QuickPicker.close()
     }
 
-    closeFilter = () => {
+    closeFilter() {
         QuickPicker.close()
     }
 
     _onPress = () => {
         QuickPicker.open({ 
-            items: eventTypes, 
+            items: this.props.eventTypes, 
             topRow: <PickerTopRow   pickerTitle={'Select Filter'} 
                                     pickerConfirm={'SELECT'}
-                                    close={ closeFilter }
-                                    confirm={ confirmFilter }
+                                    close={ this.closeFilter }
+                                    confirm={ this.confirmFilter }
                                     confirmText={'CONFIRM'} />,
-            selectedValue: currentEventType,
-            onValueChange: (selectedValueFromPicker) => updateEventType( selectedValueFromPicker ),
+            selectedValue: this.props.currentEventType,
+            onValueChange: (selectedValueFromPicker) => this.setState( { selectedFilter: selectedValueFromPicker.toString() } ),
         });
     }
-
-    return (
-        <View style={ styles.eventFilterSelect }>
-            <Touchable feedback="opacity" 
-                       native={ false } 
-                       onPress={ this._onPress } 
-                       style={ styles.eventFilterTouch }>
-                <View style={ styles.innerContent }>
-                        <Icon name="filter" size={ 28 } color="black" style={ styles.icon } /> 
-                </View>
-            </Touchable>
-      </View>
-    );
-  }
+    render() {
+        return (
+            <View style={ styles.eventFilterSelect }>
+                <Touchable feedback="opacity" 
+                        native={ false } 
+                        onPress={ this._onPress } 
+                        style={ styles.eventFilterTouch }>
+                    <View style={ styles.innerContent }>
+                            <Icon name="filter" size={ 28 } color="black" style={ styles.icon } /> 
+                    </View>
+                </Touchable>
+        </View>
+        );
+  }}
 
 const styles = StyleSheet.create({
     eventFilterSelect: {
         justifyContent: 'center',
         alignItems: 'center',
+        paddingTop: 5,
     },
     eventFilterTouch: {
         height: 46,

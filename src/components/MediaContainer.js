@@ -5,10 +5,12 @@
 //      add loader icon, etc for initial load and loading between filters and date select
 //      handle the chance that there is no media available
 //      determine how to speed media element load times 
+//      see about moving event filter out of render?
 
 import React from 'react';
-import { StyleSheet, ScrollView, Text, View } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, TouchableHighlight, Linking } from 'react-native';
 import MediaElement from './MediaElement';
+
 let eventList;
 
 export default class MediaContainer extends React.Component {
@@ -39,116 +41,141 @@ export default class MediaContainer extends React.Component {
     mapEvents(){
       const { siteURL, events } = this.props;
 
-      eventList = Object.values(events).map( (event)  => {
-      const year = event.sTimeStamp.slice(0, 4);
-      const month = event.sTimeStamp.slice(4, 6);
-      const day = event.sTimeStamp.slice(6, 8);
-      const hour = event.sTimeStamp.slice(8, 10);
-      const minute = event.sTimeStamp.slice(10, 12);
-      const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
+      if ( events.length > 0 ) {
+        console.log(events.length)
+        eventList = Object.values(events).map( (event)  => {
+        const year = event.sTimeStamp.slice(0, 4);
+        const month = event.sTimeStamp.slice(4, 6);
+        const day = event.sTimeStamp.slice(6, 8);
+        const hour = event.sTimeStamp.slice(8, 10);
+        const minute = event.sTimeStamp.slice(10, 12);
+        const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
 
-      const date = month + '/' + day + '/' + year;
-      const time = hour + ':' + minute + ' ' + dayNight;
+        const date = month + '/' + day + '/' + year;
+        const time = hour + ':' + minute + ' ' + dayNight;
 
-      const videoEventImage = 'https://ak1.picdn.net/shutterstock/videos/16692211/thumb/11.jpg';
-      const stillEventImage = siteURL + event.sImage;
+        const stillEventImage = siteURL + event.sThumbnail     //event.sImage;
 
-      return (
-        <MediaElement 
-          key={ event.bID }
-          date={ date }
-          time={ time }
-          image={ event.sImage ? stillEventImage : videoEventImage }
-          download={ this.downloadCurrentMedia }
-          zoom={ this.zoomCurrentMedia }
-          value={ event.bID } />        
-       )
-      });
+        return (
+          <MediaElement 
+            key={ event.bID }
+            date={ date }
+            time={ time }
+            image={ stillEventImage }
+            download={ this.downloadCurrentMedia }
+            zoom={ this.zoomCurrentMedia }
+            value={ event.bID }
+            duration={ event.bDuration }
+            sType={ event.sType }  />        
+        )
+        });
+      } 
     }
 
   // Map only image events for the given date
     mapImages() {
       const { siteURL, images } = this.props;
 
-      eventList = Object.values(images).map( (event)  => {
-      const year = event.sTimeStamp.slice(0, 4);
-      const month = event.sTimeStamp.slice(4, 6);
-      const day = event.sTimeStamp.slice(6, 8);
-      const hour = event.sTimeStamp.slice(8, 10);
-      const minute = event.sTimeStamp.slice(10, 12);
-      const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
+      if ( images.length > 0 ) {
+        console.log(images.length)
+        eventList = Object.values(images).map( (event)  => {
+        const year = event.sTimeStamp.slice(0, 4);
+        const month = event.sTimeStamp.slice(4, 6);
+        const day = event.sTimeStamp.slice(6, 8);
+        const hour = event.sTimeStamp.slice(8, 10);
+        const minute = event.sTimeStamp.slice(10, 12);
+        const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
 
-      const date = month + '/' + day + '/' + year;
-      const time = hour + ':' + minute + ' ' + dayNight;
+        const date = month + '/' + day + '/' + year;
+        const time = hour + ':' + minute + ' ' + dayNight;
 
-      const stillEventImage = siteURL + event.sImage;
+        const stillEventImage = siteURL +  event.sThumbnail          // event.sImage;
 
-      return (
-        <MediaElement 
-          key={ event.bID }
-          date={ date }
-          time={ time }
-          image={ stillEventImage }
-          download={ this.downloadCurrentMedia }
-          zoom={ this.zoomCurrentMedia }
-          value={ event.bID } />        
-        )
-      });
+        return (
+          <MediaElement 
+            key={ event.bID }
+            date={ date }
+            time={ time }
+            image={ stillEventImage }
+            download={ this.downloadCurrentMedia }
+            zoom={ this.zoomCurrentMedia }
+            value={ event.bID }
+            sType={ event.sType }  />        
+          )
+        });
+      } 
     }
 
   // Map only video events for the given date
     mapVideos() {
-      const { siteURL, videos } = this.props;
+      const { videos } = this.props;
 
-      eventList = Object.values(videos).map( (event)  => {
-      const year = event.sTimeStamp.slice(0, 4);
-      const month = event.sTimeStamp.slice(4, 6);
-      const day = event.sTimeStamp.slice(6, 8);
-      const hour = event.sTimeStamp.slice(8, 10);
-      const minute = event.sTimeStamp.slice(10, 12);
-      const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
+      if ( videos.length > 0 ) {
+        console.log(videos.length)
+        eventList = Object.values(videos).map( (event)  => {
+        const year = event.sTimeStamp.slice(0, 4);
+        const month = event.sTimeStamp.slice(4, 6);
+        const day = event.sTimeStamp.slice(6, 8);
+        const hour = event.sTimeStamp.slice(8, 10);
+        const minute = event.sTimeStamp.slice(10, 12);
+        const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
 
-      const date = month + '/' + day + '/' + year;
-      const time = hour + ':' + minute + ' ' + dayNight;
+        const date = month + '/' + day + '/' + year;
+        const time = hour + ':' + minute + ' ' + dayNight;
 
-      const videoEventImage = 'https://ak1.picdn.net/shutterstock/videos/16692211/thumb/11.jpg';
 
-      return (
-        <MediaElement 
-          key={ event.bID }
-          date={ date }
-          time={ time }
-          image={ videoEventImage }
-          download={ this.downloadCurrentMedia }
-          zoom={ this.zoomCurrentMedia }
-          value={ event.bID } />        
-        )
-      });
+        return (
+          <MediaElement 
+            key={ event.bID }
+            date={ date }
+            time={ time }
+            download={ this.downloadCurrentMedia }
+            zoom={ this.zoomCurrentMedia }
+            value={ event.bID }   
+            duration={ event.bDuration }
+            sType={ event.sType }  />  
+          )
+        });
+      } 
     }
 
-    render() {
-
-    // Evaluate event type and filter results
-      switch ( this.props.currentEventType ) {
-        case ( 'ALL' ):
-          console.log( 'FILTERING ALL events' )
-          this.mapEvents();
+    render() {   
+      if( this.props.filterEvents ) {
+        switch ( this.props.currentEventType ) {
+          case 'ALL': 
+            this.mapEvents();
+            this.props.triggerFilter();
           break;
-        case ( 'IMAGES' ):
-          console.log( 'Filtering IMAGE events' )
-          this.mapImages();
+          case 'IMAGES':
+            this.mapImages();
+            this.props.triggerFilter();
           break;
-        case ( 'VIDEOS' ):
-        console.log( 'Filtering VIDEO events' )
-          this.mapVideos();
+          case 'VIDEOS':
+            this.mapVideos();
+            this.props.triggerFilter();
           break;
-        default:
-          console.log( 'FILTERING ALL events' )
-      }
+          default:
+            this.mapEvents()
+            this.props.triggerFilter();
+        }
+      } 
 
       return (
         <ScrollView contentContainerStyle={ styles.scroll }>
-           { eventList }
+          
+            {  !this.state.loading && this.props.events.length > 0 ?
+                  eventList  : 
+                  <View style={styles.errorModal}>
+                    <Text style={styles.error}>No events found for { this.props.date }.</Text>
+                    <Text style={styles.errorContact}>If the problem persists please contact Dividia.</Text>
+                    <Text style={styles.phone}>817-288-1040</Text>
+                    <TouchableHighlight onPress={() => 
+                      Linking.openURL('mailto:support@dividia.net?subject= ' + this.props.site + ' - iSite Support Request' )}>
+                      <Text style={styles.support}>support@dividia.net</Text>
+                    </TouchableHighlight>
+                  </View>
+            } 
+
         </ScrollView>
       );
     }
@@ -162,5 +189,41 @@ const styles = StyleSheet.create({
     paddingTop: 26,
     // backgroundColor: 'red',
     paddingLeft: 10,
+    jusifyContent: 'center',
+  },
+  errorModal: {
+    marginTop: 60,
+    width: '90%',
+    backgroundColor: 'lightgrey',
+    justifyContents: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    borderWidth: 4,
+    borderColor: 'yellow',
+    padding: 10,
+    marginLeft: 10,
+  },
+  error: {
+    fontSize: 24,
+    textAlign: 'center',
+    marginBottom: 14,
+  },
+  errorContact: {
+    fontSize: 20,
+    textAlign: 'center',
+    marginBottom: 14,
+  },
+  phone: {
+    fontSize: 20,
+    textAlign: 'center',
+    marginBottom: 14,
+  },
+  support: {
+    fontSize: 20,
+    color: 'blue',
+    textDecoration: 'underline',
+    textAlign: 'center',
+    marginTop: 10,
+    paddingBottom: 10,
   },
 });

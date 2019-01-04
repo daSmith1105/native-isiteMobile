@@ -7,7 +7,7 @@ const width = '100%';
 
 const Header = (props) => {
 
-    const { site, dataUsage } = props;
+    const { site, dataUsage, maxData } = props;
   
     return (
       <View style={ styles.header }>
@@ -20,7 +20,7 @@ const Header = (props) => {
         <View style={ styles.statusContainer }>
             <View style={ styles.statusData }>
                 <Text style={ styles.customer }>{ site}</Text>
-                <Text style={ styles.data }>{ dataUsage }/10GB</Text>
+                <Text style={ styles.data }>{ dataUsage }GB/{ maxData }GB</Text>
             </View>
         </View>
       </View>
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     statusContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        marginLeft: 20,
+        marginLeft: 12,
         marginTop: -20,
     },
     statusData: {

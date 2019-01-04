@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { WebBrowser } from 'expo';
 import { NavButton, NavCloseButton } from '../components/NavButtons';
@@ -7,97 +7,107 @@ import PickerTopRow from '../components/PickerTopRow';
 
 const width = '100%';
 
-export default function MainNav (props) {
+class MainNav extends React.Component {
+    constructor(props) {
+        super(props);
 
-    const { toggleNav, 
-            availableCams, 
-            selectedCam, 
-            updateCam,
-            getSnapshot } = props;
+        this.state = {
+            currentCam: 1
+        }
 
-    const timelapse = () => {
+        this.timelapse = this.timelapse.bind(this);
+        this.logout = this.logout.bind(this);
+        this.openDividiaURL = this.openDividiaURL.bind(this);
+        this.confirmCamSelect = this.confirmCamSelect.bind(this);
+        this.closeCamSelect = this.closeCamSelect.bind(this);
+        this._onPress = this._onPress.bind(this);
+    }
+
+    timelapse() {
         console.log('Create timelapse clicked!');
-        toggleNav();
+        this.props.toggleNav();
     }
 
-    const logout = () => {
+    logout() {
         console.log('Logout clicked!');
-        toggleNav();
+        this.props.toggleNav();
     }
 
-    const openDividiaURL = () => {
+    openDividiaURL() {
         console.log('Dividia web link clicked!');
-        toggleNav();
+        this.props.toggleNav();
         WebBrowser.openBrowserAsync('http://www.dividia.net');
     }
 
-    confirmCamSelect = () => {
-        console.log('camera selection confirmed')
+    confirmCamSelect() {
+        QuickPicker.close()
+        console.log(this.state.currentCam);
+        this.props.updateCam(this.state.currentCam);
+    }
+
+    closeCamSelect() {
         QuickPicker.close()
     }
 
-    closeCamSelect = () => {
-        QuickPicker.close()
-    }
-
-    const _onPress = () => {
+    _onPress() {
         console.log('Cam Select clicked!');
-        toggleNav();
+        this.props.toggleNav;
         QuickPicker.open({ 
-            items: availableCams, 
+            items: this.props.camArray, 
             topRow: <PickerTopRow   pickerTitle={'Select Camera'} 
                                     pickerConfirm={'SELECT'}
-                                    close={ closeCamSelect }
-                                    confirm={ confirmCamSelect }
+                                    close={ this.closeCamSelect }
+                                    confirm={ this.confirmCamSelect }
                                     confirmText={'CONFIRM'} />,
-            selectedValue: selectedCam,
-            onValueChange: ( selectedValueFromPicker ) => updateCam( selectedValueFromPicker ),
+            selectedValue: this.state.currentCam,
+            onValueChange: ( selectedValueFromPicker ) => this.setState({ currentCam: selectedValueFromPicker.toString() }),
         });
     }
+        render() {
 
-        return (
+            return (
 
-            <View style={ styles.container }>
+                <View style={ styles.container }>
 
-                {/* Overlay the top portion of screen to disable touch events in that region */}
-                <View style={ styles.overlay }>
-                
-                </View>
-
-                {/* Nav options / buttons */}
-                <View style={ styles.nav }>
-                    <View style={ styles.touchContainer } >
-
-                    {/* Navigate to timelapse screen */}
-                        <NavButton call={ timelapse } title={ 'Create Timelapse' } />
-
-                    {/* Request a current image from camera */}
-                        <NavButton call={ getSnapshot } title={ 'Get Current Image' } />
-
-                    {/* Select additional cameras if available */}
-                        { availableCams.length > 1 ?
-                            <NavButton call={ _onPress } title={ 'View Additional Cameras' } /> :
-                            null }
-
-                    {/* Logout of app */}
-                        <NavButton call={ logout } title={ 'Logout' } />
-
-                    {/* Dividia Website link */}
-                        <Text style={ styles.dividiaLink }
-                            onPress={ openDividiaURL }>
-                            www.dividia.net
-                        </Text>
-
+                    {/* Overlay the top portion of screen to disable touch events in that region */}
+                    <View style={ styles.overlay }>
+                    
                     </View>
 
-                    {/* Nav close button */}
-                    <NavCloseButton call={ toggleNav } title={ 'X' } />
+                    {/* Nav options / buttons */}
+                    <View style={ styles.nav }>
+                        <View style={ styles.touchContainer } >
 
-                </View>
-          </View>
-        )
+                        {/* Navigate to timelapse screen */}
+                            <NavButton call={ this.timelapse } title={ 'Create Timelapse' } />
+
+                        {/* Request a current image from camera */}
+                            <NavButton call={ this.props.getSnapshot } title={ 'Get Current Image' } />
+
+                        {/* Select additional cameras if available */}
+                            { this.props.projects.length > 1 ?
+                                <NavButton call={ this._onPress } title={ 'View Additional Cameras' } /> :
+                                null }
+
+                        {/* Logout of app */}
+                            <NavButton call={ this.logout } title={ 'Logout' } />
+
+                        {/* Dividia Website link */}
+                            <Text style={ styles.dividiaLink }
+                                onPress={ this.openDividiaURL }>
+                                www.dividia.net
+                            </Text>
+
+                        </View>
+
+                        {/* Nav close button */}
+                        <NavCloseButton call={ this.props.toggleNav } title={ 'X' } />
+
+                    </View>
+            </View>
+            )
+        }
     }
-
 
 const styles = StyleSheet.create({
     container: {
@@ -138,3 +148,5 @@ const styles = StyleSheet.create({
     },
    
   });
+
+  export default MainNav;

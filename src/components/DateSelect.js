@@ -2,25 +2,41 @@
 //      figure out how to save the last pressed date and use that for the next selection
 
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import Touchable from '@appandflow/touchable';
 import QuickPicker from 'quick-picker';
 import PickerTopRow from './PickerTopRow';
+import moment from 'moment';
 
-function DateSelect (props) {
+class DateSelect extends React.Component {
+    constructor(props) {
+        super(props);
 
-    confirmDate = () => {
-        console.log('date confirmed')
-        QuickPicker.close()
+        this.state = {
+            selectedDate: new Date
+        }
+
+        this.confirmDate = this.confirmDate.bind(this);
+        this.closeDate = this.closeDate.bind(this);
     }
 
-    closeDate = () => {
+    confirmDate() {
+        // console.log('props: ' + this.props.date);
+        // console.log('local state : ' + moment(this.state.selectedDate).format('MM/DD/YY'));
+        if (moment(this.state.selectedDate).format('MM/DD/YY') != this.props.date) {
+            this.props.setDate(this.state.selectedDate);
+            QuickPicker.close()
+        } else {
+            console.log('Same date selected!');
+            QuickPicker.close()
+        }
+    }
+
+    closeDate() {
         QuickPicker.close()
     }
-   
-    const { date, setDate } = props;
 
     _onPress = () => {
         const today = new Date;
@@ -30,12 +46,12 @@ function DateSelect (props) {
             mode: 'date',
             topRow: <PickerTopRow   pickerTitle={'Select Date'} 
                                     pickerConfirm={'SELECT'}
-                                    close={ closeDate }
-                                    confirm={ confirmDate }
+                                    close={ this.closeDate }
+                                    confirm={ this.confirmDate }
                                     confirmText={'CONFIRM'} />,
-            selectedValue: today,
+            selectedValue: this.state.selectedDate,
             maximumDate: today,
-            onValueChange: (selectedValueFromPicker) => setDate( selectedValueFromPicker.toString().slice(0,15) ),
+            onValueChange: (selectedValueFromPicker) =>  this.setState( { selectedDate: selectedValueFromPicker } ),
         });
     }
 
@@ -43,24 +59,28 @@ function DateSelect (props) {
         QuickPicker.close()
     }
 
-    return (
-        <View style={ styles.dateSelect }>
-            <Touchable feedback="opacity" 
-                       native={ false } 
-                       onPress={ this._onPress } 
-                       style={ styles.dateSelectTouch }>
-                <View style={ styles.innerContent }>
-                        <Icon name="calendar" size={ 28 } color="black" style={ styles.icon } /> 
-                </View>
-            </Touchable>
-      </View>
-    );
-  }
+    render() {
+        return (
+            <View style={ styles.dateSelect }>
+                <Touchable feedback="opacity" 
+                        native={ false } 
+                        onPress={ this._onPress } 
+                        style={ styles.dateSelectTouch }>
+                    <View style={ styles.innerContent }>
+                            <Icon name="calendar" size={ 28 } color="black" style={ styles.icon } /> 
+                    </View>
+                </Touchable>
+        </View>
+        )
+      }
+    }
+
 
 const styles = StyleSheet.create({
     dateSelect: {
         justifyContent: 'center',
         alignItems: 'center',
+        paddingTop: 5,
     },
     dateSelectTouch: {
         height: 46,

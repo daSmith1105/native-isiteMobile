@@ -1,7 +1,7 @@
 // Contains MainNav Button, DateSelect, EventFilter
 
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, ImageBackground } from 'react-native';
 import { Hamburger } from './NavButtons';
 import DateSelect from './DateSelect';
 import EventFilter from './EventFilter';
@@ -20,14 +20,16 @@ function Footer (props) {
 
         {/* Footer content */}
         <View style={ styles.footerContainer }>
-            <DateSelect style={ styles.dateSelect }
-                        date={ date }
-                        setDate={ setDate } />
-            <Hamburger call={ toggleNav } />
-            <EventFilter style={ styles.eventFilter}
-                         currentEventType={ currentEventType }
-                         eventTypes={ eventTypes }
-                         updateEventType={ updateEventType } />
+            <ImageBackground source={ require('../../assets/images/steel.jpg') }
+                             style={styles.background}/>
+                <DateSelect style={ styles.dateSelect }
+                            date={ date }
+                            setDate={ setDate } />
+                <Hamburger call={ toggleNav } />
+                <EventFilter style={ styles.eventFilter}
+                            currentEventType={ currentEventType }
+                            eventTypes={ eventTypes }
+                            updateEventType={ updateEventType } />       
         </View>
 
       </View>
@@ -48,12 +50,18 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         left: 0,
-        padding: 8,
         backgroundColor: 'grey',
         height: 70,
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         alignItems: 'center',
+    },
+    background: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        height: 70,
+        width,
     },
 });
 

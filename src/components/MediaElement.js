@@ -3,15 +3,13 @@
 //Video overlay image (if video)
 
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Image } from 'react-native';
+import { StyleSheet, View, TouchableHighlight, Image, Text } from 'react-native';
 import MediaElementHeader from './MediaElementHeader';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const width = '100%';
-
 export default function MediaElement (props) {
 
-    const { date, time, zoom, download, image } = props;
+    const { date, time, zoom, download, image, duration, sType } = props;
 
     return (
         <View style={ styles.media }>
@@ -21,8 +19,10 @@ export default function MediaElement (props) {
                                 date={ date }
                                 time={ time } 
                                 download={ download } />
-
-              <Image source={{uri: image }} style={ styles.image } />
+              {sType == 'VIDEO' ?
+                <Image source={require('../../assets/images/video.png')} style={ styles.image } /> :
+                <Image source={{uri: image }} style={ styles.image } />
+              }
               <MediaElementHeader date={ date }
                                 time={ time } 
                                 download={ download } />
@@ -30,6 +30,13 @@ export default function MediaElement (props) {
               <TouchableHighlight onPress={ zoom } style={ styles.enlarge }>
                       <Icon name="expand" size={ 20 } color="white" />     
               </TouchableHighlight>  
+
+              {sType == 'VIDEO' ?
+                <Text style={ styles.duration }>
+                  { Math.floor(duration / 60) + 'm ' + duration % 60 + 's' }
+                </Text> :
+                null 
+              }
       
         </View>
     );
@@ -66,4 +73,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
   },
+  duration: {
+    marginTop: -20,
+    marginLeft: '75%',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white'
+  }
 });
