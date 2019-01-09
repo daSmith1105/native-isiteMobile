@@ -8,7 +8,7 @@
 //      see about moving event filter out of render?
 
 import React from 'react';
-import { StyleSheet, ScrollView, Text, View, TouchableHighlight, Linking } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, TouchableHighlight, Linking, Image } from 'react-native';
 import MediaElement from './MediaElement';
 
 let eventList;
@@ -19,7 +19,6 @@ export default class MediaContainer extends React.Component {
       super(props);
 
       this.state = {
-        loading: false,
         zoom: false,
         alert: '',
       }
@@ -35,6 +34,19 @@ export default class MediaContainer extends React.Component {
 
     zoomCurrentMedia(e) {
       console.log(e.target)
+    }
+
+    displayError() {
+      eventlist =  
+              <View style={styles.errorModal}>
+                <Text style={styles.error}>No events found for { this.props.date }.</Text>
+                <Text style={styles.errorContact}>If the problem persists please contact Dividia.</Text>
+                <Text style={styles.phone}>817-288-1040</Text>
+                <TouchableHighlight onPress={() => 
+                  Linking.openURL('mailto:support@dividia.net?subject= ' + this.props.site + ' - iSite Support Request' )}>
+                  <Text style={styles.support}>support@dividia.net</Text>
+                </TouchableHighlight>
+              </View>
     }
     
     // Map all events for the given date
@@ -66,10 +78,15 @@ export default class MediaContainer extends React.Component {
             zoom={ this.zoomCurrentMedia }
             value={ event.bID }
             duration={ event.bDuration }
-            sType={ event.sType }  />        
+            sType={ event.sType } />        
         )
         });
-      } 
+
+        this.props.toggleLoading
+      } else {
+          this.props.toggleLoading
+          this.displayError;  
+      }
     }
 
   // Map only image events for the given date
@@ -100,10 +117,15 @@ export default class MediaContainer extends React.Component {
             download={ this.downloadCurrentMedia }
             zoom={ this.zoomCurrentMedia }
             value={ event.bID }
-            sType={ event.sType }  />        
+            sType={ event.sType }
+              />        
           )
         });
-      } 
+        this.props.toggleLoading
+      } else {
+          this.props.toggleLoading
+          this.displayError;  
+      }
     }
 
   // Map only video events for the given date
@@ -123,7 +145,6 @@ export default class MediaContainer extends React.Component {
         const date = month + '/' + day + '/' + year;
         const time = hour + ':' + minute + ' ' + dayNight;
 
-
         return (
           <MediaElement 
             key={ event.bID }
@@ -136,7 +157,11 @@ export default class MediaContainer extends React.Component {
             sType={ event.sType }  />  
           )
         });
-      } 
+        this.props.toggleLoading
+      } else {
+          this.props.toggleLoading
+          this.displayError;  
+      }
     }
 
     render() {   
@@ -145,37 +170,37 @@ export default class MediaContainer extends React.Component {
           case 'ALL': 
             this.mapEvents();
             this.props.triggerFilter();
+          
           break;
           case 'IMAGES':
             this.mapImages();
             this.props.triggerFilter();
+            
           break;
           case 'VIDEOS':
             this.mapVideos();
             this.props.triggerFilter();
+            
           break;
           default:
             this.mapEvents()
             this.props.triggerFilter();
+            
         }
       } 
 
       return (
         <ScrollView contentContainerStyle={ styles.scroll }>
-          
-            {  !this.state.loading && this.props.events.length > 0 ?
-                  eventList  : 
-                  <View style={styles.errorModal}>
-                    <Text style={styles.error}>No events found for { this.props.date }.</Text>
-                    <Text style={styles.errorContact}>If the problem persists please contact Dividia.</Text>
-                    <Text style={styles.phone}>817-288-1040</Text>
-                    <TouchableHighlight onPress={() => 
-                      Linking.openURL('mailto:support@dividia.net?subject= ' + this.props.site + ' - iSite Support Request' )}>
-                      <Text style={styles.support}>support@dividia.net</Text>
-                    </TouchableHighlight>
-                  </View>
-            } 
-
+          { this.props.loading ? 
+            <View style={ styles.loader }>
+              <View style={ styles.loaderContainer }>
+                <Text style={ styles.loaderText }>Loading Events</Text>
+                <Image source={ require('../../assets/images/loader-small.gif') }
+                      style={ styles.loaderIcon } />
+              </View>
+            </View> : 
+            eventList 
+          }
         </ScrollView>
       );
     }
@@ -190,11 +215,12 @@ const styles = StyleSheet.create({
     // backgroundColor: 'red',
     paddingLeft: 10,
     jusifyContent: 'center',
+    alignItems: 'center',
   },
   errorModal: {
     marginTop: 60,
     width: '90%',
-    backgroundColor: 'lightgrey',
+    // backgroundColor: 'lightgrey',
     justifyContents: 'center',
     alignItems: 'center',
     borderRadius: 10,
@@ -226,4 +252,39 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingBottom: 10,
   },
+  loader: {
+    width: 260,
+    height: 600,
+    borderRadius: 10,
+    alignItems: 'center',
+    position: 'absolute',
+    top: 100,
+    backgroundColor: 'white',
+  },
+  loaderContainer: {
+    borderWidth: 5,
+    borderColor: '#0075A2',
+    borderRadius: 20,
+    padding: 10,
+    justifyContent: 'center',
+    backgroundColor: 'white',
+    paddingLeft: 20,
+    marginTop: 20,
+    width: '100%',
+  },
+  loaderText: {
+    fontSize: 28,
+    color: '#0075A2',
+    marginBottom: -26,
+    zIndex: 1,
+    marginLeft: 10,
+  },
+  loaderIcon: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    marginRight: 10,
+    marginTop: -10,
+    backgroundColor: 'white'
+  }
 });

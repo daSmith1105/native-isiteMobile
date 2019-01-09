@@ -31,6 +31,7 @@ class MainNav extends React.Component {
     logout() {
         console.log('Logout clicked!');
         this.props.toggleNav();
+        this.props.doLogout();
     }
 
     openDividiaURL() {
@@ -41,8 +42,8 @@ class MainNav extends React.Component {
 
     confirmCamSelect() {
         QuickPicker.close()
-        console.log(this.state.currentCam);
-        this.props.updateCam(this.state.currentCam);
+        this.props.toggleNav();
+        this.props.updateCam(this.state.currentCam.slice(4, 6));
     }
 
     closeCamSelect() {

@@ -2,7 +2,7 @@
 //      implement quickSearch feature on the right hand side of screen
 
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import MainNav from '../navigation/MainNav';
@@ -18,10 +18,10 @@ export default class MainScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      site: 'Birch Raquet Club',
+      site: this.props.site || '',
       dataUsage: '',
       maxData: '',
-      siteURL: 'https://birch.dividia.net/',
+      siteURL: 'https://' + this.props.siteTag + '.dividia.net/',
       projects: [],
 
   // Snapshot request
@@ -56,6 +56,7 @@ export default class MainScreen extends React.Component {
     this.fetchSnapShot = this.fetchSnapShot.bind(this);
     this.checkForMultipleCams = this.checkForMultipleCams.bind(this);
     this.triggerFilter = this.triggerFilter.bind(this);
+    this.toggleLoading = this.toggleLoading.bind(this);
   }
 
 // Fetch data for today's date onLoad
@@ -68,13 +69,8 @@ export default class MainScreen extends React.Component {
 
   // Fetch dataUsage
   fetchDataUsage() {
-    this.setState({
-        loading: true,
-        error: false
-    });
-              // May need this proxy:
-              // let proxy = 'https://cors-anywhere.herokuapp.com/';
-
+    // May need this proxy:
+    // let proxy = 'https://cors-anywhere.herokuapp.com/';
     fetch( this.state.siteURL + `ajax.php?action=getBandwidthUsage`)
     .then( response => {
           if (response.status !== 200) {
@@ -85,7 +81,6 @@ export default class MainScreen extends React.Component {
               this.setState({
                  dataUsage: data.bTotal.toString().slice(0,4),
                  maxData: data.bDataPlanGB,
-                 loading: false
                 });
             })
       .catch(err => {
@@ -119,8 +114,8 @@ export default class MainScreen extends React.Component {
                  images,
                  videos,
                  currentEventType: filter || 'ALL',
-                 loading: false,
-                 filterEvents: true
+                 filterEvents: true,
+                 loading: false
                 });
             })
       .catch(err => {
@@ -131,13 +126,8 @@ export default class MainScreen extends React.Component {
 
   // Fetch current snapshot image
   fetchSnapShot() {
-    this.setState({
-        loading: true,
-        error: false,
-    });
-              // May need this proxy:
-              // let proxy = 'https://cors-anywhere.herokuapp.com/';
-
+    // May need this proxy:
+    // let proxy = 'https://cors-anywhere.herokuapp.com/';
     fetch( this.state.siteURL + `ajax.php?action=requestStill`)
       .then( response => {
             if (response.status !== 200) {
@@ -146,18 +136,16 @@ export default class MainScreen extends React.Component {
             }
             // Fetch new image and update filter to show only images
             this.fetchNewByDate('IMAGES', today)
+          })
+      .catch(err => {
+        console.log('Fetch Error: ', err);
       });
   }
 
   // Check for multiple cameras
   checkForMultipleCams() {
-    this.setState({
-        loading: true,
-        error: false
-    });
-              // May need this proxy:
-              // let proxy = 'https://cors-anywhere.herokuapp.com/';
-
+    // May need this proxy:
+    // let proxy = 'https://cors-anywhere.herokuapp.com/';
     fetch( this.state.siteURL + `ajax.php?action=getProjects`)
       .then( response => {
             if (response.status !== 200) {
@@ -167,7 +155,6 @@ export default class MainScreen extends React.Component {
             response.json().then(data => {
               this.setState({
                  projects: data,
-                 loading: false
                 }, function(){ 
                   for( let x = 0; x < this.state.projects.length; x++ ){
                     camCount.push('Cam ' + (x + 1).toString())
@@ -197,7 +184,7 @@ export default class MainScreen extends React.Component {
 // Handle the selection of other cams if customer site has more than one
   handleCamSelect(cam) {
     this.setState({ selectedCam: cam },
-      function(){console.log(this.state.selectedCam)});
+      function(){console.log('currently selected camera project is: ' + this.state.selectedCam)});
   }
 
 // Toggle the main navigation menu from footer bar
@@ -224,13 +211,19 @@ export default class MainScreen extends React.Component {
   updateEventType( eventType ) {
     this.setState({ 
       currentEventType: eventType,
-    }, this.triggerFilter())
+    }, this.triggerFilter() )
     
   }
 
 // Set boolean for triggering rerender of media after filter selection
   triggerFilter() {
-    this.setState({ filterEvents: !this.state.filterEvents })
+    this.setState({ 
+      filterEvents: !this.state.filterEvents,
+    })
+  }
+
+  toggleLoading() {
+    this.setState({ loading: !this.state.loading })
   }
   
   render() {
@@ -260,7 +253,9 @@ export default class MainScreen extends React.Component {
                             triggerFilter={ this.triggerFilter }
                             filterEvents={ this.state.filterEvents}
                             site={ this.state.site } 
-                            date={ this.state.date } />
+                            date={ this.state.date }
+                            loading={ this.state.loading }
+                            toggleloading={ this.toggleLoading } />
 
             <QuickTimeSearch style={ styles.quickTimeSearch } />
           </View>
@@ -275,14 +270,17 @@ export default class MainScreen extends React.Component {
                      camArray= { camCount }
                      selectedCam={ this.state.selectedCam }
                      updateCam= { this.handleCamSelect }
-                     getSnapshot={ this.getCurrentImage } /> : 
+                     getSnapshot={ this.getCurrentImage }
+                     doLogout={ this.props.setLogout } /> : 
             <View>
               <Footer toggleNav={ this.toggleNav }
                       currentEventType={ this.state.currentEventType }
                       eventTypes={ this.state.eventTypes }
                       updateEventType={ this.updateEventType }
                       date={ this.state.date }
-                      setDate={ this.setDate } /> 
+                      setDate={ this.setDate }
+                      loading={ this.state.loading }
+                      toggleloading={ this.toggleLoading } /> 
             </View> }
 
 {/* ************************************************** */}

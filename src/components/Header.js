@@ -13,7 +13,9 @@ const Header = (props) => {
       <View style={ styles.header }>
 
         <View style={ styles.logosContainer }>
-            <Image source={ require('../../assets/images/dividia.psd') } style={ styles.companyLogo } />
+            <View style={ styles.imageContainer }>
+                <Image source={ require('../../assets/images/dividia.png') } style={ styles.companyLogo } />
+            </View>
             <Image source={ require('../../assets/images/i-site.png') } style={ styles.productLogo } />
         </View>
  
@@ -38,25 +40,37 @@ const styles = StyleSheet.create({
     logosContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        paddingTop: 25,
+        paddingTop: 20,
+        paddingRight: 10,
+        paddingLeft: 10,
+        width: '100%',
+    },
+    imageContainer: {
+        flex: 2,
+        padding: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+        height: 60,
+        width: '75%',
     },
     companyLogo: {
-        width: 200,
-        height: 50,
-        marginRight: 22,
-        flex: 2,
+        width: '90%',
+        height: '73%',
+        zIndex: 1,
+        overflow: 'visible',
     },
     productLogo: {
-        width: 70,
+        width: 75,
         height: 70,
         flex: .5,
-        marginRight: 10,
     },
     statusContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
         marginLeft: 12,
-        marginTop: -20,
+        marginTop: -14,
+        width: '75%'
     },
     statusData: {
         flex: 1,

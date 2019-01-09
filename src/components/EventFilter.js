@@ -21,8 +21,12 @@ class EventFilter extends React.Component {
     }
 
     confirmFilter() {
-        this.props.updateEventType(this.state.selectedFilter);
+        console.log( 'pre toggle ' + this.props.loading)
+        this.props.toggleLoading
+        console.log( 'post toggle ' + this.props.loading)
         QuickPicker.close()
+        this.props.updateEventType(this.state.selectedFilter);
+        console.log( 'after update event type' + this.props.loading)
     }
 
     closeFilter() {

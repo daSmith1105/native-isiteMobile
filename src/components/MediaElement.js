@@ -12,15 +12,17 @@ export default function MediaElement (props) {
     const { date, time, zoom, download, image, duration, sType } = props;
 
     return (
-        <View style={ styles.media }>
-        {/* <Text>{ JSON.stringify(props) }</Text>    */}       
+        <View style={ styles.media }>  
             
             <MediaElementHeader style={ styles.mediaHeader }
                                 date={ date }
                                 time={ time } 
                                 download={ download } />
               {sType == 'VIDEO' ?
-                <Image source={require('../../assets/images/video.png')} style={ styles.image } /> :
+                  <TouchableHighlight onPress={ () => console.log('pressed') }
+                                      style={ styles.videoBackground }>
+                    <Icon name="play-circle" size={ 100 } color="white" style={ styles.playButton }/>    
+                  </TouchableHighlight> :
                 <Image source={{uri: image }} style={ styles.image } />
               }
               <MediaElementHeader date={ date }
@@ -72,6 +74,18 @@ const styles = StyleSheet.create({
     marginTop: -30,
     width: '100%',
     height: 200,
+  },
+  videoBackground: {
+    borderRadius: 5,
+    marginTop: -30,
+    width: '100%',
+    height: 200,
+    backgroundColor: 'dodgerblue',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playButton: {
+    marginTop: 16,
   },
   duration: {
     marginTop: -20,
