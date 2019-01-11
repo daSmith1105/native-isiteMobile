@@ -13,6 +13,7 @@
   "dependencies": {
     "@expo/samples": "2.1.1",
     "expo": "^31.0.2",
+    "expo-file-system": "^2.0.0",
     "moment": "^2.23.0",
     "quick-picker": "^1.2.0",
     "react": "16.5.0",

@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableHighlight } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
 
 const PickerTopRow = (props) => {
     return (

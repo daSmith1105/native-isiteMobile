@@ -8,7 +8,7 @@
 //      see about moving event filter out of render?
 
 import React from 'react';
-import { StyleSheet, ScrollView, Text, View, TouchableHighlight, Linking, Image } from 'react-native';
+import { StyleSheet, FlatList, Text, View, TouchableHighlight, Linking, Image } from 'react-native';
 import MediaElement from './MediaElement';
 
 let eventList;
@@ -20,15 +20,16 @@ export default class MediaContainer extends React.Component {
 
       this.state = {
         zoom: false,
-        alert: '',
+        eventType: this.props.currentEventType
+
       }
 
       this.downloadCurrentMedia = this.downloadCurrentMedia.bind(this);
       this.zoomCurrentMedia = this.zoomCurrentMedia.bind(this);
-      this.mapEvents = this.mapEvents.bind(this);
+      this._renderItem = this._renderItem.bind(this);
     }
 
-    downloadCurrentMedia(e) {
+    downloadCurrentMedia = (e) => {
       console.log(e.target)
     }
 
@@ -37,161 +38,98 @@ export default class MediaContainer extends React.Component {
     }
 
     displayError() {
-      eventlist =  
-              <View style={styles.errorModal}>
-                <Text style={styles.error}>No events found for { this.props.date }.</Text>
-                <Text style={styles.errorContact}>If the problem persists please contact Dividia.</Text>
-                <Text style={styles.phone}>817-288-1040</Text>
-                <TouchableHighlight onPress={() => 
-                  Linking.openURL('mailto:support@dividia.net?subject= ' + this.props.site + ' - iSite Support Request' )}>
-                  <Text style={styles.support}>support@dividia.net</Text>
-                </TouchableHighlight>
-              </View>
+      console.log( 'error' )
+      eventList = <View style={ styles.errorModal }>
+                      <Text style={ styles.error }>No events found for { this.props.date }.</Text>
+                      <Text style={ styles.errorContact }>If the problem persists please contact Dividia.</Text>
+                      <Text style={ styles.phone }>817-288-1040</Text>
+                      <TouchableHighlight onPress={() => 
+                        Linking.openURL('mailto:support@dividia.net?subject= ' + this.props.site + ' - iSite Support Request' ) }>
+                        <Text style={ styles.support }>support@dividia.net</Text>
+                      </TouchableHighlight>
+                  </View>
     }
-    
-    // Map all events for the given date
-    mapEvents(){
-      const { siteURL, events } = this.props;
 
+    _renderItem({ item }){
+      const { siteURL, siteTag, events } = this.props;
       if ( events.length > 0 ) {
-        console.log(events.length)
-        eventList = Object.values(events).map( (event)  => {
-        const year = event.sTimeStamp.slice(0, 4);
-        const month = event.sTimeStamp.slice(4, 6);
-        const day = event.sTimeStamp.slice(6, 8);
-        const hour = event.sTimeStamp.slice(8, 10);
-        const minute = event.sTimeStamp.slice(10, 12);
+
+        const year = item.sTimeStamp.slice(0, 4);
+        const month = item.sTimeStamp.slice(4, 6);
+        const day = item.sTimeStamp.slice(6, 8);
+        const hour = item.sTimeStamp.slice(8, 10);
+        const minute = item.sTimeStamp.slice(10, 12);
         const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
 
         const date = month + '/' + day + '/' + year;
         const time = hour + ':' + minute + ' ' + dayNight;
 
-        const stillEventImage = siteURL + event.sThumbnail     //event.sImage;
+           const imageURL = siteURL + 'thumbnail.php?img=base/' + siteTag + '/' + item.sTimeStamp + '.jpg&size=m';
+          
+            return (
 
-        return (
-          <MediaElement 
-            key={ event.bID }
-            date={ date }
-            time={ time }
-            image={ stillEventImage }
-            download={ this.downloadCurrentMedia }
-            zoom={ this.zoomCurrentMedia }
-            value={ event.bID }
-            duration={ event.bDuration }
-            sType={ event.sType } />        
-        )
-        });
+              <MediaElement 
+                date={ date }
+                time={ time }
+                image={ imageURL }
+                download={ this.downloadCurrentMedia }
+                zoom={ this.zoomCurrentMedia }
+                value={ item.bID }
+                duration={ item.bDuration }
+                sType={ item.sType }
+                url={ imageURL } />     
 
-        this.props.toggleLoading
+            )
       } else {
-          this.props.toggleLoading
-          this.displayError;  
-      }
-    }
-
-  // Map only image events for the given date
-    mapImages() {
-      const { siteURL, images } = this.props;
-
-      if ( images.length > 0 ) {
-        console.log(images.length)
-        eventList = Object.values(images).map( (event)  => {
-        const year = event.sTimeStamp.slice(0, 4);
-        const month = event.sTimeStamp.slice(4, 6);
-        const day = event.sTimeStamp.slice(6, 8);
-        const hour = event.sTimeStamp.slice(8, 10);
-        const minute = event.sTimeStamp.slice(10, 12);
-        const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
-
-        const date = month + '/' + day + '/' + year;
-        const time = hour + ':' + minute + ' ' + dayNight;
-
-        const stillEventImage = siteURL +  event.sThumbnail          // event.sImage;
-
-        return (
-          <MediaElement 
-            key={ event.bID }
-            date={ date }
-            time={ time }
-            image={ stillEventImage }
-            download={ this.downloadCurrentMedia }
-            zoom={ this.zoomCurrentMedia }
-            value={ event.bID }
-            sType={ event.sType }
-              />        
-          )
-        });
-        this.props.toggleLoading
-      } else {
-          this.props.toggleLoading
-          this.displayError;  
-      }
-    }
-
-  // Map only video events for the given date
-    mapVideos() {
-      const { videos } = this.props;
-
-      if ( videos.length > 0 ) {
-        console.log(videos.length)
-        eventList = Object.values(videos).map( (event)  => {
-        const year = event.sTimeStamp.slice(0, 4);
-        const month = event.sTimeStamp.slice(4, 6);
-        const day = event.sTimeStamp.slice(6, 8);
-        const hour = event.sTimeStamp.slice(8, 10);
-        const minute = event.sTimeStamp.slice(10, 12);
-        const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
-
-        const date = month + '/' + day + '/' + year;
-        const time = hour + ':' + minute + ' ' + dayNight;
-
-        return (
-          <MediaElement 
-            key={ event.bID }
-            date={ date }
-            time={ time }
-            download={ this.downloadCurrentMedia }
-            zoom={ this.zoomCurrentMedia }
-            value={ event.bID }   
-            duration={ event.bDuration }
-            sType={ event.sType }  />  
-          )
-        });
-        this.props.toggleLoading
-      } else {
-          this.props.toggleLoading
-          this.displayError;  
+          this.props.toggleLoading;
+          this.displayError();  
       }
     }
 
     render() {   
+       const { events, images, videos } = this.props;
+
       if( this.props.filterEvents ) {
+
         switch ( this.props.currentEventType ) {
           case 'ALL': 
-            this.mapEvents();
+            console.log('displaying ALL events')
+            eventList = <FlatList inverted
+                                  data={ events } 
+                                  renderItem={ this._renderItem }
+                                  keyExtractor={ (item) => item.bID }
+                                  style={ styles.eventList } />;
             this.props.triggerFilter();
-          
+            this.props.toggleLoading;
           break;
           case 'IMAGES':
-            this.mapImages();
-            this.props.triggerFilter();
-            
+            console.log('displaying IMAGE events')
+            eventList = <FlatList inverted
+                                  data={ images } 
+                                  renderItem={ this._renderItem }
+                                  keyExtractor={ (item) => item.bID }
+                                  style={ styles.eventList } />;
+            this.props.triggerFilter();   
+            this.props.toggleLoading;    
           break;
           case 'VIDEOS':
-            this.mapVideos();
+            console.log('displaying Video events')
+            eventList = <FlatList inverted
+                                  data={ videos } 
+                                  renderItem={ this._renderItem }
+                                  keyExtractor={ (item) => item.bID }
+                                  style={ styles.eventList } />;
             this.props.triggerFilter();
-            
+            this.props.toggleLoading;
           break;
           default:
-            this.mapEvents()
-            this.props.triggerFilter();
-            
+            console.log('Event type error');
         }
       } 
 
       return (
-        <ScrollView contentContainerStyle={ styles.scroll }>
-          { this.props.loading ? 
+        <View style={ styles.scroll }>
+        { this.props.loading ? 
             <View style={ styles.loader }>
               <View style={ styles.loaderContainer }>
                 <Text style={ styles.loaderText }>Loading Events</Text>
@@ -199,9 +137,11 @@ export default class MediaContainer extends React.Component {
                       style={ styles.loaderIcon } />
               </View>
             </View> : 
-            eventList 
+
+             eventList
+
           }
-        </ScrollView>
+        </View>
       );
     }
   }
@@ -210,17 +150,19 @@ export default class MediaContainer extends React.Component {
 const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
-    paddingBottom: 60,
-    paddingTop: 26,
-    // backgroundColor: 'red',
-    paddingLeft: 10,
+    paddingBottom: 40,
+    paddingTop: 10,
     jusifyContent: 'center',
     alignItems: 'center',
+    width: '80%',
+  },
+  eventList: {
+    width: '95%',
+    paddingTop: 24,
   },
   errorModal: {
     marginTop: 60,
     width: '90%',
-    // backgroundColor: 'lightgrey',
     justifyContents: 'center',
     alignItems: 'center',
     borderRadius: 10,

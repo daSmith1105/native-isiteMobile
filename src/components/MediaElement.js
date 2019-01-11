@@ -9,36 +9,41 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function MediaElement (props) {
 
-    const { date, time, zoom, download, image, duration, sType } = props;
+    const { date, time, zoom, download, image, duration, sType, url } = props;
 
     return (
         <View style={ styles.media }>  
-            
-            <MediaElementHeader style={ styles.mediaHeader }
-                                date={ date }
-                                time={ time } 
-                                download={ download } />
-              {sType == 'VIDEO' ?
+
+              { sType == 'VIDEO' ?
                   <TouchableHighlight onPress={ () => console.log('pressed') }
                                       style={ styles.videoBackground }>
                     <Icon name="play-circle" size={ 100 } color="white" style={ styles.playButton }/>    
-                  </TouchableHighlight> :
+                  </TouchableHighlight>
+                   :
                 <Image source={{uri: image }} style={ styles.image } />
               }
-              <MediaElementHeader date={ date }
-                                time={ time } 
-                                download={ download } />
-
+  
+              {/* Expand button */}
               <TouchableHighlight onPress={ zoom } style={ styles.enlarge }>
                       <Icon name="expand" size={ 20 } color="white" />     
               </TouchableHighlight>  
 
-              {sType == 'VIDEO' ?
+              {/* Show video duration */}
+              { sType == 'VIDEO' ?
                 <Text style={ styles.duration }>
                   { Math.floor(duration / 60) + 'm ' + duration % 60 + 's' }
                 </Text> :
                 null 
               }
+
+              <MediaElementHeader style={ styles.mediaHeader }
+                                  date={ date }
+                                  time={ time } />
+
+            <TouchableHighlight onPress={ download } style={ styles.download}>
+                <Icon name="arrow-circle-down" size={ 20 } color="white" />
+            </TouchableHighlight>
+
       
         </View>
     );
@@ -50,7 +55,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 5,
     flexGrow: 1,
-    // backgroundColor: 'yellow',
     width: '100%',
     height: 200,
     paddingBottom: -100,
@@ -59,6 +63,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
+    width: '100%',
   },
   enlarge: {
     marginTop: -36,
@@ -92,6 +97,10 @@ const styles = StyleSheet.create({
     marginLeft: '75%',
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'white'
-  }
+    color: 'white',
+  },
+  download: {
+    marginTop: 22,
+    marginLeft: '90%',
+  },
 });

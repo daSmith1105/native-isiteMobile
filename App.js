@@ -14,9 +14,9 @@ class App extends React.Component {
       site: '', // full site name used in header
       siteTag: '', // short version of site used for URL
       siteList: [ 'birch', 'gte' ],
-      noInput: false,
       error: false,
     }
+
     this.setLogout = this.setLogout.bind(this);
     this.validateLogin = this.validateLogin.bind(this);
     this.resolveSitename = this.resolveSitename.bind(this);
@@ -26,26 +26,17 @@ class App extends React.Component {
   validateLogin(userInput) {
     let siteList = this.state.siteList;
 
-    if ( userInput.length < 1 ) {
-      this.setState({ noInput: true },
-        function(){
-          setTimeout(
-            () => this.clearError(), 5000)
-          })
-    } 
-    
     if ( siteList.includes( userInput ) ) {
       this.resolveSitename( userInput );
-      console.log(userInput)
       this.setState({ 
         isLoggedIn: true,
         siteTag: userInput
       })
 
     } else {
+      console.log( 'Error logging in with user \"' +  userInput + '\"')
       this.setState({ 
         error: true,
-        textInput: ''
       },
         function(){
           setTimeout(
@@ -66,8 +57,7 @@ class App extends React.Component {
 
   clearError() {
     this.setState({ 
-      error: false,
-      noInput: false 
+      error: false
     })
   }
 
@@ -84,28 +74,28 @@ class App extends React.Component {
 
   render() {
       return (
-            <View style={ styles.container }>
 
-              {/* Main app view */}
-              { this.state.isLoggedIn ? 
-              <MainScreen setLogout={ this.setLogout }
-                          loggedIn={ this.state.isLoggedIn}
-                          site={ this.state.site }
-                          siteTag={ this.state.siteTag } /> :
+                <View style={ styles.container }>
 
-              <LoginScreen setLogin={ this.setLogin } 
-                           setLogout={ this.setLogout }
-                           loggedIn={ this.state.isLoggedIn }
-                           validateLogin={ this.validateLogin }
-                           noInput={ this.state.noInput }
-                           error={ this.state.error }
-                           checkLogin={ this.checkLogin } />
-              }    
+                  {/* Main app view */}
+                  { this.state.isLoggedIn ? 
+                  <MainScreen setLogout={ this.setLogout }
+                              loggedIn={ this.state.isLoggedIn}
+                              site={ this.state.site }
+                              siteTag={ this.state.siteTag } /> :
 
-              {/* Hide the top status bar on ios */}
-              <StatusBar hidden={ true } style={ styles.statusBar }/>
-
-            </View>
+                  <LoginScreen setLogin={ this.setLogin } 
+                              setLogout={ this.setLogout }
+                              loggedIn={ this.state.isLoggedIn }
+                              validateLogin={ this.validateLogin }
+                              noInput={ this.state.noInput }
+                              error={ this.state.error }
+                              checkLogin={ this.checkLogin } />
+                  }    
+                  {/* Hide the top status bar on ios */}
+                  <StatusBar hidden={ true } style={ styles.statusBar }/>
+                </View>
+     
       );
     }
   }

@@ -39,12 +39,8 @@ class LoginScreen extends React.Component {
             </View>
           </View>
 
-          { this.props.error ?
+          { this.props.error & this.state.textInput == '' ?
             <Text style={ styles.error }>'{ this.state.text }'' not found. Please try again.</Text> : 
-            null
-          }
-          { this.props.noInput ?
-            <Text style={ styles.error }>Please enter your site name.</Text> : 
             null
           }
 

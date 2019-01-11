@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Text } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { StyleSheet, View, Text } from 'react-native';
 
 
 export default function MediaElementHeader (props) {
@@ -15,9 +14,6 @@ export default function MediaElementHeader (props) {
                 <Text style={ styles.date }>{ date }</Text>
                 <Text style={ styles.time }>{ time }</Text>
             </View>
-            <TouchableHighlight onPress={ download } style={ styles.download}>
-                <Icon name="arrow-circle-down" size={ 20 } color="white" />
-            </TouchableHighlight>
 
         </View>
     );
@@ -53,10 +49,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
-  },
-  download: {
-    justifyContent: 'center',
-    paddingLeft: 5,
-    paddingRight: 5,
   },
 });

@@ -48,7 +48,6 @@ export default class QuickTimeSearch extends React.Component {
 
 const styles = StyleSheet.create({
   quickTimeSearch: {
-    //   backgroundColor: 'dodgerblue',
       width: '15%',
       alignItems: 'center',
       justifyContent: 'flex-end',

@@ -40,7 +40,6 @@ function Footer (props) {
 
 const styles = StyleSheet.create({
     footer: {
-        // backgroundColor: 'rgba(0,0,0,0.5)',
         width,
         height: width,
         position: 'absolute',

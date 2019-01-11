@@ -19,6 +19,7 @@ export default class MainScreen extends React.Component {
     super(props);
     this.state = {
       site: this.props.site || '',
+      siteTag: this.props.siteTag || '',
       dataUsage: '',
       maxData: '',
       siteURL: 'https://' + this.props.siteTag + '.dividia.net/',
@@ -106,18 +107,17 @@ export default class MainScreen extends React.Component {
             return;
           }
           response.json().then(data => {
-              let images = data.filter(d => d.sType === "STILL");
-              // let thumbs = data.filter(d )
-              let videos = data.filter(d => d.sType === "VIDEO");
+              let images = data.filter(d => d.sType === "STILL").reverse();
+              let videos = data.filter(d => d.sType === "VIDEO").reverse();
               this.setState({
-                 events: data,
+                 events: data.reverse(),
                  images,
                  videos,
                  currentEventType: filter || 'ALL',
                  filterEvents: true,
                  loading: false
                 });
-            })
+          })
       .catch(err => {
         console.log('Fetch Error: ', err);
             });
@@ -171,13 +171,12 @@ export default class MainScreen extends React.Component {
 
 // Set new date and fetch events for new date
   setDate( selectedDate ) {
-    console.log( 'This is the date we recieved from Selection: ' + selectedDate )
     this.setState({ 
       date: moment(selectedDate).format('MM/DD/YY'),
      }, 
     function(){ 
       console.log('New state of date is: ' + this.state.date)
-      this.fetchNewByDate(this.state.date) 
+      this.fetchNewByDate('ALL', this.state.date) 
     })
   }
 
@@ -253,6 +252,7 @@ export default class MainScreen extends React.Component {
                             triggerFilter={ this.triggerFilter }
                             filterEvents={ this.state.filterEvents}
                             site={ this.state.site } 
+                            siteTag={ this.state.siteTag }
                             date={ this.state.date }
                             loading={ this.state.loading }
                             toggleloading={ this.toggleLoading } />
