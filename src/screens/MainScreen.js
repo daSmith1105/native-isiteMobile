@@ -82,6 +82,9 @@ export default class MainScreen extends React.Component {
               this.setState({
                  dataUsage: data.bTotal.toString().slice(0,4),
                  maxData: data.bDataPlanGB,
+                }, function() {
+                  this.props.setDataUsage( this.state.dataUsage )
+                  this.props.setMaxData( this.state.maxData )
                 });
             })
       .catch(err => {
@@ -271,7 +274,8 @@ export default class MainScreen extends React.Component {
                      selectedCam={ this.state.selectedCam }
                      updateCam= { this.handleCamSelect }
                      getSnapshot={ this.getCurrentImage }
-                     doLogout={ this.props.setLogout } /> : 
+                     doLogout={ this.props.setLogout }
+                     toggleTimelapse={ this.props.toggleTimelapse } /> : 
             <View>
               <Footer toggleNav={ this.toggleNav }
                       currentEventType={ this.state.currentEventType }

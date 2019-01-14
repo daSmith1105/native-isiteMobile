@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 40,
     paddingTop: 10,
-    jusifyContent: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
     width: '80%',
   },
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   errorModal: {
     marginTop: 60,
     width: '90%',
-    justifyContents: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
     borderWidth: 4,
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   support: {
     fontSize: 20,
     color: 'blue',
-    textDecoration: 'underline',
+    // textDecoration: 'underline',
     textAlign: 'center',
     marginTop: 10,
     paddingBottom: 10,

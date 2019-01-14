@@ -24,7 +24,7 @@ class MainNav extends React.Component {
     }
 
     timelapse() {
-        console.log('Create timelapse clicked!');
+        this.props.toggleTimelapse;
         this.props.toggleNav();
     }
 
@@ -80,7 +80,7 @@ class MainNav extends React.Component {
                         <View style={ styles.touchContainer } >
 
                         {/* Navigate to timelapse screen */}
-                            <NavButton call={ this.timelapse } title={ 'Create Timelapse' } />
+                            <NavButton call={ this.props.toggleTimelapse } title={ 'Create Timelapse' } />
 
                         {/* Request a current image from camera */}
                             <NavButton call={ this.props.getSnapshot } title={ 'Get Current Image' } />
