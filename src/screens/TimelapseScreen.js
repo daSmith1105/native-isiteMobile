@@ -8,152 +8,61 @@ import PickerTopRow from '../components/PickerTopRow';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const today = moment(new Date()).format('MM/DD/YY');
-
 class TimelapseScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      temp: '',
-      siteURL: 'https://gte.dividia.net/', //'https://' + this.props.siteTag + '.dividia.net/'
-      date: today,
-      dayArray: [],
-      weekArray: [],
-      monthArray: [],
-      projectArray: [],
-      startDate: new Date,
-      endDate: new Date
+     
     }
-    this.handleButtonClick = this.handleButtonClick.bind(this);
-    this.fetchPastWeek = this.fetchPastWeek.bind(this);
-    this.fetchPastDay = this.fetchPastDay.bind(this);
-    this.fetchPastMonth= this.fetchPastMonth.bind(this);
-    this.fetchProject= this.fetchProject.bind(this);
+
+    this.requestWeek = this.requestWeek.bind(this);
+    this.requestDay = this.requestDay.bind(this);
+    this.requestMonth= this.requestMonth.bind(this);
+    this.requestProject= this.requestProject.bind(this);
+    this.requestByDateRange = this.requestByDateRange.bind(this);
     this._onPressS = this._onPressS.bind(this);
     this._onPressE = this._onPressE.bind(this);
     this.closeDate = this.closeDate.bind(this);
+
   }
 
-    handleButtonClick(length) {
-        switch (length) {
-            case 'day':
-                console.log('day selected')
-                console.log(this.state.dayArray.length)
-            break;
-            case 'week':
-                console.log('week selected')
-                console.log(this.state.dayArray.length)
-            break;
-            case 'month':
-                console.log('month selected')
-                console.log(this.state.dayArray.length)
-            break;
-            case 'project':
-                console.log('entire project selected')
-                console.log(this.state.dayArray.length)
-            break;
-            default:
-                console.log('day selected')
-                console.log('switch statement default called')
-        }
+//   http://ashgrovejs.dividia.net/timelapse.php?start=2018/11/15&end=2018/11/16
+    
+    requestDay() {
+        const today = moment().format('YYYY/MM/DD');
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + today + '&end=' + today )
+        this.props.toggleTimelapseVideo()
     }
 
-    componentDidMount() {
-        this.fetchPastDay()
-        this.fetchPastWeek()
-        this.fetchPastMonth()
-        this.fetchProject()
+    requestWeek() {
+        const today = moment().format('YYYY/MM/DD');
+        const lastWeek = moment().subtract(7,'d').format('YYYY/MM/DD');
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastWeek + '&end=' + today )
+        this.props.toggleTimelapseVideo()
     }
 
-    fetchPastDay() {
-                  // May need this proxy:
-                  // let proxy = 'https://cors-anywhere.herokuapp.com/';
-    
-        fetch( this.state.siteURL + `ajax.php?action=getEvents&date=` + this.state.date )
-        .then( response => {
-              if (response.status !== 200) {
-                console.log('Error. Status Code: ' + response.status);
-                return;
-              }
-              response.json().then(data => {
-                  let images = data.filter(d => d.sType === "STILL");
-                  this.setState({
-                     dayArray: images,
-                    });
-              })
-          .catch(err => {
-            console.log('Fetch Error: ', err);
-                });
-            })
-      }
+    requestMonth() {
+        const today = moment().format('YYYY/MM/DD');
+        const lastMonth = moment().subtract(30,'d').format('YYYY/MM/DD');
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastMonth + '&end=' + today )
+        this.props.toggleTimelapseVideo()
+    }
 
-      fetchPastWeek() {
-                  // May need this proxy:
-                  // let proxy = 'https://cors-anywhere.herokuapp.com/';
-    
-        fetch( this.state.siteURL + `ajax.php?action=getEvents&date=` + this.state.date )
-        .then( response => {
-              if (response.status !== 200) {
-                console.log('Error. Status Code: ' + response.status);
-                return;
-              }
-              response.json().then(data => {
-                  let images = data.filter(d => d.sType === "STILL");
-                  this.setState({
-                     weekArray: images,
-                    });
-              })
-          .catch(err => {
-            console.log('Fetch Error: ', err);
-                });
-            })
-      }
+    requestProject() {
+        const today = moment().format('YYYY/MM/DD');
+        const fiveYears = moment().subtract(1800,'d').format('YYYY/MM/DD');
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + fiveYears + '&end=' + today )
+        this.props.toggleTimelapseVideo()          
+    }
 
-      fetchPastMonth() {
-
-                  // May need this proxy:
-                  // let proxy = 'https://cors-anywhere.herokuapp.com/';
-    
-        fetch( this.state.siteURL + `ajax.php?action=getEvents&date=` + this.state.date )
-        .then( response => {
-              if (response.status !== 200) {
-                console.log('Error. Status Code: ' + response.status);
-                return;
-              }
-              response.json().then(data => {
-                  let images = data.filter(d => d.sType === "STILL");
-                  this.setState({
-                     monthArray: images,
-                    });
-              })
-          .catch(err => {
-            console.log('Fetch Error: ', err);
-                });
-            })
-      }
-
-      fetchProject() {
-
-                  // May need this proxy:
-                  // let proxy = 'https://cors-anywhere.herokuapp.com/';
-    
-        fetch( this.state.siteURL + `ajax.php?action=getEvents` )
-        .then( response => {
-              if (response.status !== 200) {
-                console.log('Error. Status Code: ' + response.status);
-                return;
-              }
-              response.json().then(data => {
-                  let images = data.filter(d => d.sType === "STILL");
-                  this.setState({
-                     projectArray: images,
-                    });
-              })
-          .catch(err => {
-            console.log('Fetch Error: ', err);
-                });
-            })
-      }
+    requestByDateRange() {
+        let start = this.props.timelapseStart.toString().slice(2, -1);
+        let end = this.props.timelapseEnd.toString().slice(2, -1);
+        let s = moment(start).format('YYYY/MM/DD');
+        let e = moment(end).format('YYYY/MM/DD');
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + s + '&end=' + e )
+        this.props.toggleTimelapseVideo()   
+    }
 
       closeDate() {
         QuickPicker.close()
@@ -169,9 +78,9 @@ class TimelapseScreen extends React.Component {
             //                         pickerConfirm={'SELECT'}
             //                         close={ this.closeDate }
             //                         confirmText={'CONFIRM'} />,
-            selectedValue: this.state.startDate,
+            selectedValue: this.props.timelapseStart,
             maximumDate: today,
-            onValueChange: (selectedValueFromPicker) => this.setState({ startDate: selectedValueFromPicker })                                                                  
+            onValueChange: (selectedValueFromPicker) => this.props.setTimelapseStart( selectedValueFromPicker )                                                                  
         });
     }
 
@@ -185,9 +94,9 @@ class TimelapseScreen extends React.Component {
             //                         pickerConfirm={'SELECT'}
             //                         close={ this.closeDate }
             //                         confirmText={'CONFIRM'} />,
-            selectedValue: this.state.endDate,
+            selectedValue: this.props.timelapseEnd,
             maximumDate: today,
-            onValueChange: (selectedValueFromPicker) => this.setState({ endDate: selectedValueFromPicker })
+            onValueChange: (selectedValueFromPicker) => this.props.setTimelapseEnd( selectedValueFromPicker )
         });
     }
 
@@ -196,11 +105,11 @@ class TimelapseScreen extends React.Component {
         return (
         <View style={ styles.container }>
             <Header  site={ this.props.site } 
-                    dataUsage={ this.props.dataUsage }
-                    maxData={ this.props.maxData} />
+                     dataUsage={ this.props.dataUsage }
+                     maxData={ this.props.maxData} />
 
             <View style={ styles.timelapseContainer }>
-                { this.state.startDate > this.state.endDate ? <Text>Start date must be prior to end date.</Text> : null }
+                { this.props.timelapseStart > this.props.timelapseEnd ? <Text>Start date must be prior to end date.</Text> : null }
             
                 <Text style={ styles.timelapseHeading }>Timelapse Video Creator</Text>
                 <View style={ styles.dateSelectContainer }>
@@ -215,7 +124,7 @@ class TimelapseScreen extends React.Component {
                                     onPress={ this._onPressS } 
                                     style={ styles.dateSelect }>
                             <Icon name="calendar" size={ 28 } color="black" style={ styles.icon } /> 
-                            <Text style={ styles.dateText }>{ moment(this.state.startDate.toString()).format('MM/DD/YY') }</Text>
+                            <Text style={ styles.dateText }>{ moment(this.props.timelapseStart.toString()).format('MM/DD/YY') }</Text>
                         </Touchable>
 
 
@@ -224,21 +133,23 @@ class TimelapseScreen extends React.Component {
                                     onPress={ this._onPressE } 
                                     style={ styles.dateSelect }>
                             <Icon name="calendar" size={ 28 } color="black" style={ styles.icon } /> 
-                            <Text style={ styles.dateText }>{ moment(this.state.endDate.toString()).format('MM/DD/YY') }</Text>
+                            <Text style={ styles.dateText }>{ moment(this.props.timelapseEnd.toString()).format('MM/DD/YY') }</Text>
                         </Touchable>
                     </View>
-                    <TimelapseButton title={'Create'} call={ () => console.log('submitted') }/>
+                    <TimelapseButton title={'Play'} call={ this.requestByDateRange }/>
                 </View>
+
+        {/* Preset options */}
                 
                 <View style={ styles.buttonContainer }>
                     <Text style={ styles.selectionHeading }>Quick Play Options</Text>
                     <View style={ styles.buttonRow }>
-                        <TimelapseButton title={'day'} call={ () => this.handleButtonClick('day') }/>
-                        <TimelapseButton title={'past week'} call={ () => this.handleButtonClick('week') }/>
+                        <TimelapseButton title={'day'} call={ this.requestDay }/>
+                        <TimelapseButton title={'past week'} call={ this.requestWeek }/>
                     </View>
                     <View style={ styles.buttonRow }>
-                        <TimelapseButton title={'past month'} call={ () => this.handleButtonClick('month') }/>
-                        <TimelapseButton title={'entire project'} call={ () => this.handleButtonClick('project') }/>
+                        <TimelapseButton title={'past month'} call={ this.requestMonth }/>
+                        <TimelapseButton title={'entire project'} call={ this.requestProject }/>
                     </View>
                 </View>
             </View>

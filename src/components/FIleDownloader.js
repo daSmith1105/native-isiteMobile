@@ -24,4 +24,6 @@ const timelapseDownloader = (props) => {
     const { uri: localUri } = await FileSystem.downloadAsync(remoteUri, FileSystem.documentDirectory + 'name.ext');
     }
 
-export default ( imageDownloader, videoDownloader, timelapseDownloader );
+exports.imageDownloader;
+exports.videoDownloader;
+exports.timelapseDownloader;

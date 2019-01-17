@@ -10,7 +10,7 @@ const width = '100%';
 
 function Footer (props) {
 
-    const { toggleNav, currentEventType, eventTypes, updateEventType, date, setDate, loading, toggleLoading } = props;
+    const { toggleMainNav, currentEventType, eventTypes, updateEventType, date, setDate, loading, toggleLoading } = props;
 
     return (
       <View style={ styles.footer }>
@@ -25,7 +25,7 @@ function Footer (props) {
                 <DateSelect style={ styles.dateSelect }
                             date={ date }
                             setDate={ setDate } />
-                <Hamburger call={ toggleNav } />
+                <Hamburger call={ toggleMainNav } />
                 <EventFilter style={ styles.eventFilter}
                             currentEventType={ currentEventType }
                             eventTypes={ eventTypes }

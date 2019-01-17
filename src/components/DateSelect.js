@@ -23,8 +23,6 @@ class DateSelect extends React.Component {
     }
 
     confirmDate() {
-        // console.log('props: ' + this.props.date);
-        // console.log('local state : ' + moment(this.state.selectedDate).format('MM/DD/YY'));
         if (moment(this.state.selectedDate).format('MM/DD/YY') != this.props.date) {
             this.props.setDate(this.state.selectedDate);
             QuickPicker.close()

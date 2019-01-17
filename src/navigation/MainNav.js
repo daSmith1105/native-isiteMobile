@@ -25,24 +25,24 @@ class MainNav extends React.Component {
 
     timelapse() {
         this.props.toggleTimelapse;
-        this.props.toggleNav();
+        this.props.toggleMainNav();
     }
 
     logout() {
         console.log('Logout clicked!');
-        this.props.toggleNav();
+        this.props.toggleMainNav();
         this.props.doLogout();
     }
 
     openDividiaURL() {
         console.log('Dividia web link clicked!');
-        this.props.toggleNav();
+        this.props.toggleMainNav();
         WebBrowser.openBrowserAsync('http://www.dividia.net');
     }
 
     confirmCamSelect() {
         QuickPicker.close()
-        this.props.toggleNav();
+        this.props.toggleMainNav();
         this.props.updateCam(this.state.currentCam.slice(4, 6));
     }
 
@@ -52,7 +52,7 @@ class MainNav extends React.Component {
 
     _onPress() {
         console.log('Cam Select clicked!');
-        this.props.toggleNav;
+        this.props.toggleMainNav;
         QuickPicker.open({ 
             items: this.props.camArray, 
             topRow: <PickerTopRow   pickerTitle={'Select Camera'} 
@@ -102,7 +102,7 @@ class MainNav extends React.Component {
                         </View>
 
                         {/* Nav close button */}
-                        <NavCloseButton call={ this.props.toggleNav } title={ 'X' } />
+                        <NavCloseButton call={ this.props.toggleMainNav } title={ 'X' } />
 
                     </View>
             </View>

@@ -9,236 +9,32 @@ import MainNav from '../navigation/MainNav';
 import QuickPicker from 'quick-picker';
 import MediaContainer from '../components/MediaContainer';
 import QuickTimeSearch from '../components/QuickTimeSearch';
-import moment from 'moment';
 
-let camCount = [];
-const today = moment(new Date()).format('MM/DD/YY')
 
 export default class MainScreen extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      site: this.props.site || '',
-      siteTag: this.props.siteTag || '',
-      dataUsage: '',
-      maxData: '',
-      siteURL: 'https://' + this.props.siteTag + '.dividia.net/',
-      projects: [],
 
-  // Snapshot request
-      snapShot: '',
-
-  // Number of customer cams 
-      selectedCam: '1',
-
-  // Events arrays
-      date: '' || today,
-      events: [],
-      images: [],
-      videos: [],
-
-  // Event filter state
-      eventTypes: [ 'ALL', 'IMAGES', 'VIDEOS' ],
-      currentEventType: 'ALL',
-      filterEvents: false,
-
-  //  Toggle state of Main Nav
-      toggleNav: false,
-    }
-
-  // Function bindings
-    this.handleCamSelect = this.handleCamSelect.bind(this);
-    this.toggleNav = this.toggleNav.bind(this);
-    this.getCurrentImage = this.getCurrentImage.bind(this);
-    this.updateEventType = this.updateEventType.bind(this);
-    this.setDate = this.setDate.bind(this);
-    this.fetchNewByDate = this.fetchNewByDate.bind(this);
-    this.fetchDataUsage = this.fetchDataUsage.bind(this);
-    this.fetchSnapShot = this.fetchSnapShot.bind(this);
-    this.checkForMultipleCams = this.checkForMultipleCams.bind(this);
-    this.triggerFilter = this.triggerFilter.bind(this);
-    this.toggleLoading = this.toggleLoading.bind(this);
-  }
 
 // Fetch data for today's date onLoad
   componentDidMount() {
-    this.triggerFilter()
-    this.fetchDataUsage()
-    this.fetchNewByDate()
-    this.checkForMultipleCams()
+    this.props.triggerFilter()
+    this.props.fetchDataUsage()
+    this.props.fetchNewByDate()
+    this.props.checkForMultipleCams()
+    this.props.getTimelapseDay()
+    this.props.getTimelapseWeek()
+    this.props.getTimelapseMonth()
+    this.props.getTimelapseProject()
   }
-
-  // Fetch dataUsage
-  fetchDataUsage() {
-    // May need this proxy:
-    // let proxy = 'https://cors-anywhere.herokuapp.com/';
-    fetch( this.state.siteURL + `ajax.php?action=getBandwidthUsage`)
-    .then( response => {
-          if (response.status !== 200) {
-            console.log('Error. Status Code: ' + response.status);
-            return;
-          }
-          response.json().then(data => {
-              this.setState({
-                 dataUsage: data.bTotal.toString().slice(0,4),
-                 maxData: data.bDataPlanGB,
-                }, function() {
-                  this.props.setDataUsage( this.state.dataUsage )
-                  this.props.setMaxData( this.state.maxData )
-                });
-            })
-      .catch(err => {
-        console.log('Fetch Error: ', err);
-            });
-        })
-  }
-
-// Fetch all events by date and save filtered results to state
-  fetchNewByDate(filter, date) {
-    this.setState({
-        loading: true,
-        error: false,
-        date: date || this.state.date
-    });
-              // May need this proxy:
-              // let proxy = 'https://cors-anywhere.herokuapp.com/';
-
-    fetch( this.state.siteURL + `ajax.php?action=getEvents&date=` + this.state.date)
-    .then( response => {
-          if (response.status !== 200) {
-            console.log('Error. Status Code: ' + response.status);
-            return;
-          }
-          response.json().then(data => {
-              let images = data.filter(d => d.sType === "STILL").reverse();
-              let videos = data.filter(d => d.sType === "VIDEO").reverse();
-              this.setState({
-                 events: data.reverse(),
-                 images,
-                 videos,
-                 currentEventType: filter || 'ALL',
-                 filterEvents: true,
-                 loading: false
-                });
-          })
-      .catch(err => {
-        console.log('Fetch Error: ', err);
-            });
-        })
-  }
-
-  // Fetch current snapshot image
-  fetchSnapShot() {
-    // May need this proxy:
-    // let proxy = 'https://cors-anywhere.herokuapp.com/';
-    fetch( this.state.siteURL + `ajax.php?action=requestStill`)
-      .then( response => {
-            if (response.status !== 200) {
-              console.log('Error. Status Code: ' + response.status);
-              return;
-            }
-            // Fetch new image and update filter to show only images
-            this.fetchNewByDate('IMAGES', today)
-          })
-      .catch(err => {
-        console.log('Fetch Error: ', err);
-      });
-  }
-
-  // Check for multiple cameras
-  checkForMultipleCams() {
-    // May need this proxy:
-    // let proxy = 'https://cors-anywhere.herokuapp.com/';
-    fetch( this.state.siteURL + `ajax.php?action=getProjects`)
-      .then( response => {
-            if (response.status !== 200) {
-              console.log('Error. Status Code: ' + response.status);
-              return;
-            }
-            response.json().then(data => {
-              this.setState({
-                 projects: data,
-                }, function(){ 
-                  for( let x = 0; x < this.state.projects.length; x++ ){
-                    camCount.push('Cam ' + (x + 1).toString())
-                  }
-                 });
-            })
-      .catch(err => {
-        console.log('Fetch Error: ', err);
-            });
-        })
-  }
-
-
-
-// Set new date and fetch events for new date
-  setDate( selectedDate ) {
-    this.setState({ 
-      date: moment(selectedDate).format('MM/DD/YY'),
-     }, 
-    function(){ 
-      console.log('New state of date is: ' + this.state.date)
-      this.fetchNewByDate('ALL', this.state.date) 
-    })
-  }
-
-// Handle the selection of other cams if customer site has more than one
-  handleCamSelect(cam) {
-    this.setState({ selectedCam: cam },
-      function(){console.log('currently selected camera project is: ' + this.state.selectedCam)});
-  }
-
-// Toggle the main navigation menu from footer bar
-  toggleNav() {
-    if(!this.state.toggleNav) {
-      console.log('Nav opened!')
-    } else {
-      console.log('Nav closed!')
-    }
-
-    this.setState({ toggleNav: !(this.state.toggleNav) });
-    // add easing in
-  }
-
-// Get a current image from the snapshot button in footer bar
-  getCurrentImage() {
-    // this.setState({ alert: 'snapshot being taken'});
-    console.log('snapshot requested');
-    this.fetchSnapShot()
-    this.toggleNav();
-  }
-
-// Set the current event filter based on picker input from footer bar
-  updateEventType( eventType ) {
-    this.setState({ 
-      currentEventType: eventType,
-    }, this.triggerFilter() )
-    
-  }
-
-// Set boolean for triggering rerender of media after filter selection
-  triggerFilter() {
-    this.setState({ 
-      filterEvents: !this.state.filterEvents,
-    })
-  }
-
-  toggleLoading() {
-    this.setState({ loading: !this.state.loading })
-  }
-  
   render() {
-
     return (
       <View style={ styles.container }>
 
 {/* ************************************************** */}
       {/* Header component containing logos and customer / data usage information */}
 {/* ************************************************** */}
-          <Header  site={ this.state.site } 
-                    dataUsage={ this.state.dataUsage }
-                    maxData={ this.state.maxData} />
+          <Header  site={ this.props.site } 
+                    dataUsage={ this.props.dataUsage }
+                    maxData={ this.props.maxData} />
 
 {/* ************************************************** */}
       {/* Images, Video thumbnail display and quick search by hour */}
@@ -247,18 +43,30 @@ export default class MainScreen extends React.Component {
           {/* Testing for cam selected */}
             {/* <Text>{ this.state.selectedCam.toString() }</Text> */}
             <MediaContainer style={ styles.mediaContent } 
-                            events={ this.state.events }
-                            images={ this.state.images }
-                            videos={ this.state.videos }
-                            siteURL={ this.state.siteURL }
-                            currentEventType={ this.state.currentEventType }
-                            triggerFilter={ this.triggerFilter }
-                            filterEvents={ this.state.filterEvents}
-                            site={ this.state.site } 
-                            siteTag={ this.state.siteTag }
-                            date={ this.state.date }
-                            loading={ this.state.loading }
-                            toggleloading={ this.toggleLoading } />
+                            events={ this.props.events }
+                            images={ this.props.images }
+                            videos={ this.props.videos }
+                            siteURL={ this.props.siteURL }
+                            currentEventType={ this.props.currentEventType }
+                            triggerFilter={ this.props.triggerFilter }
+                            filterEvents={ this.props.filterEvents }
+                            site={ this.props.site } 
+                            siteTag={ this.props.siteTag }
+                            date={ this.props.date }
+                            loading={ this.props.loading }
+                            toggleloading={ this.props.toggleLoading }
+                            toggleImage={ this.props.toggleImage } 
+                            requestVideo={ this.props.requestVideo }
+                            progressBar={ this.props.progressBar }
+                            videoLoading={ this.props.videoLoading }
+                            videoReady={ this.props.videoReady }
+                            playVideo={ this.props.playVideo }
+                            downloadEvent={ this.props.downloadEvent }
+                            toggleError={ this.props.toggleError }
+                            fetchError={ this.props.fetchError }
+                            serverError={ this.props.seerverError }
+                            error={ this.props.error } /> 
+                        
 
             <QuickTimeSearch style={ styles.quickTimeSearch } />
           </View>
@@ -266,26 +74,28 @@ export default class MainScreen extends React.Component {
 {/* ************************************************** */}
       {/* Render MainNav or Footer based on state */}
 {/* ************************************************** */}      
-          { this.state.toggleNav ? 
+          { this.props.showMainNav ? 
             <MainNav 
-                     toggleNav={ this.toggleNav }
-                     projects={ this.state.projects }
-                     camArray= { camCount }
-                     selectedCam={ this.state.selectedCam }
-                     updateCam= { this.handleCamSelect }
-                     getSnapshot={ this.getCurrentImage }
+                     toggleMainNav={ this.props.toggleMainNav }
+                     projects={ this.props.projects }
+                     camArray= { this.props.camArray }
+                     selectedCam={ this.props.selectedCam }
+                     updateCam= { this.props.handleCamSelect }
+                     getSnapshot={ this.props.getCurrentImage }
                      doLogout={ this.props.setLogout }
                      toggleTimelapse={ this.props.toggleTimelapse } /> : 
+
             <View>
-              <Footer toggleNav={ this.toggleNav }
-                      currentEventType={ this.state.currentEventType }
-                      eventTypes={ this.state.eventTypes }
-                      updateEventType={ this.updateEventType }
-                      date={ this.state.date }
-                      setDate={ this.setDate }
-                      loading={ this.state.loading }
-                      toggleloading={ this.toggleLoading } /> 
-            </View> }
+              <Footer toggleMainNav={ this.props.toggleMainNav }
+                      currentEventType={ this.props.currentEventType }
+                      eventTypes={ this.props.eventTypes }
+                      updateEventType={ this.props.updateEventType }
+                      date={ this.props.date }
+                      setDate={ this.props.setDate }
+                      loading={ this.props.loading }
+                      toggleloading={ this.props.toggleLoading } /> 
+            </View> 
+          }
 
 {/* ************************************************** */}
       {/* Placeholder for the Picker called in other components */}
@@ -293,7 +103,7 @@ export default class MainScreen extends React.Component {
           <QuickPicker />
 
       </View>
-    );
+    )
   }
 }
 

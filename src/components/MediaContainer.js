@@ -19,39 +19,15 @@ export default class MediaContainer extends React.Component {
       super(props);
 
       this.state = {
-        zoom: false,
         eventType: this.props.currentEventType
 
       }
 
-      this.downloadCurrentMedia = this.downloadCurrentMedia.bind(this);
-      this.zoomCurrentMedia = this.zoomCurrentMedia.bind(this);
       this._renderItem = this._renderItem.bind(this);
     }
 
-    downloadCurrentMedia = (e) => {
-      console.log(e.target)
-    }
-
-    zoomCurrentMedia(e) {
-      console.log(e.target)
-    }
-
-    displayError() {
-      console.log( 'error' )
-      eventList = <View style={ styles.errorModal }>
-                      <Text style={ styles.error }>No events found for { this.props.date }.</Text>
-                      <Text style={ styles.errorContact }>If the problem persists please contact Dividia.</Text>
-                      <Text style={ styles.phone }>817-288-1040</Text>
-                      <TouchableHighlight onPress={() => 
-                        Linking.openURL('mailto:support@dividia.net?subject= ' + this.props.site + ' - iSite Support Request' ) }>
-                        <Text style={ styles.support }>support@dividia.net</Text>
-                      </TouchableHighlight>
-                  </View>
-    }
-
     _renderItem({ item }){
-      const { siteURL, siteTag, events } = this.props;
+      const { siteTag, events } = this.props;
       if ( events.length > 0 ) {
 
         const year = item.sTimeStamp.slice(0, 4);
@@ -60,38 +36,50 @@ export default class MediaContainer extends React.Component {
         const hour = item.sTimeStamp.slice(8, 10);
         const minute = item.sTimeStamp.slice(10, 12);
         const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
-
         const date = month + '/' + day + '/' + year;
         const time = hour + ':' + minute + ' ' + dayNight;
+        const imageURL = 'https://' + siteTag + '.dividia.net/thumbnail.php?img=base/' + siteTag + '/' + item.sTimeStamp + '.jpg&size=m';
+          return (
 
-           const imageURL = siteURL + 'thumbnail.php?img=base/' + siteTag + '/' + item.sTimeStamp + '.jpg&size=m';
-          
-            return (
-
-              <MediaElement 
-                date={ date }
-                time={ time }
-                image={ imageURL }
-                download={ this.downloadCurrentMedia }
-                zoom={ this.zoomCurrentMedia }
-                value={ item.bID }
-                duration={ item.bDuration }
-                sType={ item.sType }
-                url={ imageURL } />     
-
-            )
+            <MediaElement 
+              sTimeStamp={ item.sTimeStamp }
+              date={ date }
+              time={ time }
+              image={ imageURL }
+              siteTag={ siteTag }
+              downloadEvent={ this.props.downloadEvent }
+              toggleImage={ this.props.toggleImage }
+              sImage={ item.sImage }
+              duration={ item.bDuration }
+              sType={ item.sType }
+              cached={ item.fCached }
+              cachedProgress={ parseInt( item.dCacheProgress ) }
+              requestVideo={ this.props.requestVideo }
+              progressBar= { this.props.progressBar }
+              videoLoading={ this.props.videoLoading }
+              videoReady={ this.props.videoReady }
+              playVideo={ this.props.playVideo }
+              bID={ item.bID } />     
+          )
       } else {
+
           this.props.toggleLoading;
-          this.displayError();  
+          this.props.toggleError()
       }
     }
 
     render() {   
-       const { events, images, videos } = this.props;
+       const { events, 
+               images, 
+               videos, 
+               filterEvents, 
+               currentEventType,
+               triggerFilter,
+               toggleLoading } = this.props;
 
-      if( this.props.filterEvents ) {
+      if( filterEvents ) {
 
-        switch ( this.props.currentEventType ) {
+        switch ( currentEventType ) {
           case 'ALL': 
             console.log('displaying ALL events')
             eventList = <FlatList inverted
@@ -99,8 +87,8 @@ export default class MediaContainer extends React.Component {
                                   renderItem={ this._renderItem }
                                   keyExtractor={ (item) => item.bID }
                                   style={ styles.eventList } />;
-            this.props.triggerFilter();
-            this.props.toggleLoading;
+            triggerFilter();
+            toggleLoading;
           break;
           case 'IMAGES':
             console.log('displaying IMAGE events')
@@ -109,8 +97,8 @@ export default class MediaContainer extends React.Component {
                                   renderItem={ this._renderItem }
                                   keyExtractor={ (item) => item.bID }
                                   style={ styles.eventList } />;
-            this.props.triggerFilter();   
-            this.props.toggleLoading;    
+            triggerFilter();   
+            toggleLoading;    
           break;
           case 'VIDEOS':
             console.log('displaying Video events')
@@ -119,28 +107,44 @@ export default class MediaContainer extends React.Component {
                                   renderItem={ this._renderItem }
                                   keyExtractor={ (item) => item.bID }
                                   style={ styles.eventList } />;
-            this.props.triggerFilter();
-            this.props.toggleLoading;
+            triggerFilter();
+            toggleLoading;
           break;
           default:
             console.log('Event type error');
         }
       } 
-
       return (
         <View style={ styles.scroll }>
-        { this.props.loading ? 
-            <View style={ styles.loader }>
-              <View style={ styles.loaderContainer }>
-                <Text style={ styles.loaderText }>Loading Events</Text>
-                <Image source={ require('../../assets/images/loader-small.gif') }
-                      style={ styles.loaderIcon } />
-              </View>
-            </View> : 
+            { this.props.loading ? 
+                <View style={ styles.loader }>
+                  <View style={ styles.loaderContainer }>
+                    <Text style={ styles.loaderText }>Loading Events</Text>
+                    <Image source={ require('../../assets/images/loader-small.gif') }
+                          style={ styles.loaderIcon } />
+                  </View>
+                </View> : 
+                null 
+            } 
 
-             eventList
+            { this.props.fetchError ?
+                <View style={ styles.errorModal }>
+                  <Text style={ styles.error }>Fetching events failed for {this.props.date}.</Text>
+                  <Text style={ styles.error }>Is this camera system offline?</Text>
+                  <Text style={ styles.errorContact }>If the problem persists please contact Dividia.</Text>
+                  <Text style={ styles.phone }>817-288-1040</Text> 
+                  <TouchableHighlight onPress={() => 
+                    Linking.openURL('mailto:support@dividia.net?subject= ' + this.props.site + ' - iSite Support Request' ) }>
+                    <Text style={ styles.support }>support@dividia.net</Text>
+                  </TouchableHighlight>
+                </View> :
+                null
+            }
 
-          }
+            { !this.props.loading && !this.props.error ? 
+              eventList :
+              null
+            }
         </View>
       );
     }
@@ -152,7 +156,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 40,
     paddingTop: 10,
-    justifyContent: 'center',
+    jusifyContent: 'center',
     alignItems: 'center',
     width: '80%',
   },
@@ -163,11 +167,12 @@ const styles = StyleSheet.create({
   errorModal: {
     marginTop: 60,
     width: '90%',
-    justifyContent: 'center',
+    justifyContents: 'center',
     alignItems: 'center',
     borderRadius: 10,
     borderWidth: 4,
     borderColor: 'yellow',
+    backgroundColor: 'yellow',
     padding: 10,
     marginLeft: 10,
   },
@@ -189,7 +194,7 @@ const styles = StyleSheet.create({
   support: {
     fontSize: 20,
     color: 'blue',
-    // textDecoration: 'underline',
+    textDecoration: 'underline',
     textAlign: 'center',
     marginTop: 10,
     paddingBottom: 10,
