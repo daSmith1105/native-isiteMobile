@@ -12,7 +12,7 @@ class MainNav extends React.Component {
         super(props);
 
         this.state = {
-            currentCam: 1
+            currentCam: this.props.camArray[0]
         }
 
         this.timelapse = this.timelapse.bind(this);
@@ -29,13 +29,11 @@ class MainNav extends React.Component {
     }
 
     logout() {
-        console.log('Logout clicked!');
         this.props.toggleMainNav();
         this.props.doLogout();
     }
 
     openDividiaURL() {
-        console.log('Dividia web link clicked!');
         this.props.toggleMainNav();
         WebBrowser.openBrowserAsync('http://www.dividia.net');
     }
@@ -43,7 +41,9 @@ class MainNav extends React.Component {
     confirmCamSelect() {
         QuickPicker.close()
         this.props.toggleMainNav();
-        this.props.updateCam(this.state.currentCam.slice(4, 6));
+        this.props.handleCamSelect(parseInt( this.state.currentCam.slice(4,6) ) )
+
+        console.log('current cam from picker: ' + this.state.currentCam )
     }
 
     closeCamSelect() {
@@ -51,8 +51,9 @@ class MainNav extends React.Component {
     }
 
     _onPress() {
-        console.log('Cam Select clicked!');
         this.props.toggleMainNav;
+        let camValue = 'Cam ' + (this.props.selectedCam + 1).toString();
+        console.log( 'camValue > ' + camValue )
         QuickPicker.open({ 
             items: this.props.camArray, 
             topRow: <PickerTopRow   pickerTitle={'Select Camera'} 
@@ -60,7 +61,7 @@ class MainNav extends React.Component {
                                     close={ this.closeCamSelect }
                                     confirm={ this.confirmCamSelect }
                                     confirmText={'CONFIRM'} />,
-            selectedValue: this.state.currentCam,
+            selectedValue: camValue,
             onValueChange: ( selectedValueFromPicker ) => this.setState({ currentCam: selectedValueFromPicker.toString() }),
         });
     }

@@ -4,22 +4,29 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 
 export default function FullScreenImage (props) {
+
+  const { siteURL, 
+          sImage, 
+          sImageDate, 
+          sImageTime, 
+          downloadEvent, 
+          toggleImage } = props;
   
-  let URL = props.siteURL + props.sImage;
-  let timeStamp = props.sImageDate + props.sImageTime;
+  let URL = siteURL + sImage;
+  let timeStamp = sImageDate + sImageTime;
   let type = 'IMAGE';
 
     return (
       <View style={{ flex: 1, backgroundColor: 'black' }}>
-        <TouchableHighlight onPress={ () => props.downloadEvent( type, URL, timeStamp )  } style={ styles.download}>
+        <TouchableHighlight onPress={ () => downloadEvent( type, URL, timeStamp )  } style={ styles.download}>
                     <Icon name="arrow-circle-down" size={ 50 } color="white" />
         </TouchableHighlight>
 
-        <TouchableHighlight onPress={ props.toggleImage } style={ styles.back}>
+        <TouchableHighlight onPress={ () => toggleImage() } style={ styles.back}>
                     <Icon name="arrow-left" size={ 30 } color="white" />             
         </TouchableHighlight>
 
-        <Text style={ styles.timestamp }>{ props.sImageDate } { props.sImageTime }</Text>
+        <Text style={ styles.timestamp }>{ sImageDate } { sImageTime }</Text>
 
         <View style={ styles.container }>
           <View style={ styles.bumper }></View>

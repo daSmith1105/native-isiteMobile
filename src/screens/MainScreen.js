@@ -16,14 +16,11 @@ export default class MainScreen extends React.Component {
 
 // Fetch data for today's date onLoad
   componentDidMount() {
-    this.props.triggerFilter()
-    this.props.fetchDataUsage()
-    this.props.fetchNewByDate()
-    this.props.checkForMultipleCams()
-    this.props.getTimelapseDay()
-    this.props.getTimelapseWeek()
-    this.props.getTimelapseMonth()
-    this.props.getTimelapseProject()
+    // this.props.checkForMultipleCams()
+    // this.props.getTimelapseDay()
+    // this.props.getTimelapseWeek()
+    // this.props.getTimelapseMonth()
+    // this.props.getTimelapseProject()
   }
   render() {
     return (
@@ -54,7 +51,7 @@ export default class MainScreen extends React.Component {
                             siteTag={ this.props.siteTag }
                             date={ this.props.date }
                             loading={ this.props.loading }
-                            toggleloading={ this.props.toggleLoading }
+                            toggleoading={ this.props.toggleLoading }
                             toggleImage={ this.props.toggleImage } 
                             requestVideo={ this.props.requestVideo }
                             progressBar={ this.props.progressBar }
@@ -62,9 +59,8 @@ export default class MainScreen extends React.Component {
                             videoReady={ this.props.videoReady }
                             playVideo={ this.props.playVideo }
                             downloadEvent={ this.props.downloadEvent }
-                            toggleError={ this.props.toggleError }
+                            toggleFetchError={ this.props.toggleFetchError }
                             fetchError={ this.props.fetchError }
-                            serverError={ this.props.seerverError }
                             error={ this.props.error } /> 
                         
 
@@ -80,7 +76,7 @@ export default class MainScreen extends React.Component {
                      projects={ this.props.projects }
                      camArray= { this.props.camArray }
                      selectedCam={ this.props.selectedCam }
-                     updateCam= { this.props.handleCamSelect }
+                     handleCamSelect= { this.props.handleCamSelect }
                      getSnapshot={ this.props.getCurrentImage }
                      doLogout={ this.props.setLogout }
                      toggleTimelapse={ this.props.toggleTimelapse } /> : 
@@ -93,7 +89,8 @@ export default class MainScreen extends React.Component {
                       date={ this.props.date }
                       setDate={ this.props.setDate }
                       loading={ this.props.loading }
-                      toggleloading={ this.props.toggleLoading } /> 
+                      toggleloading={ this.props.toggleLoading }
+                      toggleFetchError={ this.toggleFetchError } /> 
             </View> 
           }
 

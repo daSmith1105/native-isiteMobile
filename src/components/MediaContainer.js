@@ -11,6 +11,7 @@ import React from 'react';
 import { StyleSheet, FlatList, Text, View, TouchableHighlight, Linking, Image } from 'react-native';
 import MediaElement from './MediaElement';
 
+
 let eventList;
 
 export default class MediaContainer extends React.Component {
@@ -27,9 +28,8 @@ export default class MediaContainer extends React.Component {
     }
 
     _renderItem({ item }){
-      const { siteTag, events } = this.props;
-      if ( events.length > 0 ) {
-
+        const { siteTag } = this.props;
+        let imageURL;
         const year = item.sTimeStamp.slice(0, 4);
         const month = item.sTimeStamp.slice(4, 6);
         const day = item.sTimeStamp.slice(6, 8);
@@ -38,7 +38,13 @@ export default class MediaContainer extends React.Component {
         const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
         const date = month + '/' + day + '/' + year;
         const time = hour + ':' + minute + ' ' + dayNight;
-        const imageURL = 'https://' + siteTag + '.dividia.net/thumbnail.php?img=base/' + siteTag + '/' + item.sTimeStamp + '.jpg&size=m';
+       
+        if( item.sType == 'STILL' && item.sThumbnailM != null ) {  
+           imageURL = 'https://' + siteTag + '.dividia.net/' + item.sThumbnailM;
+          } else {
+            imageURL = 'https://' + siteTag + '.dividia.net/thumbnail.php?&size=m&img=' + item.sImage;
+        }
+
           return (
 
             <MediaElement 
@@ -60,12 +66,7 @@ export default class MediaContainer extends React.Component {
               videoReady={ this.props.videoReady }
               playVideo={ this.props.playVideo }
               bID={ item.bID } />     
-          )
-      } else {
-
-          this.props.toggleLoading;
-          this.props.toggleError()
-      }
+          ) 
     }
 
     render() {   
@@ -75,48 +76,38 @@ export default class MediaContainer extends React.Component {
                filterEvents, 
                currentEventType,
                triggerFilter,
-               toggleLoading } = this.props;
+               toggleFetchError } = this.props;
 
       if( filterEvents ) {
+          let eventType;
+          if ( currentEventType == 'ALL') {
+            eventType = events;
+          } else if ( currentEventType == 'IMAGES') {
+            eventType = images;
+          } else if ( currentEventType == 'VIDEOS') {
+            eventType = videos;
+          } else {
+            console.log('Unknown event type recieved')
+          }
 
-        switch ( currentEventType ) {
-          case 'ALL': 
-            console.log('displaying ALL events')
-            eventList = <FlatList inverted
-                                  data={ events } 
-                                  renderItem={ this._renderItem }
-                                  keyExtractor={ (item) => item.bID }
-                                  style={ styles.eventList } />;
+          console.log( currentEventType + ': ' + eventType.length )
+
+          if ( eventType.length !== 0 ) {
+               eventList = <FlatList inverted
+                                     data={ eventType } 
+                                     renderItem={ this._renderItem }
+                                     keyExtractor={ (item) => item.bID }
+                                     style={ styles.eventList } />  ;
             triggerFilter();
-            toggleLoading;
-          break;
-          case 'IMAGES':
-            console.log('displaying IMAGE events')
-            eventList = <FlatList inverted
-                                  data={ images } 
-                                  renderItem={ this._renderItem }
-                                  keyExtractor={ (item) => item.bID }
-                                  style={ styles.eventList } />;
-            triggerFilter();   
-            toggleLoading;    
-          break;
-          case 'VIDEOS':
-            console.log('displaying Video events')
-            eventList = <FlatList inverted
-                                  data={ videos } 
-                                  renderItem={ this._renderItem }
-                                  keyExtractor={ (item) => item.bID }
-                                  style={ styles.eventList } />;
+          } else {
             triggerFilter();
-            toggleLoading;
-          break;
-          default:
-            console.log('Event type error');
-        }
+            toggleFetchError();
+          }
+            
       } 
       return (
         <View style={ styles.scroll }>
-            { this.props.loading ? 
+            { this.props.loading && !this.props.fetchError ? 
                 <View style={ styles.loader }>
                   <View style={ styles.loaderContainer }>
                     <Text style={ styles.loaderText }>Loading Events</Text>
@@ -127,7 +118,7 @@ export default class MediaContainer extends React.Component {
                 null 
             } 
 
-            { this.props.fetchError ?
+            { this.props.fetchError && !this.props.loading ?
                 <View style={ styles.errorModal }>
                   <Text style={ styles.error }>Fetching events failed for {this.props.date}.</Text>
                   <Text style={ styles.error }>Is this camera system offline?</Text>
@@ -141,7 +132,7 @@ export default class MediaContainer extends React.Component {
                 null
             }
 
-            { !this.props.loading && !this.props.error ? 
+            { !this.props.loading && !this.props.fetchError ? 
               eventList :
               null
             }

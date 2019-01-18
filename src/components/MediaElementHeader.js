@@ -5,7 +5,7 @@ import { StyleSheet, View, Text } from 'react-native';
 
 export default function MediaElementHeader (props) {
 
-    const { date, time, download } = props;
+    const { date, time } = props;
 
     return (
         <View style={ styles.mediaHeader }>

@@ -28,10 +28,9 @@ class App extends React.Component {
       siteList: [ 'birch', 'gte', 'ashgrovejs' ],
       siteURL: '',
       projects: [],
-      camCount: [],
       eventTypes: [ 'ALL', 'IMAGES', 'VIDEOS' ],
       currentEventType: 'ALL',
-      selectedCam: '1',
+      selectedCam: 0,
       loginError: false,
       showTimelapse: false,
       showFullImage: false,
@@ -52,9 +51,9 @@ class App extends React.Component {
       dataUsage: '',
       maxData: '',
       progressBar: 0,
-      filterEvents: true,
+      filterEvents: false,
       snapShot: '',
-      date: '' || today,
+      date: today,
       events: [],
       images: [],
       videos: [],
@@ -62,6 +61,7 @@ class App extends React.Component {
       fetchError: false,
       videoPaused: false,
       videoReload: false,
+      done: false
     }
 
     this.setLogout = this.setLogout.bind(this);
@@ -99,7 +99,8 @@ class App extends React.Component {
     this.toggleVideoPaused = this.toggleVideoPaused.bind(this);
     this.toggleVideoReload = this.toggleVideoReload.bind(this);
     this.saveSessionVariable = this.saveSessionVariable.bind(this);
-  }
+    this.loadNewCam = this.loadNewCam.bind(this)
+;  }
 
   componentDidMount() {
     this.retrieveSessionVariable()
@@ -122,15 +123,23 @@ class App extends React.Component {
     try {
       const vSiteTag = await AsyncStorage.getItem('siteTag');
       if( vSiteTag !== null ) {
-        console.log( vSiteTag )
+
         this.resolveSitename( vSiteTag )
         this.setState({ siteTag: vSiteTag })
+      } else {
+        this.setState({ siteTag: '' })
       }
       const vIsLoggedIn = await AsyncStorage.getItem('isLoggedIn');
       if( vIsLoggedIn !== null ) {
-        console.log( vIsLoggedIn )
+  
         this.setState({ isLoggedIn: vIsLoggedIn })
+      } else {
+        this.setState({ isLoggedIn: false })
       }
+        this.fetchDataUsage()
+        this.fetchNewByDate()
+        this.checkForMultipleCams();
+
     } catch( error ) {
       console.log( 'Retrieving session variable from local storage failed. ' + error.message )
     }
@@ -160,6 +169,9 @@ class App extends React.Component {
         isLoggedIn: true
       },
         function() {
+          this.fetchDataUsage()
+          this.fetchNewByDate()
+          this.checkForMultipleCams();
           this.saveSessionVariable()
       })
     } else {
@@ -258,7 +270,6 @@ class App extends React.Component {
 
   // Check for multiple cameras
   checkForMultipleCams() {
-    console.log( 'https://' + this.state.siteTag + '.dividia.net/ajax.php?action=getProjects' );
     fetch( 'https://' + this.state.siteTag + '.dividia.net/ajax.php?action=getProjects')
       .then( response => {
             if (response.status !== 200) {
@@ -283,8 +294,25 @@ class App extends React.Component {
   // dataUasage functions
 
   handleCamSelect(cam) {
-    this.setState({ selectedCam: cam },
-      function(){console.log('currently selected camera project is: ' + this.state.selectedCam)});
+    console.log('getting in handleCamSelect: ' + cam )
+    this.setState({ selectedCam: ( cam - 1 ) }, () =>
+      console.log('new state of selected cam ' + this.state.selectedCam))
+      this.loadNewCam(cam - 1)
+  }
+
+  // load selected cam events from multiple cam select 
+
+  loadNewCam( newCam ) {
+    console.log( 'https://' + this.state.siteTag + '.dividia.net/index.php?setproject=' + newCam )
+    fetch( 'https://' + this.state.siteTag + '.dividia.net/index.php?setproject=' + newCam )
+    .then( response => {
+      if (response.status !== 200) {
+        console.log('Error. Status Code: ' + response.status);
+        return;
+      }
+      this.fetchDataUsage()
+      this.fetchNewByDate()
+    })
   }
 
   // image event functions
@@ -292,8 +320,9 @@ class App extends React.Component {
   toggleImage( image, date, time ) {
     this.setCurrentImage(image, date, time);
     this.setState({ 
-      showFullImage: !this.state.showFullImage
-    }, function(){console.log(this.state.sImage)})
+      showFullImage: !this.state.showFullImage,
+      showMainNav: false
+    })
   }
 
   setCurrentImage(image, date, time ) {
@@ -306,7 +335,6 @@ class App extends React.Component {
 
   requestVideo( siteURL, bID ) {
     console.log('Downloading video ... ');
-    console.log( siteURL + 'ajax.php?action=requestVideo&id=' + bID )
       fetch( siteURL + 'ajax.php?action=requestVideo&id=' + bID )
         .then( response => {
           if (response.status !== 200) {
@@ -314,36 +342,29 @@ class App extends React.Component {
             return;
           }
           response.json().then( data => {
+
             if (data.status == 0 ) {
-
-              var pollProgress = 
-                setInterval(function() {
-                  let done = 0;
-                  if(done == 1) {
-                    this.fetchNewByDate()
-                  }
-                  fetch( siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
-                  .then( response => {
-                    response.json().then( data => {
-                      if (parseInt(data.dCacheProgress) >= 100){
-                        console.log(bID + ': done')
-                        clearInterval(pollProgress)
-                      } 
-
-                      console.log( parseInt(data.dCacheProgress) )
-                      this.setState({ progressBar: parseInt( data.dCacheProgress ) })
-                    })
-                  })
-                }, 1000 )
+// ***** CAN ONLY CONSOLE LOG IN THIS FUNCTION FOR SOME REASON
+                var pollProgress = 
+                  setInterval(function() {
+                    fetch( siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
+                      .then( response => {
+                        response.json().then( data => {
+                          if (parseInt(data.dCacheProgress) == 100){  
+                            console.log('woohoo')
+                            clearInterval(pollProgress) 
+                          } 
+                          console.log( parseInt(data.dCacheProgress) )
+          
+                        })
+                      })
+                    }, 1000 )
               }
             })
         })
   }
 
   playVideo ( sTimeStamp, date, time, duration ) {
-    console.log( sTimeStamp )
-    console.log( date )
-    console.log( time )
     this.setState({
       sVideo: 'base/' + this.state.siteTag + '/video/' + sTimeStamp + '.mp4',
       sVideoDate: date,
@@ -365,7 +386,8 @@ class App extends React.Component {
     console.log('toggling Video')
     this.setState({ 
       showFullVideo: !this.state.showFullVideo,
-      showTimelapse: !this.state.showTimelapse 
+      showTimelapse: !this.state.showTimelapse,
+      showMainNav: false
       })
   }
 
@@ -375,7 +397,7 @@ class App extends React.Component {
     this.setState({ 
       sTimelapse: url,
      },
-      function(){ console.log( 'this is the timelapse file: ' + this.state.sTimelapse ) })
+      function(){ console.log( 'timelapse file set: ' + this.state.sTimelapse ) })
   }
 
   setTimelapseStart(value) {
@@ -387,7 +409,9 @@ class App extends React.Component {
   }
 
   toggleTimelapse() {
-    this.setState({ showTimelapse: !this.state.showTimelapse })
+    this.setState({ 
+      showTimelapse: !this.state.showTimelapse,
+      showMainNav: false })
   }
   
   toggleTimelapseVideo() {
@@ -397,9 +421,6 @@ class App extends React.Component {
   // event download function
 
   downloadEvent( type, URL, sTimeStamp ) {
-    console.log(type)
-    console.log(URL)
-    console.log( sTimeStamp )
     if(type == 'IMAGE') {
       FileSystem.downloadAsync( URL,
         FileSystem.documentDirectory + 'image.jpg'
@@ -432,15 +453,15 @@ class App extends React.Component {
   updateEventType( eventType ) {
     this.setState({ 
       currentEventType: eventType,
-    })
-    this.triggerFilter()
+    }, () => this.triggerFilter() )
   }
 
 // Get a current image from the snapshot button in footer bar
   getCurrentImage() {
     console.log('snapshot requested');
+    this.toggleMainNav()
     this.fetchSnapShot()
-    this.toggleMainNav();
+    this.triggerFilter()
   }
 
   // Fetch current snapshot image
@@ -453,6 +474,7 @@ class App extends React.Component {
             }
             // Fetch new image and update filter to show only images
             this.fetchNewByDate('IMAGES', today)
+            this.triggerFilter()
           })
       .catch(err => {
         console.log('Fetch Error: ', err);
@@ -460,26 +482,21 @@ class App extends React.Component {
     }
 
     // Fetch all events by date and save filtered results to state
-  fetchNewByDate(filter, date) {
-    this.setState({
-        loading: true,
-        date: date || this.state.date,
-        currentEventType: filter || 'ALL',
-        fetchError: false
-    },
-    function(){ console.log( 'fetchError cleared' )});
-              // May need this proxy:
-              // let proxy = 'https://cors-anywhere.herokuapp.com/';
-
-    fetch( 'http://' + this.state.siteTag + `.dividia.net/ajax.php?action=getEvents&date=` + this.state.date)
+  fetchNewByDate(filter, uDate) {
+    let date;
+    let filterType;
+    if(uDate){ date = uDate } else{ date = this.state.date }
+    if(filter){ filterType = filter} else { filterType = 'ALL' }
+      this.setState({
+          loading: true,
+          fetchError: false,
+          date: date ,
+          currentEventType: filterType,
+      });
+    fetch( 'https://' + this.state.siteTag + '.dividia.net/ajax.php?action=getEvents&date=' + this.state.date )
     .then( response => {
           if (response.status !== 200) {
-            this.setState({
-              loading: false,
-              fetchError: true
-            })
-            console.log('Server Error. Status Code: ' + response.status);
-            return;
+            console.log('ooops, could not connect to server')
           }
           response.json().then(data => {
               let images = data.filter(d => d.sType === "STILL").reverse();
@@ -488,13 +505,22 @@ class App extends React.Component {
                  events: data.reverse(),
                  images,
                  videos,
-                 currentEventType: filter || 'ALL',
-                 loading: false
-                });
-                this.triggerFilter()
+                 currentEventType: this.state.currentEventType,
+                 loading: false,
+                 fetchError: false
+                },
+                  () => { 
+                          this.triggerFilter()
+              })
           })
       .catch(err => {
         console.log('Fetch Error: ', err);
+        this.setState({
+          loading: false,
+          fetchError: true,
+          filterEvents: false
+        },
+          () => console.log( 'Fetch failed - loading: ' + this.state.loading + ' - fetchError: ') + this.state.fetchError)
       })
     })
   }
@@ -507,7 +533,7 @@ class App extends React.Component {
      }, 
     function(){ 
       console.log('New state of date is: ' + this.state.date)
-      this.fetchNewByDate('ALL', this.state.date) 
+      this.fetchNewByDate() 
     })
   }
 
@@ -532,18 +558,13 @@ class App extends React.Component {
         }
 
 // Toggle loader for waiting on events fetch
-  toggleLoading() {
-    this.setState({ loading: !this.state.loading })
+  toggleLoading(value) {
+    this.setState({ loading: value || !this.state.loading },
+      () => console.log( 'loading: ' + this.state.loading ))
   }
 
   // Toggle the main navigation menu from footer bar
   toggleMainNav() {
-    if(!this.state.toggleNav) {
-      console.log('Nav opened!')
-    } else {
-      console.log('Nav closed!')
-    }
-
     this.setState({ showMainNav: !this.state.showMainNav });
     // add easing in
   }
@@ -579,14 +600,16 @@ class App extends React.Component {
   toggleLoginError() {
     this.setstate({ 
       error: !this.state.error 
-    })
+    },
+      () => console.log( 'Login error: ' + this.state.error ))
   }
 
   toggleFetchError() {
-    this.setstate({ 
+    this.setState({ 
       fetchError: !this.state.fetchError,
-      loading: !this.state.loading
-    })
+      loading: false
+    },
+    () => console.log('fetchError: ' + this.state.fetchError))
   }
 
   toggleVideoPaused() {
@@ -657,7 +680,7 @@ class App extends React.Component {
                           getTimelapseProject={ this.getTimelapseProject }
                           fetchError={ this.state.fetchError }
                           error={ this.state.error }
-                          toggleError={ this.toggleError } /> :
+                          toggleFetchError={ this.toggleFetchError } /> :
               null }
 
             { !this.state.isLoggedIn  ? 
@@ -722,7 +745,12 @@ class App extends React.Component {
               <FullScreenTimelapse toggleTimelapseVideo={ this.toggleTimelapseVideo }
                                    sTimelapse={ this.state.sTimelapse }
                                    siteTag={ this.state.siteTag }
-                                   downloadEvent={ this.downloadEvent } /> :
+                                   downloadEvent={ this.downloadEvent }
+                                  //  CHANGE THESE VALUES
+                                   videoReload={ this.state.videoReload }
+                                   videoPaused={ this.state.videoPaused }
+                                   toggleVideoPaused={ this.toggleVideoPaused } 
+                                   toggleVideoReload={ this.toggleVideoReload } /> :
               null }
 
             {/* Hide the top status bar on ios */}

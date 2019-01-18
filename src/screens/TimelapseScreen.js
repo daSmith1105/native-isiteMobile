@@ -4,7 +4,6 @@ import TimelapseButton from '../../src/components/TimelapseButton';
 import Header from '../../src/components/Header';
 import Touchable from '@appandflow/touchable';
 import QuickPicker from 'quick-picker';
-import PickerTopRow from '../components/PickerTopRow';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
@@ -26,7 +25,6 @@ class TimelapseScreen extends React.Component {
 
   }
 
-//   http://ashgrovejs.dividia.net/timelapse.php?start=2018/11/15&end=2018/11/16
     
     requestDay() {
         const today = moment().format('YYYY/MM/DD');
@@ -70,7 +68,6 @@ class TimelapseScreen extends React.Component {
 
     _onPressS = () => {
         const today = new Date;
-        console.log( 'date pressed: Start Date'  )
         QuickPicker.open({ 
             pickerType: "date",
             mode: 'date',
@@ -86,7 +83,6 @@ class TimelapseScreen extends React.Component {
 
     _onPressE = () => {
         const today = new Date;
-        console.log( 'date pressed: End Date'  )
         QuickPicker.open({ 
             pickerType: "date",
             mode: 'date',
