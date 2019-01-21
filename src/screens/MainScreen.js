@@ -14,14 +14,6 @@ import QuickTimeSearch from '../components/QuickTimeSearch';
 export default class MainScreen extends React.Component {
 
 
-// Fetch data for today's date onLoad
-  componentDidMount() {
-    // this.props.checkForMultipleCams()
-    // this.props.getTimelapseDay()
-    // this.props.getTimelapseWeek()
-    // this.props.getTimelapseMonth()
-    // this.props.getTimelapseProject()
-  }
   render() {
     return (
       <View style={ styles.container }>
@@ -45,8 +37,7 @@ export default class MainScreen extends React.Component {
                             videos={ this.props.videos }
                             siteURL={ this.props.siteURL }
                             currentEventType={ this.props.currentEventType }
-                            triggerFilter={ this.props.triggerFilter }
-                            filterEvents={ this.props.filterEvents }
+                            currentEventList={ this.props.currentEventList }
                             site={ this.props.site } 
                             siteTag={ this.props.siteTag }
                             date={ this.props.date }
@@ -58,10 +49,11 @@ export default class MainScreen extends React.Component {
                             videoLoading={ this.props.videoLoading }
                             videoReady={ this.props.videoReady }
                             playVideo={ this.props.playVideo }
-                            downloadEvent={ this.props.downloadEvent }
+                            downloadImageEvent={ this.props.downloadImageEvent }
                             toggleFetchError={ this.props.toggleFetchError }
                             fetchError={ this.props.fetchError }
-                            error={ this.props.error } /> 
+                            error={ this.props.error }
+                            /> 
                         
 
             <QuickTimeSearch style={ styles.quickTimeSearch } />

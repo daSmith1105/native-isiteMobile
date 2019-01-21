@@ -13,7 +13,7 @@ export default function MediaElement (props) {
     const { date, 
             time, 
             toggleImage, 
-            downloadEvent, 
+            downloadImageEvent, 
             siteTag,
             image, 
             duration, 
@@ -26,12 +26,13 @@ export default function MediaElement (props) {
             videoLoading,
             playVideo,
             sTimeStamp,
+            siteURL,
             videoReady,
             progressBar,
               } = props;
 
       let timeStamp = sTimeStamp;
-      let type = sType;
+      let URL= siteURL + sImage;
 
     return (
         <View style={ styles.media }>  
@@ -112,7 +113,7 @@ export default function MediaElement (props) {
 
             {/* Show download button if type is 'STILL' */}                
             { sType == 'STILL' ?
-              <TouchableHighlight onPress={ () => downloadEvent( type, URL, timeStamp ) } style={ styles.download }>
+              <TouchableHighlight onPress={ () => downloadImageEvent( URL ) } style={ styles.download }>
                   <Icon name="arrow-circle-down" size={ 20 } color="white" />
               </TouchableHighlight> :
               null
@@ -127,7 +128,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 5,
     marginBottom: 5,
-    flexGrow: 1,
     width: '100%',
     height: 200,
     paddingBottom: -100,
@@ -136,7 +136,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    width: '100%',
   },
   enlarge: {
     marginTop: -40,
@@ -149,9 +148,8 @@ const styles = StyleSheet.create({
   },
   image: {
     borderRadius: 5,
-    // marginTop: -10,
     width: '100%',
-    height: 200,
+    height: '100%',
     zIndex: 1,
   },
   imageBackground: {
@@ -160,12 +158,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     justifyContent: 'center',
-    backgroundColor: 'grey',
     alignItems: 'center',
   },
   imageLoading: {
     width: '100%',
-    height: 200,
+    height: '100%',
     justifyContent: 'center',
     backgroundColor: 'white',
     alignItems: 'center',
@@ -197,8 +194,9 @@ const styles = StyleSheet.create({
   },
   download: {
     position: 'absolute',
-    top: -24,
+    top: -32,
     right: 10,
+    padding: 10
   },
   progress: {
     marginTop: 2,

@@ -3,7 +3,7 @@
    // let proxy = 'https://cors-anywhere.herokuapp.com/';
 
 import React from 'react';
-import { StyleSheet, StatusBar, View, AsyncStorage } from 'react-native';
+import { StyleSheet, StatusBar, View, AsyncStorage, CameraRoll } from 'react-native';
 import { FileSystem } from 'expo';
 import MainScreen from './src/screens/MainScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -30,6 +30,7 @@ class App extends React.Component {
       projects: [],
       eventTypes: [ 'ALL', 'IMAGES', 'VIDEOS' ],
       currentEventType: 'ALL',
+      currentEventList: [],
       selectedCam: 0,
       loginError: false,
       showTimelapse: false,
@@ -51,7 +52,6 @@ class App extends React.Component {
       dataUsage: '',
       maxData: '',
       progressBar: 0,
-      filterEvents: false,
       snapShot: '',
       date: today,
       events: [],
@@ -61,7 +61,8 @@ class App extends React.Component {
       fetchError: false,
       videoPaused: false,
       videoReload: false,
-      done: false
+      done: false,
+      renderEventsList: false
     }
 
     this.setLogout = this.setLogout.bind(this);
@@ -78,8 +79,8 @@ class App extends React.Component {
     this.setTimelapseEnd = this.setTimelapseEnd.bind(this);
     this.setTimelapse= this.setTimelapse.bind(this);
     this.playVideo = this.playVideo.bind(this);
-    this.downloadEvent = this.downloadEvent.bind(this);
-    this.triggerFilter = this.triggerFilter.bind(this);
+    this.downloadImageEvent = this.downloadImageEvent.bind(this);
+    this.downloadVideoEvent = this.downloadVideoEvent.bind(this);
     this.checkForMultipleCams = this.checkForMultipleCams.bind(this);
     this.handleCamSelect = this.handleCamSelect.bind(this);
     this.updateEventType = this.updateEventType.bind(this);
@@ -99,8 +100,10 @@ class App extends React.Component {
     this.toggleVideoPaused = this.toggleVideoPaused.bind(this);
     this.toggleVideoReload = this.toggleVideoReload.bind(this);
     this.saveSessionVariable = this.saveSessionVariable.bind(this);
-    this.loadNewCam = this.loadNewCam.bind(this)
-;  }
+    this.loadNewCam = this.loadNewCam.bind(this);
+    this.setRenderEventsComplete = this.setRenderEventsComplete.bind(this);
+    this.setCurrentEventList = this.setCurrentEventList.bind(this);
+  }
 
   componentDidMount() {
     this.retrieveSessionVariable()
@@ -114,12 +117,12 @@ class App extends React.Component {
       await AsyncStorage.setItem( 'siteTag', this.state.siteTag );
       console.log( 'saving session variables')
     } catch( error ) {
-      console.log( 'Saving session variable to local storage failed. ' + error.message )
+      console.log( 'Saving session variable to local storage FAILED. ' + error.message )
     }
   }
 
   async retrieveSessionVariable() {
-    // eventually resue with (key, value)
+    // eventually redo with (key, value)
     try {
       const vSiteTag = await AsyncStorage.getItem('siteTag');
       if( vSiteTag !== null ) {
@@ -136,12 +139,13 @@ class App extends React.Component {
       } else {
         this.setState({ isLoggedIn: false })
       }
+
+        this.fetchNewByDate( today, 'ALL')
         this.fetchDataUsage()
-        this.fetchNewByDate()
         this.checkForMultipleCams();
 
     } catch( error ) {
-      console.log( 'Retrieving session variable from local storage failed. ' + error.message )
+      console.log( 'Retrieving session variable from local storage FAILED ' + error.message )
     }
 
   }
@@ -153,7 +157,7 @@ class App extends React.Component {
       await AsyncStorage.removeItem( 'siteTag' )
       console.log( 'removing session variables')
     } catch( error ) {
-      console.log( 'Removing session variable from local storage failed. ' + error.message )
+      console.log( 'Removing session variable from local storage FAILED. ' + error.message )
     }
   }
   
@@ -169,8 +173,8 @@ class App extends React.Component {
         isLoggedIn: true
       },
         function() {
+          this.fetchNewByDate( today, 'ALL' )
           this.fetchDataUsage()
-          this.fetchNewByDate()
           this.checkForMultipleCams();
           this.saveSessionVariable()
       })
@@ -187,54 +191,54 @@ class App extends React.Component {
   }
 
   setLogout() {
-    console.log( 'clearing user session ....')
     this.clearSessionVariable()
     this.setState({   isLoggedIn: false,
-                      site: '', // full site name used in header
-                      siteTag: '', // short version of site used for URL
-                      siteList: [ 'birch', 'gte', 'ashgrovejs' ],
-                      siteURL: '',
-                      projects: [],
-                      camCount: [],
-                      eventTypes: [ 'ALL', 'IMAGES', 'VIDEOS' ],
-                      currentEventType: 'ALL',
-                      selectedCam: '1',
-                      loginError: false,
-                      showTimelapse: false,
-                      showFullImage: false,
-                      showFullVideo: false,
-                      showTimelapseVideo: false,
-                      sImage: '',
-                      sImageDate: '',
-                      sImageTime: '',
-                      sVideo: '',
-                      sVideoDate: '',
-                      sVideoTime: '',
-                      sVideoDuration: '',
-                      sTimelapse: '',
-                      sTimelapseStart: new Date,
-                      sTimelapseEnd: new Date,
-                      videoLoading: false,
-                      videoReady: false,
-                      dataUsage: '',
-                      maxData: '',
-                      progressBar: 0,
-                      filterEvents: true,
-                      snapShot: '',
-                      date: '' || today,
-                      events: [],
-                      images: [],
-                      videos: [],
-                      loading: false,
-                      fetchError: false,
-                      videoPaused: false,
-                      videoReload: false,
-                  }, function() {
-                        camCount = [];
-                        console.log( 'user session cleared' )
-                        console.log(this.state)
-                        console.log('camcount: ' + JSON.stringify(camCount))
-                  })
+      site: '', // full site name used in header
+      siteTag: '', // short version of site used for URL
+      siteList: [ 'birch', 'gte', 'ashgrovejs' ],
+      siteURL: '',
+      projects: [],
+      eventTypes: [ 'ALL', 'IMAGES', 'VIDEOS' ],
+      currentEventType: 'ALL',
+      currentEventList: [],
+      selectedCam: 0,
+      loginError: false,
+      showTimelapse: false,
+      showFullImage: false,
+      showFullVideo: false,
+      showTimelapseVideo: false,
+      sImage: '',
+      sImageDate: '',
+      sImageTime: '',
+      sVideo: '',
+      sVideoDate: '',
+      sVideoTime: '',
+      sVideoDuration: '',
+      sTimelapse: '',
+      sTimelapseStart: new Date,
+      sTimelapseEnd: new Date,
+      videoLoading: false,
+      videoReady: false,
+      dataUsage: '',
+      maxData: '',
+      progressBar: 0,
+      snapShot: '',
+      date: today,
+      events: [],
+      images: [],
+      videos: [],
+      loading: false,
+      fetchError: false,
+      videoPaused: false,
+      videoReload: false,
+      done: false,
+      renderEventsList: false
+    }, function() {
+          camCount = [];
+          console.log( 'user session cleared' )
+          console.log(this.state)
+          console.log('camcount: ' + JSON.stringify(camCount))
+    })
   }
 
   resolveSitename( site ) {
@@ -294,24 +298,21 @@ class App extends React.Component {
   // dataUasage functions
 
   handleCamSelect(cam) {
-    console.log('getting in handleCamSelect: ' + cam )
     this.setState({ selectedCam: ( cam - 1 ) }, () =>
-      console.log('new state of selected cam ' + this.state.selectedCam))
-      this.loadNewCam(cam - 1)
+      this.loadNewCam(cam - 1) )
   }
 
   // load selected cam events from multiple cam select 
 
   loadNewCam( newCam ) {
-    console.log( 'https://' + this.state.siteTag + '.dividia.net/index.php?setproject=' + newCam )
     fetch( 'https://' + this.state.siteTag + '.dividia.net/index.php?setproject=' + newCam )
     .then( response => {
       if (response.status !== 200) {
         console.log('Error. Status Code: ' + response.status);
         return;
       }
+      this.fetchNewByDate( this.toggleTimelapse.date, this.state.currentEventType )
       this.fetchDataUsage()
-      this.fetchNewByDate()
     })
   }
 
@@ -383,7 +384,6 @@ class App extends React.Component {
   }
 
   toggleVideo() {
-    console.log('toggling Video')
     this.setState({ 
       showFullVideo: !this.state.showFullVideo,
       showTimelapse: !this.state.showTimelapse,
@@ -396,8 +396,7 @@ class App extends React.Component {
   setTimelapse(url) {
     this.setState({ 
       sTimelapse: url,
-     },
-      function(){ console.log( 'timelapse file set: ' + this.state.sTimelapse ) })
+     })
   }
 
   setTimelapseStart(value) {
@@ -420,48 +419,72 @@ class App extends React.Component {
 
   // event download function
 
-  downloadEvent( type, URL, sTimeStamp ) {
-    if(type == 'IMAGE') {
-      FileSystem.downloadAsync( URL,
-        FileSystem.documentDirectory + 'image.jpg'
+  downloadImageEvent( uri ) {
+    console.log(uri)
+    var promise = CameraRoll.saveToCameraRoll(uri);
+      promise.then(function(result) {
+        console.log('save succeeded ' + result);
+      }).catch(function(error) {
+        console.log('save failed ' + error);
+      });
+  }
+
+  async downloadVideoEvent( video ) {
+    console.log(video)
+    const fileUri = FileSystem.documentDirectory + 'video.mp4';
+      await FileSystem.downloadAsync(
+        video,
+        fileUri
       )
-      .then(({ uri }) => {
-        console.log('Finished downloading to ', uri)
-      })
-      .catch(error => {
-        console.log(error);
-      })
-    } else {
-      FileSystem.downloadAsync( URL,
-        FileSystem.documentDirectory + 'video.mp4'
-      )
-      .then(({ uri }) => {
-        console.log('Finished downloading to ', uri)
-      })
-      .catch(error => {
-        console.log(error);
-      })
+        .then(({ uri }) => {
+          console.log( 'Finished downloading to ', fileUri );
+          var promise = CameraRoll.saveToCameraRoll( fileUri, 'video' );
+          promise.then(function(result) {
+            console.log('save succeeded ' + result);
+          }).catch(function(error) {
+            console.log('save failed ' + error);
+            console.log( fileUri )
+          });
+        })
+        .catch(error => {
+          console.error(error);
+        });
+  }
+
+  setCurrentEventList( type ) {
+    console.log( 'type sent to currentEventList function > ' + type )
+    switch (type.toString()) {
+      case 'ALL':
+        this.setState({ 
+          currentEventList: this.state.events
+        })
+      break;
+      case 'IMAGES':
+        this.setState({ 
+          currentEventList: this.state.images
+        })
+      break;
+      case 'VIDEOS':
+        this.setState({ 
+          currentEventList: this.state.videos
+        })
+      break;
+      default: 
+        this.setState({ 
+          currentEventList: this.state.events
+        })
     }
   }
 
-  triggerFilter() {
-    this.setState({ 
-      filterEvents: !this.state.filterEvents
-    })
-  }
-
-  updateEventType( eventType ) {
-    this.setState({ 
-      currentEventType: eventType,
-    }, () => this.triggerFilter() )
+  updateEventType( type ) {
+    this.setState({ currentEventType: type },
+      () => this.setCurrentEventList( type ))
   }
 
 // Get a current image from the snapshot button in footer bar
   getCurrentImage() {
-    console.log('snapshot requested');
     this.toggleMainNav()
     this.fetchSnapShot()
-    this.triggerFilter()
   }
 
   // Fetch current snapshot image
@@ -473,8 +496,7 @@ class App extends React.Component {
               return;
             }
             // Fetch new image and update filter to show only images
-            this.fetchNewByDate('IMAGES', today)
-            this.triggerFilter()
+            this.fetchNewByDate( today, 'IMAGES' )
           })
       .catch(err => {
         console.log('Fetch Error: ', err);
@@ -482,16 +504,25 @@ class App extends React.Component {
     }
 
     // Fetch all events by date and save filtered results to state
-  fetchNewByDate(filter, uDate) {
+  fetchNewByDate( uDate, sFilterType ) {
     let date;
     let filterType;
-    if(uDate){ date = uDate } else{ date = this.state.date }
-    if(filter){ filterType = filter} else { filterType = 'ALL' }
+
+    if( uDate ) { 
+      date = uDate 
+    } else { 
+      date = this.state.date 
+    }
+
+    if( sFilterType ) { 
+      filterType = sFilterType 
+    } else { 
+      filterType = 'ALL' }
+
       this.setState({
           loading: true,
           fetchError: false,
-          date: date ,
-          currentEventType: filterType,
+          date: date,
       });
     fetch( 'https://' + this.state.siteTag + '.dividia.net/ajax.php?action=getEvents&date=' + this.state.date )
     .then( response => {
@@ -505,25 +536,24 @@ class App extends React.Component {
                  events: data.reverse(),
                  images,
                  videos,
-                 currentEventType: this.state.currentEventType,
-                 loading: false,
-                 fetchError: false
-                },
-                  () => { 
-                          this.triggerFilter()
-              })
+                 currentEventType: filterType
+              }, () => {
+                this.setCurrentEventList( this.state.currentEventType)
+                this.setState({ loading: false })
+                console.log( '1 ' + JSON.stringify(this.state.currentEventList) )
+              })    
           })
-      .catch(err => {
+        })
+      .catch( err => {
         console.log('Fetch Error: ', err);
         this.setState({
           loading: false,
           fetchError: true,
-          filterEvents: false
         },
           () => console.log( 'Fetch failed - loading: ' + this.state.loading + ' - fetchError: ') + this.state.fetchError)
       })
-    })
-  }
+    }
+  
 
 
   // Set new date and fetch events for new date
@@ -531,9 +561,9 @@ class App extends React.Component {
     this.setState({ 
       date: moment(selectedDate).format('MM/DD/YY'),
      }, 
-    function(){ 
+    () => { 
       console.log('New state of date is: ' + this.state.date)
-      this.fetchNewByDate() 
+      this.fetchNewByDate( this.state.date, 'ALL' ) 
     })
   }
 
@@ -559,14 +589,16 @@ class App extends React.Component {
 
 // Toggle loader for waiting on events fetch
   toggleLoading(value) {
-    this.setState({ loading: value || !this.state.loading },
-      () => console.log( 'loading: ' + this.state.loading ))
+    { value ? 
+      this.setState({ loading: value }) :
+      this.setState({ loading: !this.state.loading })
+    }
+    console.log( 'loading: ' + this.state.loading )
   }
 
   // Toggle the main navigation menu from footer bar
   toggleMainNav() {
     this.setState({ showMainNav: !this.state.showMainNav });
-    // add easing in
   }
 
   getTimelapseDay() {
@@ -579,7 +611,6 @@ class App extends React.Component {
     console.log('loading timelapse Week ... ');
     const today = moment().format('YYYY/MM/DD');
     const lastWeek = moment().subtract(7,'d').format('YYYY/MM/DD');
-
       fetch( this.state.siteURL + 'timelapse.php?start=' + lastWeek + '&end=' + today )
   }
 
@@ -624,6 +655,10 @@ class App extends React.Component {
     })
   }
 
+  setRenderEventsComplete() {
+    this.setState({ renderEventsList: false })
+  }
+
   render() {
 
       return (
@@ -639,6 +674,7 @@ class App extends React.Component {
                           loggedIn={ this.state.isLoggedIn}
                           site={ this.state.site }
                           siteTag={ this.state.siteTag }
+                          siteURL={ this.state.siteURL }
                           camArray = { camCount }
                           checkForMultipleCams = { this.checkForMultipleCams }
                           toggleTimelapse={ this.toggleTimelapse }
@@ -652,16 +688,15 @@ class App extends React.Component {
                           playVideo={ this.playVideo }
                           videoLoading={ this.state.videoLoading }
                           videoReady={ this.state.videoReady }
-                          downloadEvent={ this.downloadEvent }
+                          downloadImageEvent={ this.downloadImageEvent }
                           setTimelapse={ this.setTimelapse }
-                          triggerFilter={ this.triggerFilter } 
-                          filterEvents={ this.state.filterEvents}
                           selectedCam={ this.state.selectedCam }
                           handleCamSelect = { this.handleCamSelect }
                           projects={ this.state.projects }
                           eventTypes={ this.state.eventTypes }
                           updateEventType={ this.updateEventType }
                           currentEventType={ this.state.currentEventType }
+                          currentEventList={ this.state.currentEventList }
                           getCurrentImage= { this.getCurrentImage }
                           fetchNewByDate = { this.fetchNewByDate }
                           events={ this.state.events }
@@ -680,7 +715,9 @@ class App extends React.Component {
                           getTimelapseProject={ this.getTimelapseProject }
                           fetchError={ this.state.fetchError }
                           error={ this.state.error }
-                          toggleFetchError={ this.toggleFetchError } /> :
+                          toggleFetchError={ this.toggleFetchError }
+                          renderEventsList={ this.state.renderEventsList }
+                          setRenderEventsComplete={ this.setRenderEventsComplete } /> :
               null }
 
             { !this.state.isLoggedIn  ? 
@@ -712,7 +749,8 @@ class App extends React.Component {
                                 setTimelapseEnd={ this.setTimelapseEnd }
                                 setTimelapse={ this.setTimelapse }
                                 timelapseStart={ this.state.sTimelapseStart }
-                                timelapseEnd={ this.state.sTimelapseEnd } /> :
+                                timelapseEnd={ this.state.sTimelapseEnd }
+                                downloadVideoEvent={ this.downloadVideoEvent } /> :
               null }
 
             {/* <FullScreenImage /> */}
@@ -722,7 +760,7 @@ class App extends React.Component {
                                 sImageDate={ this.state.sImageDate }
                                 sImageTime={ this.state.sImageTime }
                                 siteURL={ this.state.siteURL }
-                                downloadEvent={ this.downloadEvent } /> :
+                                downloadImageEvent={ this.downloadImageEvent } /> :
               null }
 
               {/* <FullScreenVideo /> */}
@@ -733,7 +771,7 @@ class App extends React.Component {
                                 sVideoTime={ this.state.sVideoTime }
                                 sVideoDuration={ this.state.sVideoDuration}
                                 siteURL={ this.state.siteURL }
-                                downloadEvent={ this.downloadEvent }
+                                downloadVideoEvent={ this.downloadVideoEvent }
                                 videoReload={ this.state.videoReload }
                                 videoPaused={ this.state.videoPaused }
                                 toggleVideoPaused={ this.toggleVideoPaused } 
@@ -745,7 +783,7 @@ class App extends React.Component {
               <FullScreenTimelapse toggleTimelapseVideo={ this.toggleTimelapseVideo }
                                    sTimelapse={ this.state.sTimelapse }
                                    siteTag={ this.state.siteTag }
-                                   downloadEvent={ this.downloadEvent }
+                                   downloadVideoEvent={ this.downloadVideoEvent }
                                   //  CHANGE THESE VALUES
                                    videoReload={ this.state.videoReload }
                                    videoPaused={ this.state.videoPaused }

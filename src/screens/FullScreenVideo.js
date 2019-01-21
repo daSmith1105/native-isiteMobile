@@ -1,28 +1,30 @@
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Image, Text } from 'react-native';
+import { StyleSheet, View, TouchableHighlight, ImageBackground, Text } from 'react-native';
 import { Video } from 'expo';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import moment from 'moment';
 import ControlBar from '../components/PlaybackInterface';
 
 export default function FullScreenVideo ( props ) {
-  
-  let URL = props.siteURL + props.sVideo;
-  let timeStamp = props.sVideoDate + props.sVideoTime;
-  let today = moment().format('YYYY/MM/DD');
 
   const { videoPaused, 
           videoReload, 
+          toggleVideo,
           toggleVideoPaused, 
           toggleVideoReload,
-          sVideoDuration } = props;
+          sVideo,
+          sVideoDate,
+          sVideoTime,
+          sVideoDuration,
+          downloadVideoEvent,
+          siteURL } = props;
 
-  // console.log(URL)
+  let URL = siteURL + sVideo;
+  let timeStamp = sVideoDate + sVideoTime;
 
   return (
         <View style={{ flex: 1, backgroundColor: 'black' }}>
      
-              <TouchableHighlight onPress={ () => props.downloadEvent( 'VIDEO', URL, timeStamp ) } style={ styles.download}>
+              <TouchableHighlight onPress={ () => downloadVideoEvent( URL ) } style={ styles.download }>
                           <Icon name="arrow-circle-down" size={ 50 } color="white" />
               </TouchableHighlight> 
 
@@ -33,23 +35,26 @@ export default function FullScreenVideo ( props ) {
                       toggleVideoReload={ toggleVideoReload } />
 
 
-          <Text style={ styles.timestamp }>{ props.sVideoDate } { props.sVideoTime }</Text>
+          <Text style={ styles.timestamp }>{ timeStamp }</Text>
 
           <View style={ styles.container }>
             <View style={ styles.bumper }></View>
-              <Video
-                source={{ uri: props.siteURL + props.sVideo }} 
-                rate={ 1.0 }
-                volume={ 0.0 }
-                isMuted={ true }
-                useNativeControls={ true }
-                resizeMode="contain"
-                shouldPlay
-                style={ styles.video }
-                
-              />
+              <View style={ styles.videoContainer }>
+                  <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.videoLoading } >
+                    <Video
+                      source={{ uri: URL }} 
+                      rate={ 1.0 }
+                      volume={ 0.0 }
+                      isMuted={ true }
+                      useNativeControls={ true }
+                      resizeMode="contain"
+                      shouldPlay
+                      style={ styles.video }
+                    />
+                  </ImageBackground>
+              </View>
           </View>
-          <TouchableHighlight onPress={ props.toggleVideo } style={ styles.back}>
+          <TouchableHighlight onPress={ toggleVideo } style={ styles.back }>
                       <Icon name="arrow-left" size={ 30 } color="white" />             
           </TouchableHighlight> 
         </View> 
@@ -65,9 +70,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     justifyContent: 'center'
   },
-  video: {
+  videoContainer: {
     flex: 1,
     width: '180%',
+  },
+  video: {
+      flex: 1,
+    height: '100%',
+    width: '100%',
+    zIndex: 1
+  },
+  videoLoading: {
+      flex: 1,
+    height: '100%',
+    width: '100%',
   },
   timestamp: {
     color: 'white',

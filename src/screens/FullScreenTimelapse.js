@@ -1,19 +1,22 @@
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Image, Text } from 'react-native';
+import { StyleSheet, View, TouchableHighlight, ImageBackground, Text } from 'react-native';
 import { Video } from 'expo';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import ControlBar from '../components/PlaybackInterface';
 
 export default function FullScreenTimelapse ( props ) {
     const { videoPaused, 
-        videoReload, 
-        toggleVideoPaused, 
-        toggleVideoReload,
-        sVideoDuration } = props;
+            videoReload, 
+            toggleVideoPaused, 
+            toggleVideoReload,
+            toggleTimelapseVideo,
+            sVideoDuration,
+            downloadVideoEvent,
+            sTimelapse } = props;
 
   return (
         <View style={{ flex: 1, backgroundColor: 'black' }}>
-          <TouchableHighlight onPress={ () => props.downloadEvent( 'VIDEO', URL, timeStamp ) } style={ styles.download}>
+          <TouchableHighlight onPress={ () => downloadVideoEvent( sTimelapse ) } style={ styles.download }>
                       <Icon name="arrow-circle-down" size={ 50 } color="white" />
           </TouchableHighlight>
 
@@ -27,18 +30,22 @@ export default function FullScreenTimelapse ( props ) {
 
           <View style={ styles.container }>
             <View style={ styles.bumper }></View>
-              <Video
-                source={{ uri: props.sTimelapse }} //props.sTimelapse
-                rate={ 1.0 }
-                volume={ 0.0 }
-                isMuted={ true }
-                useNativeControls={ true }
-                resizeMode="contain"
-                shouldPlay
-                style={ styles.video }
-              />
+            <View style={ styles.videoContainer }>
+              <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.videoLoading } >
+                <Video
+                  source={{ uri: sTimelapse }} //props.sTimelapse
+                  rate={ 1.0 }
+                  volume={ 0.0 }
+                  isMuted={ true }
+                  useNativeControls={ true }
+                  resizeMode="contain"
+                  shouldPlay
+                  style={ styles.video }
+                />
+              </ImageBackground>
+            </View>
           </View>
-          <TouchableHighlight onPress={ props.toggleTimelapseVideo } style={ styles.back}>
+          <TouchableHighlight onPress={ () => toggleTimelapseVideo } style={ styles.back }>
                       <Icon name="arrow-left" size={ 30 } color="white" />             
           </TouchableHighlight> 
         </View> 
@@ -54,9 +61,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     justifyContent: 'center'
     },
+    videoContainer: {
+      flex: 1,
+      width: '180%',
+    },
     video: {
-    flex: 1,
-    width: '180%',
+        flex: 1,
+      height: '100%',
+      width: '100%',
+      zIndex: 1
+    },
+    videoLoading: {
+        flex: 1,
+      height: '100%',
+      width: '100%',
     },
     timestamp: {
     color: 'white',

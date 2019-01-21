@@ -8,53 +8,49 @@
 //      see about moving event filter out of render?
 
 import React from 'react';
-import { StyleSheet, FlatList, Text, View, TouchableHighlight, Linking, Image } from 'react-native';
+import { StyleSheet, FlatList, Text, View, TouchableHighlight, Linking, Image, List } from 'react-native';
 import MediaElement from './MediaElement';
+import moment from 'moment';
 
 
-let eventList;
+class MediaContainer extends React.Component {
 
-export default class MediaContainer extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-      super(props);
-
-      this.state = {
-        eventType: this.props.currentEventType
-
-      }
-
-      this._renderItem = this._renderItem.bind(this);
+    this.state = {
+      data: []
     }
+    this._renderItem = this._renderItem.bind(this);
+  }
 
-    _renderItem({ item }){
-        const { siteTag } = this.props;
-        let imageURL;
-        const year = item.sTimeStamp.slice(0, 4);
-        const month = item.sTimeStamp.slice(4, 6);
-        const day = item.sTimeStamp.slice(6, 8);
-        const hour = item.sTimeStamp.slice(8, 10);
-        const minute = item.sTimeStamp.slice(10, 12);
-        const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
-        const date = month + '/' + day + '/' + year;
-        const time = hour + ':' + minute + ' ' + dayNight;
-       
-        if( item.sType == 'STILL' && item.sThumbnailM != null ) {  
-           imageURL = 'https://' + siteTag + '.dividia.net/' + item.sThumbnailM;
-          } else {
-            imageURL = 'https://' + siteTag + '.dividia.net/thumbnail.php?&size=m&img=' + item.sImage;
-        }
+      _renderItem({ item }) {
+          let imageURL;
+          const year = item.sTimeStamp.slice(0, 4);
+          const month = item.sTimeStamp.slice(4, 6);
+          const day = item.sTimeStamp.slice(6, 8);
+          const hour = item.sTimeStamp.slice(8, 10);
+          const minute = item.sTimeStamp.slice(10, 12);
+          const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
+          const date = month + '/' + day + '/' + year;
+          const time = hour + ':' + minute + ' ' + dayNight;
+
+          if( item.sType == 'STILL' && item.sThumbnailM != null ) {  
+            imageURL = 'https://' + this.props.siteTag + '.dividia.net/' + item.sThumbnailM;
+            } else {
+              imageURL = 'https://' + this.props.siteTag + '.dividia.net/thumbnail.php?&size=m&img=' + item.sImage;
+          }
 
           return (
-
             <MediaElement 
               sTimeStamp={ item.sTimeStamp }
               date={ date }
               time={ time }
               image={ imageURL }
-              siteTag={ siteTag }
-              downloadEvent={ this.props.downloadEvent }
-              toggleImage={ this.props.toggleImage }
+              siteTag={ this.props.siteTag }
+              siteURL={ this.props.siteURL }
+              downloadImageEvent={ this.props.downloadImageEvent }
+              toggleImage={ this.props.toggleImage } 
               sImage={ item.sImage }
               duration={ item.bDuration }
               sType={ item.sType }
@@ -65,47 +61,16 @@ export default class MediaContainer extends React.Component {
               videoLoading={ this.props.videoLoading }
               videoReady={ this.props.videoReady }
               playVideo={ this.props.playVideo }
-              bID={ item.bID } />     
-          ) 
+              bID={ item.bID } />               
+          )
+        
     }
 
-    render() {   
-       const { events, 
-               images, 
-               videos, 
-               filterEvents, 
-               currentEventType,
-               triggerFilter,
-               toggleFetchError } = this.props;
 
-      if( filterEvents ) {
-          let eventType;
-          if ( currentEventType == 'ALL') {
-            eventType = events;
-          } else if ( currentEventType == 'IMAGES') {
-            eventType = images;
-          } else if ( currentEventType == 'VIDEOS') {
-            eventType = videos;
-          } else {
-            console.log('Unknown event type recieved')
-          }
+  render() {
 
-          console.log( currentEventType + ': ' + eventType.length )
-
-          if ( eventType.length !== 0 ) {
-               eventList = <FlatList inverted
-                                     data={ eventType } 
-                                     renderItem={ this._renderItem }
-                                     keyExtractor={ (item) => item.bID }
-                                     style={ styles.eventList } />  ;
-            triggerFilter();
-          } else {
-            triggerFilter();
-            toggleFetchError();
-          }
-            
-      } 
       return (
+
         <View style={ styles.scroll }>
             { this.props.loading && !this.props.fetchError ? 
                 <View style={ styles.loader }>
@@ -120,8 +85,11 @@ export default class MediaContainer extends React.Component {
 
             { this.props.fetchError && !this.props.loading ?
                 <View style={ styles.errorModal }>
-                  <Text style={ styles.error }>Fetching events failed for {this.props.date}.</Text>
-                  <Text style={ styles.error }>Is this camera system offline?</Text>
+                  <Text style={ styles.error }>Fetching events failed for { this.props.date }.</Text>
+                  { this.props.date < moment(new Date()).format('MM/DD/YY') ?
+                    <Text style={ styles.error }>Was this camera system offline?</Text> :
+                    <Text style={ styles.error }>Is this camera system offline?</Text>
+                  }
                   <Text style={ styles.errorContact }>If the problem persists please contact Dividia.</Text>
                   <Text style={ styles.phone }>817-288-1040</Text> 
                   <TouchableHighlight onPress={() => 
@@ -132,14 +100,24 @@ export default class MediaContainer extends React.Component {
                 null
             }
 
-            { !this.props.loading && !this.props.fetchError ? 
-              eventList :
-              null
+            { !this.props.loading && !this.props.fetchError  ? 
+ 
+                  <FlatList
+                    style={ styles.eventList }
+                    inverted
+                    data={ this.props.currentEventList }
+                    renderItem={ this._renderItem }
+                    keyExtractor={ item => item.bID }  
+                    />
+            :
+                null
             }
         </View>
-      );
-    }
+      )
   }
+}
+
+export default MediaContainer;
 
 
 const styles = StyleSheet.create({
@@ -147,7 +125,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 40,
     paddingTop: 10,
-    jusifyContent: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
     width: '80%',
   },
@@ -158,12 +136,11 @@ const styles = StyleSheet.create({
   errorModal: {
     marginTop: 60,
     width: '90%',
-    justifyContents: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
     borderWidth: 4,
     borderColor: 'yellow',
-    backgroundColor: 'yellow',
     padding: 10,
     marginLeft: 10,
   },
@@ -185,7 +162,6 @@ const styles = StyleSheet.create({
   support: {
     fontSize: 20,
     color: 'blue',
-    textDecoration: 'underline',
     textAlign: 'center',
     marginTop: 10,
     paddingBottom: 10,
