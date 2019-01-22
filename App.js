@@ -3,7 +3,7 @@
    // let proxy = 'https://cors-anywhere.herokuapp.com/';
 
 import React from 'react';
-import { StyleSheet, StatusBar, View, AsyncStorage, CameraRoll } from 'react-native';
+import { StyleSheet, StatusBar, View, AsyncStorage, CameraRoll, Dimensions } from 'react-native';
 import { FileSystem } from 'expo';
 import MainScreen from './src/screens/MainScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -62,7 +62,10 @@ class App extends React.Component {
       videoPaused: false,
       videoReload: false,
       done: false,
-      renderEventsList: false
+      renderEventsList: false,
+      mediaDownloadLoading: false,
+      mediaDownloadSuccess: false,
+      mediaDownloadFailed: false
     }
 
     this.setLogout = this.setLogout.bind(this);
@@ -103,6 +106,8 @@ class App extends React.Component {
     this.loadNewCam = this.loadNewCam.bind(this);
     this.setRenderEventsComplete = this.setRenderEventsComplete.bind(this);
     this.setCurrentEventList = this.setCurrentEventList.bind(this);
+    this.toggleMediaDownloadStatus = this.toggleMediaDownloadStatus.bind(this);
+    this.updateProgressBar = this.updateProgressBar.bind(this);
   }
 
   componentDidMount() {
@@ -193,6 +198,7 @@ class App extends React.Component {
   setLogout() {
     this.clearSessionVariable()
     this.setState({   isLoggedIn: false,
+      isLoggedIn: false,
       site: '', // full site name used in header
       siteTag: '', // short version of site used for URL
       siteList: [ 'birch', 'gte', 'ashgrovejs' ],
@@ -221,7 +227,7 @@ class App extends React.Component {
       videoReady: false,
       dataUsage: '',
       maxData: '',
-      progressBar: 0,
+      progressBar: '0',
       snapShot: '',
       date: today,
       events: [],
@@ -232,7 +238,10 @@ class App extends React.Component {
       videoPaused: false,
       videoReload: false,
       done: false,
-      renderEventsList: false
+      renderEventsList: false,
+      mediaDownloadLoading: false,
+      mediaDownloadSuccess: false,
+      mediaDownloadFailed: false,
     }, function() {
           camCount = [];
           console.log( 'user session cleared' )
@@ -332,6 +341,16 @@ class App extends React.Component {
                     sImageTime: time })
   }
 
+  updateProgressBar(data) {
+    this.setState({ progressBar: data },
+      () =>  {
+        if( this.state.progressBar == 100) {
+          let currentDate = this.state.date;
+          this.fetchNewByDate( currentDate, 'VIDEOS' )
+        }
+      })
+  }
+
   // video event functions
 
   requestVideo( siteURL, bID ) {
@@ -345,21 +364,23 @@ class App extends React.Component {
           response.json().then( data => {
 
             if (data.status == 0 ) {
-// ***** CAN ONLY CONSOLE LOG IN THIS FUNCTION FOR SOME REASON
+
                 var pollProgress = 
                   setInterval(function() {
                     fetch( siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
                       .then( response => {
                         response.json().then( data => {
+
                           if (parseInt(data.dCacheProgress) == 100){  
                             console.log('woohoo')
                             clearInterval(pollProgress) 
                           } 
+
                           console.log( parseInt(data.dCacheProgress) )
-          
+                          this.updateProgressBar( data.dCacheProgress )
                         })
                       })
-                    }, 1000 )
+                      }.bind(this), 1000 )
               }
             })
         })
@@ -417,19 +438,52 @@ class App extends React.Component {
     this.setState({ showTimelapseVideo: !this.state.showTimelapseVideo })
   }
 
+  toggleMediaDownloadStatus() {
+      setTimeout(() => {
+      this.setState({ 
+        mediaDownloadSuccess: false,
+        mediaDownloadFailed: false 
+      })
+    }, 3000 )
+  }
+
+
   // event download function
 
-  downloadImageEvent( uri ) {
-    console.log(uri)
-    var promise = CameraRoll.saveToCameraRoll(uri);
-      promise.then(function(result) {
-        console.log('save succeeded ' + result);
-      }).catch(function(error) {
-        console.log('save failed ' + error);
-      });
+  async downloadImageEvent( image ) {
+    this.setState({ 
+      mediaDownloadLoading: true
+    })
+    console.log(image)
+    const fileUri = FileSystem.documentDirectory + 'image.jpg';
+      await FileSystem.downloadAsync(
+        image,
+        fileUri
+      )
+        .then(({ uri }) => {
+          console.log( 'Finished downloading to ', fileUri );
+          var promise = CameraRoll.saveToCameraRoll(fileUri, 'photo');
+            promise.then(function(result) {
+              console.log('save succeeded ' + result);
+              this.setState({ 
+                mediaDownloadLoading: false,
+                mediaDownloadSuccess: true 
+              }, 
+                this.toggleMediaDownloadStatus 
+            )
+            }.bind(this))
+            .catch(function(error) {
+              console.log('save failed ' + error);
+              console.log( fileUri )
+            });
+          })
+          .catch(error => {
+            console.error(error);
+          });
   }
 
   async downloadVideoEvent( video ) {
+    this.setState({ mediaDownloadLoading: true })
     console.log(video)
     const fileUri = FileSystem.documentDirectory + 'video.mp4';
       await FileSystem.downloadAsync(
@@ -441,7 +495,21 @@ class App extends React.Component {
           var promise = CameraRoll.saveToCameraRoll( fileUri, 'video' );
           promise.then(function(result) {
             console.log('save succeeded ' + result);
-          }).catch(function(error) {
+            this.setState({ 
+              mediaDownloadLoading: false,
+              mediaDownloadSuccess: true 
+            }, 
+              this.toggleMediaDownloadStatus 
+          )
+          }.bind(this))
+          .catch(function(error) {
+            this.setState({
+              mediaDownloadLoading: false,
+              mediaDownloadFailed: true
+            })
+            setTimeout(function() {
+              this.setState({ mediaDownloadFailed: false })
+            }, 5000)
             console.log('save failed ' + error);
             console.log( fileUri )
           });
@@ -483,9 +551,10 @@ class App extends React.Component {
 
 // Get a current image from the snapshot button in footer bar
   getCurrentImage() {
-    this.toggleMainNav()
     this.fetchSnapShot()
-  }
+    this.toggleMainNav()
+    }
+  
 
   // Fetch current snapshot image
   fetchSnapShot() {
@@ -495,8 +564,13 @@ class App extends React.Component {
               console.log('Error. Status Code: ' + response.status);
               return;
             }
-            // Fetch new image and update filter to show only images
-            this.fetchNewByDate( today, 'IMAGES' )
+            this.setState({ loading: true })
+            setTimeout(() => {
+              this.fetchNewByDate( today, 'IMAGES')
+            }, 3500)
+            setTimeout(() => {
+              this.setState({ loading: false })
+            }, 3500)    
           })
       .catch(err => {
         console.log('Fetch Error: ', err);
@@ -530,6 +604,7 @@ class App extends React.Component {
             console.log('ooops, could not connect to server')
           }
           response.json().then(data => {
+              if( data.length > 0 ) {
               let images = data.filter(d => d.sType === "STILL").reverse();
               let videos = data.filter(d => d.sType === "VIDEO").reverse();
               this.setState({
@@ -540,8 +615,13 @@ class App extends React.Component {
               }, () => {
                 this.setCurrentEventList( this.state.currentEventType)
                 this.setState({ loading: false })
-                console.log( '1 ' + JSON.stringify(this.state.currentEventList) )
               })    
+              } else {
+                this.setState({ 
+                  loading: false,
+                  fetchError: true })
+                console.log( 'no events found throwing a fetch error.');
+              } 
           })
         })
       .catch( err => {
@@ -717,7 +797,10 @@ class App extends React.Component {
                           error={ this.state.error }
                           toggleFetchError={ this.toggleFetchError }
                           renderEventsList={ this.state.renderEventsList }
-                          setRenderEventsComplete={ this.setRenderEventsComplete } /> :
+                          setRenderEventsComplete={ this.setRenderEventsComplete }
+                          mediaDownloadLoading={ this.state.mediaDownloadLoading }
+                          mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
+                          mediaDownloadFailed={ this.state.mediaDownloadFailed } /> :
               null }
 
             { !this.state.isLoggedIn  ? 
@@ -760,7 +843,11 @@ class App extends React.Component {
                                 sImageDate={ this.state.sImageDate }
                                 sImageTime={ this.state.sImageTime }
                                 siteURL={ this.state.siteURL }
-                                downloadImageEvent={ this.downloadImageEvent } /> :
+                                downloadImageEvent={ this.downloadImageEvent }
+                                mediaDownloadLoading={ this.state.mediaDownloadLoading }
+                                mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
+                                mediaDownloadFailed={ this.state.mediaDownloadFailed }
+                                 /> :
               null }
 
               {/* <FullScreenVideo /> */}
@@ -775,7 +862,11 @@ class App extends React.Component {
                                 videoReload={ this.state.videoReload }
                                 videoPaused={ this.state.videoPaused }
                                 toggleVideoPaused={ this.toggleVideoPaused } 
-                                toggleVideoReload={ this.toggleVideoReload } /> :
+                                toggleVideoReload={ this.toggleVideoReload }
+                                mediaDownloadLoading={ this.state.mediaDownloadLoading }
+                                mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
+                                mediaDownloadFailed={ this.state.mediaDownloadFailed }
+                                 /> : 
               null }
 
               {/* <FullScreenTimelapse /> */}
@@ -788,7 +879,11 @@ class App extends React.Component {
                                    videoReload={ this.state.videoReload }
                                    videoPaused={ this.state.videoPaused }
                                    toggleVideoPaused={ this.toggleVideoPaused } 
-                                   toggleVideoReload={ this.toggleVideoReload } /> :
+                                   toggleVideoReload={ this.toggleVideoReload } 
+                                   mediaDownloadLoading={ this.state.mediaDownloadLoading }
+                                   mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
+                                   mediaDownloadFailed={ this.state.mediaDownloadFailed }
+                                    /> :
               null }
 
             {/* Hide the top status bar on ios */}

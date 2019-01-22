@@ -105,6 +105,7 @@ class MediaContainer extends React.Component {
                   <FlatList
                     style={ styles.eventList }
                     inverted
+                    extraData={ this.props.currentEventList }
                     data={ this.props.currentEventList }
                     renderItem={ this._renderItem }
                     keyExtractor={ item => item.bID }  
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   errorModal: {
-    marginTop: 60,
+    marginTop: -50,
     width: '90%',
     justifyContent: 'center',
     alignItems: 'center',
@@ -168,37 +169,38 @@ const styles = StyleSheet.create({
   },
   loader: {
     width: 260,
-    height: 600,
     borderRadius: 10,
     alignItems: 'center',
-    position: 'absolute',
-    top: 100,
     backgroundColor: 'white',
+    marginTop: -50,
+    width: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    marginLeft: 10,
   },
   loaderContainer: {
     borderWidth: 5,
     borderColor: '#0075A2',
     borderRadius: 20,
-    padding: 10,
     justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'white',
-    paddingLeft: 20,
     marginTop: 20,
     width: '100%',
+    paddingBottom: 10,
   },
   loaderText: {
     fontSize: 28,
     color: '#0075A2',
-    marginBottom: -26,
-    zIndex: 1,
-    marginLeft: 10,
+    textAlign: 'center',
+    marginTop: 10,
   },
   loaderIcon: {
     width: 200,
     height: 200,
     borderRadius: 10,
-    marginRight: 10,
-    marginTop: -10,
+    textAlign: 'center',
     backgroundColor: 'white'
   }
 });

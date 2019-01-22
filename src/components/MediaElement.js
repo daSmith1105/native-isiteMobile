@@ -8,9 +8,17 @@ import MediaElementHeader from './MediaElementHeader';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AnimatedBar from 'react-native-animated-bar';
 
-export default function MediaElement (props) {
+export default class MediaElement extends React.Component {
+  constructor(props) {
+    super(props);
+      this.state = {
+        
+      }
+    }
 
-    const { date, 
+      render() {
+          const { 
+            date, 
             time, 
             toggleImage, 
             downloadImageEvent, 
@@ -27,101 +35,101 @@ export default function MediaElement (props) {
             playVideo,
             sTimeStamp,
             siteURL,
-            videoReady,
-            progressBar,
-              } = props;
+            videoReady } = this.props;
 
-      let timeStamp = sTimeStamp;
-      let URL= siteURL + sImage;
+          let timeStamp = sTimeStamp;
+          let URL= siteURL + sImage;
+                return (
 
-    return (
-        <View style={ styles.media }>  
+                    <View style={ styles.media }>  
 
-          {/* Overlayed video event icon tied to status */}
+                      {/* Overlayed video event icon tied to status */}
 
 
 
-              {/* Video pre-loading ( default initial view) */}
-              { sType == 'VIDEO' && parseInt( cachedProgress ) == 0 ?
-                  <TouchableHighlight onPress={ () => requestVideo('https://' + siteTag + '.dividia.net/', bID) } 
-                                      style={ styles.videoBackground }>
-                     <Icon name="cloud-download" size={ 100 } color="white" style={ styles.cloudButton }/> 
-                  </TouchableHighlight> :
-                  null
-              }
+                          {/* Video pre-loading ( default initial view) */}
+                          { sType == 'VIDEO' && parseInt( cachedProgress ) == 0 ?
+                              <TouchableHighlight onPress={ () => requestVideo('https://' + siteTag + '.dividia.net/', bID) } 
+                                                  style={ styles.videoBackground }>
+                                <Icon name="cloud-download" size={ 100 } color="white" style={ styles.cloudButton }/> 
+                              </TouchableHighlight> :
+                              null
+                          }
 
-              {/* Video is loading */}
-              { sType == 'VIDEO' && videoLoading ?
-                  <TouchableHighlight onPress={ () => null } 
-                                    style={ styles.videoBackground }>
-                     <Icon name="spinner" size={ 100 } color="white" style={ styles.spinner }/>
-                  </TouchableHighlight> :
-                  null
-              }
+                          {/* Video is loading */}
+                          { sType == 'VIDEO' && videoLoading ?
+                              <TouchableHighlight onPress={ () => null } 
+                                                style={ styles.videoBackground }>
+                                <Icon name="spinner" size={ 100 } color="white" style={ styles.spinner }/>
+                              </TouchableHighlight> :
+                              null
+                          }
 
-              {/* Video is ready to play */}
-              { sType == 'VIDEO' && parseInt( cachedProgress ) == 100  ?
-                  <TouchableHighlight onPress={ () => playVideo( sTimeStamp, date, time, duration )} 
-                                      style={ styles.videoBackground }>
-                     <Icon name="play-circle" size={ 100 } color="white" style={ styles.playButton }/> 
-                  </TouchableHighlight> :
-                  null
-              }
+                          {/* Video is ready to play */}
+                          { sType == 'VIDEO' && parseInt( cachedProgress ) == 100  ?
+                              <TouchableHighlight onPress={ () => playVideo( sTimeStamp, date, time, duration )} 
+                                                  style={ styles.videoBackground }>
+                                <Icon name="play-circle" size={ 100 } color="white" style={ styles.playButton }/> 
+                              </TouchableHighlight> :
+                              null
+                          }
+                          
+                          {/* Show image background if type is 'STILL' */}
+                          { sType == 'STILL' ?
+                            <TouchableHighlight onPress={ () => null } 
+                              style={ styles.imageBackground }>
+                              <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.imageLoading } >
+                              <Image source={{ uri: image }} style={ styles.image } />
+                              </ImageBackground>
+                            </TouchableHighlight> :
+                            null
+                          }
               
-              {/* Show image background if type is 'STILL' */}
-              { sType == 'STILL' ?
-                <TouchableHighlight onPress={ () => null } 
-                  style={ styles.imageBackground }>
-                  <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.imageLoading } >
-                  <Image source={{ uri: image }} style={ styles.image } />
-                  </ImageBackground>
-                </TouchableHighlight> :
-                null
+                          {/* Expand button for type 'STILL' */}
+                          { sType == 'STILL' ?
+                            <TouchableHighlight onPress={ () => toggleImage( sImage, date, time ) } style={ styles.enlarge }>
+                                    <Icon name="expand" size={ 20 } color="white" />     
+                            </TouchableHighlight>  :
+                            null
+                          }
+
+                          {/* Show video duration for type 'VIDEO' */}
+                          { sType == 'VIDEO' ?
+                            <Text style={ styles.duration }>
+                              { Math.floor(duration / 60) + 'm ' + duration % 60 + 's' }
+                            </Text> :
+                            null 
+                          }
+
+                          {/* Show progress bar for type 'VIDEO' */}
+                              { sType == 'VIDEO' ?
+                                    <Text style={ styles.progress }>{ this.props.progressBar }</Text>
+                                      // <AnimatedBar
+                                      // style={ styles.progress }
+                                      // progress={ cached == 1 ? 100 : 0 }
+                                      // height={16}
+                                      // barColor="green"
+                                      // borderRadius={5} />
+                                  : null
+                              }
+
+
+                          <MediaElementHeader style={ styles.mediaHeader }
+                                              date={ date }
+                                              time={ time } />
+
+                        {/* Show download button if type is 'STILL' */}                
+                        { sType == 'STILL' ?
+                          <TouchableHighlight onPress={ () => downloadImageEvent( URL ) } style={ styles.download }>
+                              <Icon name="arrow-circle-down" size={ 20 } color="white" />
+                          </TouchableHighlight> :
+                          null
+                        }
+                        
+                    </View>
+                )
               }
-  
-              {/* Expand button for type 'STILL' */}
-              { sType == 'STILL' ?
-                <TouchableHighlight onPress={ () => toggleImage( sImage, date, time ) } style={ styles.enlarge }>
-                        <Icon name="expand" size={ 20 } color="white" />     
-                </TouchableHighlight>  :
-                null
-              }
-
-              {/* Show video duration for type 'VIDEO' */}
-              { sType == 'VIDEO' ?
-                <Text style={ styles.duration }>
-                  { Math.floor(duration / 60) + 'm ' + duration % 60 + 's' }
-                </Text> :
-                null 
-              }
-
-              {/* Show progress bar for type 'VIDEO' */}
-                  { sType == 'VIDEO' ?
-                        <AnimatedBar
-                          style={ styles.progress }
-                          progress={ cached == 1 ? 100 : 0 }
-                          height={16}
-                          barColor="green"
-                          borderRadius={5} />
-                      : null
-                  }
-
-
-              <MediaElementHeader style={ styles.mediaHeader }
-                                  date={ date }
-                                  time={ time } />
-
-            {/* Show download button if type is 'STILL' */}                
-            { sType == 'STILL' ?
-              <TouchableHighlight onPress={ () => downloadImageEvent( URL ) } style={ styles.download }>
-                  <Icon name="arrow-circle-down" size={ 20 } color="white" />
-              </TouchableHighlight> :
-              null
             }
-            
-        </View>
-    );
-  }
 
 const styles = StyleSheet.create({
   media: {
@@ -196,7 +204,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -32,
     right: 10,
-    padding: 10
+    padding: 10,
+    zIndex: 3,
   },
   progress: {
     marginTop: 2,

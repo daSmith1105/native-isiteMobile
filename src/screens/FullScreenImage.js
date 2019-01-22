@@ -10,7 +10,10 @@ export default function FullScreenImage (props) {
           sImageDate, 
           sImageTime, 
           downloadImageEvent, 
-          toggleImage } = props;
+          toggleImage,
+          mediaDownloadLoading,
+          mediaDownloadSuccess,
+          mediaDownloadFailed } = props;
   
   let URL= siteURL + sImage;
   console.log( 'this is the image uri: ' + URL )
@@ -18,6 +21,22 @@ export default function FullScreenImage (props) {
 
     return (
       <View style={{ flex: 1, backgroundColor: 'black' }}>
+
+        <View style={ styles.mediaDownloadStatus }>
+            { mediaDownloadLoading && ( !mediaDownloadSuccess || !mediaDownloadFailed ) ? 
+            <Text style={ styles.mediaDownloadText }>Download in progress...</Text> :
+            null
+            }
+            { mediaDownloadSuccess ? 
+            <Text style={ styles.mediaDownloadText }>Media successfully saved to your camera roll.</Text> :
+            null
+            }
+            { mediaDownloadFailed ? 
+            <Text style={ styles.mediaDownloadText }>Media failed to save to device.</Text> :
+            null
+            }
+        </View>
+
         <TouchableHighlight onPress={ () => downloadImageEvent( URL )  } style={ styles.download}>
                     <Icon name="arrow-circle-down" size={ 50 } color="white" />
         </TouchableHighlight>
@@ -100,4 +119,25 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     padding: 10
   },
+  mediaDownloadStatus: {
+    transform: [{ rotate: '90deg'}],
+    backgroundColor: 'rgba:(0,0,0,0.5)',
+    padding: 5,
+    position: 'absolute',
+    top: '50%',
+    zIndex: 5,
+    height: 30,
+    fontsize: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  mediaDownloadText: {
+    // fontsize: 40,
+    color: 'white',
+    position: 'absolute',
+    top: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });

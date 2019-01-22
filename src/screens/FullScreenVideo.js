@@ -16,13 +16,31 @@ export default function FullScreenVideo ( props ) {
           sVideoTime,
           sVideoDuration,
           downloadVideoEvent,
-          siteURL } = props;
+          siteURL,
+          mediaDownloadLoading,
+          mediaDownloadSuccess,
+          mediaDownloadFailed } = props;
 
   let URL = siteURL + sVideo;
   let timeStamp = sVideoDate + sVideoTime;
 
   return (
         <View style={{ flex: 1, backgroundColor: 'black' }}>
+
+              <View style={ styles.mediaDownloadStatus }>
+                  { mediaDownloadLoading && ( !mediaDownloadSuccess || !mediaDownloadFailed ) ? 
+                  <Text style={ styles.mediaDownloadText }>Download in progress...</Text> :
+                  null
+                  }
+                  { mediaDownloadSuccess ? 
+                  <Text style={ styles.mediaDownloadText }>Media successfully saved to your camera roll.</Text> :
+                  null
+                  }
+                  { mediaDownloadFailed ? 
+                  <Text style={ styles.mediaDownloadText }>Media failed to save to device.</Text> :
+                  null
+                  }
+              </View>
      
               <TouchableHighlight onPress={ () => downloadVideoEvent( URL ) } style={ styles.download }>
                           <Icon name="arrow-circle-down" size={ 50 } color="white" />
@@ -54,7 +72,7 @@ export default function FullScreenVideo ( props ) {
                   </ImageBackground>
               </View>
           </View>
-          <TouchableHighlight onPress={ toggleVideo } style={ styles.back }>
+          <TouchableHighlight onPress={ () => toggleVideo() } style={ styles.back }>
                       <Icon name="arrow-left" size={ 30 } color="white" />             
           </TouchableHighlight> 
         </View> 
@@ -125,4 +143,23 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     padding: 10
   },
+  mediaDownloadStatus: {
+    transform: [{ rotate: '90deg'}],
+    position: 'absolute',
+    top: '50%',
+    zIndex: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  mediaDownloadText: {
+    // fontsize: 40,
+    color: 'white',
+    position: 'absolute',
+    top: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 5,
+    backgroundColor:'rgba:(0,0,0,0.5)',
+  }
 });
