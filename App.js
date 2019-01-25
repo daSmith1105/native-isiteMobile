@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { StyleSheet, StatusBar, View, AsyncStorage, CameraRoll, Dimensions } from 'react-native';
-import { FileSystem } from 'expo';
+import { FileSystem, ScreenOrientation } from 'expo';
 import MainScreen from './src/screens/MainScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import TimelapseScreen from './src/screens/TimelapseScreen';
@@ -65,7 +65,8 @@ class App extends React.Component {
       renderEventsList: false,
       mediaDownloadLoading: false,
       mediaDownloadSuccess: false,
-      mediaDownloadFailed: false
+      mediaDownloadFailed: false,
+      isPortrait: true,
     }
 
     this.setLogout = this.setLogout.bind(this);
@@ -100,18 +101,39 @@ class App extends React.Component {
     this.getTimelapseProject = this.getTimelapseProject.bind(this);
     this.toggleLoginError = this.toggleLoginError.bind(this);
     this.toggleFetchError = this.toggleFetchError.bind(this);
-    this.toggleVideoPaused = this.toggleVideoPaused.bind(this);
-    this.toggleVideoReload = this.toggleVideoReload.bind(this);
     this.saveSessionVariable = this.saveSessionVariable.bind(this);
     this.loadNewCam = this.loadNewCam.bind(this);
-    this.setRenderEventsComplete = this.setRenderEventsComplete.bind(this);
     this.setCurrentEventList = this.setCurrentEventList.bind(this);
     this.toggleMediaDownloadStatus = this.toggleMediaDownloadStatus.bind(this);
     this.updateProgressBar = this.updateProgressBar.bind(this);
-  }
+    this.switchToPortrait = this.switchToPortrait.bind(this);
+    this.switchtoLandscape = this.switchToLandscape.bind(this);
+    this.orientationChangeHandler = this.orientationChangeHandler.bind(this);
+    }
 
   componentDidMount() {
-    this.retrieveSessionVariable()
+      ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+      Dimensions.addEventListener(
+        'change',
+        this.orientationChangeHandler
+      );
+      this.switchToPortrait();
+      this.retrieveSessionVariable()
+  }
+
+  orientationChangeHandler(dims) {
+    const { width, height } = dims.window;
+    const isLandscape = width > height;
+    this.setState({ isPortrait: !isLandscape });
+    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.ALL);
+  }
+
+  switchToLandscape() {
+    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.LANDSCAPE);
+  }
+
+  switchToPortrait() {
+    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
   }
 
   async saveSessionVariable() { 
@@ -341,14 +363,8 @@ class App extends React.Component {
                     sImageTime: time })
   }
 
-  updateProgressBar(data) {
-    this.setState({ progressBar: data },
-      () =>  {
-        if( this.state.progressBar == 100) {
-          let currentDate = this.state.date;
-          this.fetchNewByDate( currentDate, 'VIDEOS' )
-        }
-      })
+  updateProgressBar(event, data) { 
+    this.setState({ [ event.target ]: data })
   }
 
   // video event functions
@@ -376,8 +392,8 @@ class App extends React.Component {
                             clearInterval(pollProgress) 
                           } 
 
-                          console.log( parseInt(data.dCacheProgress) )
-                          this.updateProgressBar( data.dCacheProgress )
+                          console.log( parseInt( data.dCacheProgress ) )
+                          this.updateProgress()
                         })
                       })
                       }.bind(this), 1000 )
@@ -604,7 +620,8 @@ class App extends React.Component {
             console.log('ooops, could not connect to server')
           }
           response.json().then(data => {
-              if( data.length > 0 ) {
+              if( data.length > 0 ) {  
+                // .reverse()
               let images = data.filter(d => d.sType === "STILL").reverse();
               let videos = data.filter(d => d.sType === "VIDEO").reverse();
               this.setState({
@@ -723,21 +740,7 @@ class App extends React.Component {
     () => console.log('fetchError: ' + this.state.fetchError))
   }
 
-  toggleVideoPaused() {
-    this.setState({ 
-      videoPaused: !this.state.videoPaused 
-    })
-  }
-
-  toggleVideoReload() {
-    this.setState({
-      videoReload: !this.state.videoReload
-    })
-  }
-
-  setRenderEventsComplete() {
-    this.setState({ renderEventsList: false })
-  }
+  
 
   render() {
 
@@ -800,7 +803,8 @@ class App extends React.Component {
                           setRenderEventsComplete={ this.setRenderEventsComplete }
                           mediaDownloadLoading={ this.state.mediaDownloadLoading }
                           mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
-                          mediaDownloadFailed={ this.state.mediaDownloadFailed } /> :
+                          mediaDownloadFailed={ this.state.mediaDownloadFailed }
+                           /> :
               null }
 
             { !this.state.isLoggedIn  ? 

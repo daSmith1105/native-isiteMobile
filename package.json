@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "@expo/samples": "2.1.1",
+    "@expo/vector-icons": "^9.0.0",
+    "@expo/videoplayer": "^0.4.0",
+    "alpha-scroll-flat-list": "^0.2.20",
     "expo": "^31.0.2",
     "expo-file-system": "^2.0.0",
     "moment": "^2.23.0",
@@ -20,6 +23,8 @@
     "react-native": "https://github.com/expo/react-native/archive/sdk-31.0.0.tar.gz",
     "react-native-animated-bar": "^0.2.0",
     "react-native-elements": "^0.19.1",
+    "react-native-section-list-get-item-layout": "^2.2.3",
+    "react-native-selectablesectionlistview": "^0.4.0",
     "react-native-vector-icons": "^6.1.0",
     "react-native-video": "^4.3.1",
     "react-native-woodpicker": "0.0.7",

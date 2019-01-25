@@ -8,23 +8,38 @@
 //      see about moving event filter out of render?
 
 import React from 'react';
-import { StyleSheet, FlatList, Text, View, TouchableHighlight, Linking, Image, List } from 'react-native';
+import { StyleSheet, Text, View, TouchableHighlight, Linking, Image, SectionList, PixelRatio } from 'react-native';
+import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 import MediaElement from './MediaElement';
 import moment from 'moment';
 
+let data;
 
 class MediaContainer extends React.Component {
 
   constructor(props) {
     super(props);
-
-    this.state = {
-      data: []
-    }
+ 
     this._renderItem = this._renderItem.bind(this);
+    this.scrollTo = this.scrollTo.bind(this);
+
+    // this.getItemLayout = sectionListGetItemLayout({
+    //     // The height of the row with rowData at the given sectionIndex and rowIndex
+    //     getItemHeight: (rowData, sectionIndex, rowIndex) => sectionIndex === 0 ? 100 : 50,
+
+    //     // These three properties are optional
+    //     getSeparatorHeight: () => 1 / PixelRatio.get(), // The height of your separators
+    //     getSectionHeaderHeight: () => 20, // The height of your section headers
+    //     getSectionFooterHeight: () => 10, // The height of your section footers
+    // })
+
   }
 
-      _renderItem({ item }) {
+  componentDidMount() {
+    // this.sectionList.scrollToBottom();
+  }
+
+      _renderItem( { item } ) {
           let imageURL;
           const year = item.sTimeStamp.slice(0, 4);
           const month = item.sTimeStamp.slice(4, 6);
@@ -67,8 +82,57 @@ class MediaContainer extends React.Component {
         
     }
 
+    keyExtractor (item) {
+      return item.bID;
+    }
+
+    scrollTo(sectionIndex,itemIndex = 1 ) {
+    this.sectionList.scrollToLocation({
+        sectionIndex: sectionIndex,
+        itemIndex: itemIndex
+        });
+    }
+    //     let sectionIndex = ( data.length - 1);
+    //     let itemIndex = data[sectionIndex].data.length - 1;
+    //     this.sectionList.scrollToLocation(
+    //         {  
+    //             itemIndex,
+    //             sectionIndex: index,
+    //             animated: true
+    //         })
+    // }
+
 
   render() {
+
+    const { currentEventList } = this.props;
+
+    data= [
+        {title: '12AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '00').reverse() },
+        {title: '1AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '01').reverse() },
+        {title: '2AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '02').reverse() },
+        {title: '3AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '03').reverse() },
+        {title: '4AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '04').reverse() },
+        {title: '5AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '05').reverse() },
+        {title: '6AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '06').reverse() },
+        {title: '7AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '07').reverse() },
+        {title: '8AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '08').reverse() },
+        {title: '9AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '09').reverse() },
+        {title: '10AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '10').reverse() },
+        {title: '11AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '11').reverse() },
+        {title: '12PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '12').reverse() },
+        {title: '1PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '13').reverse() },
+        {title: '2PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '14').reverse() },
+        {title: '3PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '15').reverse() },
+        {title: '4PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '16').reverse() },
+        {title: '5PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '17').reverse() },
+        {title: '6PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '18').reverse() },
+        {title: '7PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '19').reverse() },
+        {title: '8PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '20').reverse() },
+        {title: '9PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '21').reverse() },
+        {title: '10PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '22').reverse() },
+        {title: '11PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '23').reverse() }
+        ]
 
       return (
 
@@ -103,17 +167,41 @@ class MediaContainer extends React.Component {
 
             { !this.props.loading && !this.props.fetchError  ? 
  
-                  <FlatList
-                    style={ styles.eventList }
-                    inverted
-                    extraData={ this.props }
-                    data={ this.props.currentEventList}
-                    renderItem={ this._renderItem }
-                    keyExtractor={ item => item.bID }  
-                    />
-            :
+            <SectionList
+                style={ styles.eventList }
+                ref={(sectionList) => { this.sectionList = sectionList }}
+                renderItem={ this._renderItem }
+                renderSectionHeader={({section: {title}}) => (
+                    <Text style={{fontWeight: 'bold'}}>{title}</Text>
+                    )}
+                sections={ data }
+                keyExtractor={ this.keyExtractor }
+                getItemLayout={this.getItemLayout}
+                /> :
                 null
             }
+
+            <View style={ styles.sectionSelector }>
+                <TouchableHighlight onPress={ () => this.scrollTo(0) }>
+                    <Text style={ styles.selector }>1AM</Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={ () => this.scrollTo(1) }>
+                    <Text style={ styles.selector }>2PM</Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={ () => this.scrollTo(2) }>
+                    <Text style={ styles.selector }>3PM</Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={ () => this.scrollTo(3) }>
+                    <Text style={ styles.selector }>4PM</Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={ () => this.scrollTo(4) }>
+                    <Text style={ styles.selector }>5PM</Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={ () => this.scrollTo(5) }>
+                    <Text style={ styles.selector }>6PM</Text>
+                </TouchableHighlight>
+            </View>
+
         </View>
       )
   }
@@ -130,6 +218,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '80%',
+  },
+  sectionSelector: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    zIndex: 5,
   },
   eventList: {
     width: '95%',

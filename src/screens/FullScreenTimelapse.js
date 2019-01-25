@@ -1,10 +1,53 @@
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, ImageBackground, Text } from 'react-native';
+import { StyleSheet, View, TouchableHighlight, Text, Dimensions } from 'react-native';
 import { Video } from 'expo';
+import VideoPlayer from '@expo/videoplayer';
+import { Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import ControlBar from '../components/PlaybackInterface';
+import { ScreenOrientation } from 'expo';
 
-export default function FullScreenTimelapse ( props ) {
+export default class FullScreenTimelapse extends React.Component {
+
+  constructor( props) {
+    super(props);
+
+    this.state = {
+        isPortrait: false,
+      };
+
+    this.orientationChangeHandler = this.orientationChangeHandler.bind(this);
+    this.switchToLandscape = this.switchToLandscape.bind(this);
+    this.switchToPortrait = this.switchToPortrait.bind(this);
+}
+
+  componentWillMount() {
+    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.Portrait);
+    Dimensions.addEventListener(
+      'change',
+      this.orientationChangeHandler
+    );
+  }
+  componentWillUnmount() {
+    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+    Dimensions.removeEventListener('change', this.orientationChangeHandler);
+  }
+
+  orientationChangeHandler(dims) {
+    const { width, height } = dims.window;
+    const isLandscape = width > height;
+    this.setState({ isPortrait: !isLandscape });
+    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.ALL);
+  }
+
+  switchToLandscape() {
+    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.LANDSCAPE);
+  }
+
+  switchToPortrait() {
+    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+  }
+
+  render() {
     const { videoPaused, 
             videoReload, 
             toggleVideoPaused, 
@@ -15,10 +58,31 @@ export default function FullScreenTimelapse ( props ) {
             sTimelapse,
             mediaDownloadLoading,
             mediaDownloadSuccess,
-            mediaDownloadFailed } = props;
+            mediaDownloadFailed } = this.props;
 
-  return (
-        <View style={{ flex: 1, backgroundColor: 'black' }}>
+    const COLOR = '#92DCE5';
+    const icon = (name, size = 36) => () => (
+      <Ionicons
+        name={name}
+        size={size}
+        color={COLOR}
+        style={{ textAlign: 'center' }}
+      />
+    );
+
+    return (
+        <View style={ styles.container }>
+
+          <View style={ styles.fullScreenHeader }>
+            <TouchableHighlight onPress={ () => toggleTimelapseVideo() } style={ styles.back }>
+                        <Icon name="arrow-left" size={ 30 } color="white" />             
+            </TouchableHighlight> 
+
+            <TouchableHighlight onPress={ () => downloadVideoEvent( sTimelapse ) } style={ styles.download }>
+                      <Icon name="arrow-circle-down" size={ 50 } color="white" />
+          </TouchableHighlight>
+
+          </View>
 
           <View style={ styles.mediaDownloadStatus }>
               { mediaDownloadLoading && ( !mediaDownloadSuccess || !mediaDownloadFailed ) ? 
@@ -34,104 +98,86 @@ export default function FullScreenTimelapse ( props ) {
               null
               }
           </View>
-          
-          <TouchableHighlight onPress={ () => downloadVideoEvent( sTimelapse ) } style={ styles.download }>
-                      <Icon name="arrow-circle-down" size={ 50 } color="white" />
-          </TouchableHighlight>
+           
+          <VideoPlayer
+                style={ styles.videoPlayer }
+                videoProps={{
+                  shouldPlay: false,
+                  resizeMode: Video.RESIZE_MODE_COVER,
+                  source: {
+                    uri: sTimelapse,
+                  },
+                  isMuted: false,
+                }}
+                playIcon={icon('ios-play')}
+                pauseIcon={icon('ios-pause')}
+                fullscreenEnterIcon={icon('ios-expand-outline', 28)}
+                fullscreenExitIcon={icon('ios-contract-outline', 28)}
+                trackImage={require('../../assets/images/track.png')}
+                thumbImage={require('../../assets/images/thumb.png')}
+                textStyle={{
+                  color: COLOR,
+                  fontSize: 12,
+                }}
+                showFullscreenButton={ false }
+                playFromPositionMillis={ 0 }
+                fadeInDuration={ 200 }
+                fadeOutDuration={ 600 }
+                quickFadeOutDuration={ 200 }
+                hideControlsTimerDuration={ 3000 }
+                showControlsOnLoad={ true }
+                isPortrait={ this.state.isPortrait }
+                switchToLandscape={ this.switchToLandscape() }
+              
+              />
 
-          <ControlBar videoReload={ videoReload }
-                      videoPaused={ videoPaused }
-                      duration={ sVideoDuration }
-                      toggleVideoPaused={ toggleVideoPaused }
-                      toggleVideoReload={ toggleVideoReload } />
-
-          <Text style={ styles.timestamp }>Timelapse</Text>
-
-          <View style={ styles.container }>
-            <View style={ styles.bumper }></View>
-            <View style={ styles.videoContainer }>
-              <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.videoLoading } >
-                <Video
-                  source={{ uri: sTimelapse }} //props.sTimelapse
-                  rate={ 1.0 }
-                  volume={ 0.0 }
-                  isMuted={ true }
-                  useNativeControls={ true }
-                  resizeMode="contain"
-                  shouldPlay
-                  style={ styles.video }
-                />
-              </ImageBackground>
-            </View>
-          </View>
-          <TouchableHighlight onPress={ () => toggleTimelapseVideo() } style={ styles.back }>
-                      <Icon name="arrow-left" size={ 30 } color="white" />             
-          </TouchableHighlight> 
         </View> 
-  );
+    );
+  }
 }
 
-
-const styles = StyleSheet.create({
+    
+  const styles = StyleSheet.create({
+    
     container: {
-    flex: 1,
-    transform: [{ rotate: '90deg'}],
-    alignItems: 'center',
-    backgroundColor: 'black',
-    justifyContent: 'center'
-    },
-    videoContainer: {
       flex: 1,
-      width: '180%',
+      position: 'relative',
     },
-    video: {
-        flex: 1,
-      height: '100%',
+    fullScreenHeader: {
+      position: 'absolute',
+      top: 20,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 5,
+      zIndex: 2,
+      backgroundColor: 'rgba(0,0,0,0.0)',
       width: '100%',
-      zIndex: 1
     },
-    videoLoading: {
-        flex: 1,
-      height: '100%',
-      width: '100%',
+    videoPlayer: {
+      flex: 1,
+      zIndex: 1,
     },
-    timestamp: {
-    color: 'white',
-    fontSize: 18,
-    transform: [{ rotate: '90deg'}],
-    position: 'absolute',
-    top: 150,
-    right: -65,
-    zIndex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 2,
-    borderRadius: 5,
-    },
-    bumper: {
-    width: '20%',
+    icon: {
+      marginTop: 15,
+      marginBottom: 15
     },
     download: {
-    position: 'absolute',
-    bottom: 10,
-    right: 30,
-    transform: [{ rotate: '90deg'}],
-    zIndex: 1,
-    borderRadius: 50,
-    backgroundColor: 'grey',
-    paddingLeft: 5,
-    paddingRight: 5,
+      borderRadius: 50,
+      backgroundColor: 'grey',
+      paddingLeft: 3,
+      paddingRight: 3,
     },
     back: {
-    position: 'absolute',
-    top: 20,
-    left: 5,
-    transform: [{ rotate: '90deg'}],
-    zIndex: 2,
-    borderRadius: 100,
-    padding: 10
+      borderRadius: 50,
+      backgroundColor: 'grey',
+      paddingLeft: 9,
+      paddingRight: 11,
+      paddingTop: 6,
+      paddingBottom: 10,
+      borderWidth: 2,
+      borderColor: 'white'
     },
     mediaDownloadStatus: {
-      transform: [{ rotate: '90deg'}],
       position: 'absolute',
       top: '50%',
       zIndex: 5,
@@ -140,13 +186,12 @@ const styles = StyleSheet.create({
       width: '100%',
     },
     mediaDownloadText: {
-      // fontsize: 40,
+      fontsize: 40,
       color: 'white',
       position: 'absolute',
       top: '50%',
       alignItems: 'center',
       justifyContent: 'center',
       margin: 5,
-      backgroundColor:'rgba:(0,0,0,0.5)',
     }
-});
+  });

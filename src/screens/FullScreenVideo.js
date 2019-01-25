@@ -1,150 +1,202 @@
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, ImageBackground, Text } from 'react-native';
+import { StyleSheet, View, TouchableHighlight, Text, Dimensions } from 'react-native';
 import { Video } from 'expo';
+import VideoPlayer from '@expo/videoplayer';
+import { Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import ControlBar from '../components/PlaybackInterface';
+import { ScreenOrientation } from 'expo';
 
-export default function FullScreenVideo ( props ) {
 
-  const { videoPaused, 
-          videoReload, 
-          toggleVideo,
-          toggleVideoPaused, 
-          toggleVideoReload,
-          sVideo,
-          sVideoDate,
-          sVideoTime,
-          sVideoDuration,
-          downloadVideoEvent,
-          siteURL,
-          mediaDownloadLoading,
-          mediaDownloadSuccess,
-          mediaDownloadFailed } = props;
+export default class FullScreenVideo extends React.Component {
+    constructor( props) {
+        super(props);
 
-  let URL = siteURL + sVideo;
-  let timeStamp = sVideoDate + sVideoTime;
+        this.state = {
+            isPortrait: false,
+          };
 
-  return (
-        <View style={{ flex: 1, backgroundColor: 'black' }}>
+        this.orientationChangeHandler = this.orientationChangeHandler.bind(this);
+        this.switchToLandscape = this.switchToLandscape.bind(this);
+        this.switchToPortrait = this.switchToPortrait.bind(this);
+    }
 
-              <View style={ styles.mediaDownloadStatus }>
-                  { mediaDownloadLoading && ( !mediaDownloadSuccess || !mediaDownloadFailed ) ? 
-                  <Text style={ styles.mediaDownloadText }>Download in progress...</Text> :
-                  null
-                  }
-                  { mediaDownloadSuccess ? 
-                  <Text style={ styles.mediaDownloadText }>Media successfully saved to your camera roll.</Text> :
-                  null
-                  }
-                  { mediaDownloadFailed ? 
-                  <Text style={ styles.mediaDownloadText }>Media failed to save to device.</Text> :
-                  null
-                  }
-              </View>
-     
-              <TouchableHighlight onPress={ () => downloadVideoEvent( URL ) } style={ styles.download }>
-                          <Icon name="arrow-circle-down" size={ 50 } color="white" />
+      componentWillMount() {
+        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.Portrait);
+        Dimensions.addEventListener(
+          'change',
+          this.orientationChangeHandler
+        );
+      }
+      componentWillUnmount() {
+        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+        Dimensions.removeEventListener('change', this.orientationChangeHandler);
+      }
+
+      orientationChangeHandler(dims) {
+        const { width, height } = dims.window;
+        const isLandscape = width > height;
+        this.setState({ isPortrait: !isLandscape });
+        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.ALL);
+      }
+    
+      switchToLandscape() {
+        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.LANDSCAPE);
+      }
+    
+      switchToPortrait() {
+        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+      }
+    
+    
+
+    render() {
+
+        const { 
+            toggleVideo,
+            sVideo,
+            sVideoDate,
+            sVideoTime,
+            sVideoDuration,
+            downloadVideoEvent,
+            siteURL,
+            mediaDownloadLoading,
+            mediaDownloadSuccess,
+            mediaDownloadFailed } = this.props;
+
+        let URL = this.props.siteURL + this.props.sVideo;
+        let timeStamp = sVideoDate + sVideoTime;
+
+        const COLOR = '#92DCE5';
+        const icon = (name, size = 36) => () => (
+          <Ionicons
+            name={name}
+            size={size}
+            color={COLOR}
+            style={{ textAlign: 'center' }}
+          />
+        );
+        return (
+          <View style={ styles.container }>
+
+            <View style={ styles.fullScreenHeader }>
+              <TouchableHighlight onPress={ () => toggleVideo() } style={ styles.back }>
+                <Icon name="arrow-left" size={ 30 } color="white" />             
               </TouchableHighlight> 
 
-          <ControlBar videoReload={ videoReload }
-                      videoPaused={ videoPaused }
-                      duration={ sVideoDuration }
-                      toggleVideoPaused={ toggleVideoPaused }
-                      toggleVideoReload={ toggleVideoReload } />
+              <TouchableHighlight onPress={ () => downloadVideoEvent( URL ) } style={ styles.download }>
+                <Icon name="arrow-circle-down" size={ 45 } color="white" />
+              </TouchableHighlight> 
 
+            </View>
 
-          <Text style={ styles.timestamp }>{ timeStamp }</Text>
+            <Text style={ styles.timestamp }>{ timeStamp }</Text>
 
-          <View style={ styles.container }>
-            <View style={ styles.bumper }></View>
-              <View style={ styles.videoContainer }>
-                  <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.videoLoading } >
-                    <Video
-                      source={{ uri: URL }} 
-                      rate={ 1.0 }
-                      volume={ 0.0 }
-                      isMuted={ true }
-                      useNativeControls={ true }
-                      resizeMode="contain"
-                      shouldPlay
-                      style={ styles.video }
-                    />
-                  </ImageBackground>
-              </View>
+            <View style={ styles.mediaDownloadStatus }>
+                { mediaDownloadLoading && ( !mediaDownloadSuccess || !mediaDownloadFailed ) ? 
+                <Text style={ styles.mediaDownloadText }>Download in progress...</Text> :
+                null
+                }
+                { mediaDownloadSuccess ? 
+                <Text style={ styles.mediaDownloadText }>Media successfully saved to your camera roll.</Text> :
+                    null
+                    }
+                    { mediaDownloadFailed ? 
+                <Text style={ styles.mediaDownloadText }>Media failed to save to device.</Text> :
+                    null
+                }
+            </View> 
+
+              <VideoPlayer
+                style={ styles.videoPlayer }
+                videoProps={{
+                  shouldPlay: false,
+                  resizeMode: Video.RESIZE_MODE_COVER,
+                  source: {
+                    uri: URL,
+                  },
+                  isMuted: false,
+                }}
+                playIcon={icon('ios-play')}
+                pauseIcon={icon('ios-pause')}
+                fullscreenEnterIcon={icon('ios-expand-outline', 28)}
+                fullscreenExitIcon={icon('ios-contract-outline', 28)}
+                trackImage={require('../../assets/images/track.png')}
+                thumbImage={require('../../assets/images/thumb.png')}
+                textStyle={{
+                  color: COLOR,
+                  fontSize: 12,
+                }}
+                showFullscreenButton={ false }
+                playFromPositionMillis={ 0 }
+                fadeInDuration={ 200 }
+                fadeOutDuration={ 600 }
+                quickFadeOutDuration={ 200 }
+                hideControlsTimerDuration={ 2200 }
+                showControlsOnLoad={ true }
+                isPortrait={ this.state.isPortrait }
+                switchToLandscape={ this.switchToLandscape() }
+              
+              />
+
           </View>
-          <TouchableHighlight onPress={ () => toggleVideo() } style={ styles.back }>
-                      <Icon name="arrow-left" size={ 30 } color="white" />             
-          </TouchableHighlight> 
-        </View> 
-  );
-}
-
+        )
+      }
+    }
 
 const styles = StyleSheet.create({
+    
   container: {
     flex: 1,
-    transform: [{ rotate: '90deg'}],
-    alignItems: 'center',
-    backgroundColor: 'black',
-    justifyContent: 'center'
+    positiion: 'relative',
   },
-  videoContainer: {
+  fullScreenHeader: {
+    position: 'absolute',
+      top: 20,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 5,
+      zIndex: 2,
+      backgroundColor: 'rgba(0,0,0,0.0)',
+      width: '100%',
+  },
+  videoPlayer: {
     flex: 1,
-    width: '180%',
-  },
-  video: {
-      flex: 1,
-    height: '100%',
-    width: '100%',
-    zIndex: 1
-  },
-  videoLoading: {
-      flex: 1,
-    height: '100%',
-    width: '100%',
+    zIndex: 1,
   },
   timestamp: {
-    color: 'white',
-    fontSize: 18,
-    transform: [{ rotate: '90deg'}],
     position: 'absolute',
-    top: 150,
-    right: -65,
-    zIndex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 2,
+    top: 0,
+    left: 0,
+    right: 0,
+    margin: 'auto',
+    color: 'white',
+    fontSize: 16,
+    backgroundColor: 'rgba(0,0,0,0.3)',
     borderRadius: 5,
+    zIndex: 2,
+    textAlign: 'center'
   },
   icon: {
-    transform: [{ rotate: '90deg'}],
     marginTop: 15,
     marginBottom: 15
   },
-  bumper: {
-    width: '20%',
-  },
   download: {
-    position: 'absolute',
-    bottom: 10,
-    right: 30,
-    transform: [{ rotate: '90deg'}],
-    zIndex: 1,
     borderRadius: 50,
     backgroundColor: 'grey',
-    paddingLeft: 5,
-    paddingRight: 5,
+    paddingLeft: 3,
+    paddingRight: 3,
   },
   back: {
-    position: 'absolute',
-    top: 20,
-    left: 5,
-    transform: [{ rotate: '90deg'}],
-    zIndex: 2,
-    borderRadius: 100,
-    padding: 10
+    borderRadius: 50,
+    backgroundColor: 'grey',
+    paddingLeft: 7,
+    paddingRight: 7,
+    paddingTop: 4,
+    paddingBottom: 6,
+    borderWidth: 2,
+    borderColor: 'white'
   },
   mediaDownloadStatus: {
-    transform: [{ rotate: '90deg'}],
     position: 'absolute',
     top: '50%',
     zIndex: 5,
@@ -153,13 +205,12 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   mediaDownloadText: {
-    // fontsize: 40,
+    fontsize: 40,
     color: 'white',
     position: 'absolute',
     top: '50%',
     alignItems: 'center',
     justifyContent: 'center',
     margin: 5,
-    backgroundColor:'rgba:(0,0,0,0.5)',
   }
 });

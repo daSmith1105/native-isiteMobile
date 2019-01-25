@@ -14,6 +14,7 @@ export default class MediaElement extends React.Component {
       this.state = {
         
       }
+      this.exampleRef = React.createRef()
     }
 
       render() {

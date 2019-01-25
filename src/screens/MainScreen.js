@@ -7,7 +7,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import MainNav from '../navigation/MainNav';
 import QuickPicker from 'quick-picker';
-import MediaContainer from '../components/MediaContainer';
+import MediaContainer from '../components/MediaContainer1';
 import QuickTimeSearch from '../components/QuickTimeSearch';
 
 

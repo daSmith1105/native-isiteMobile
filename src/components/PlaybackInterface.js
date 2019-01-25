@@ -5,17 +5,17 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const ControlBar = ( props ) => {
 
-    const { videoReload,
-            videoPaused,
-            toggleVideoReload,
-            toggleVideoPaused,
+    const { reload,
+            shouldPlay,
+            toggleReload,
+            togglePlayPause,
             duration } = props;
 
     return (
         <View style={ styles.controlBar }>
           
-              { videoReload ? 
-                <TouchableHighlight onPress={ () => toggleVideoReload() }
+              { reload ? 
+                <TouchableHighlight onPress={ () => toggleReload() }
                                     style={ styles.controlButton }>
                   <Icon name="undo" 
                           size={ 28 } 
@@ -25,17 +25,17 @@ const ControlBar = ( props ) => {
                   null
               }
 
-              <TouchableHighlight onPress={ () => toggleVideoPaused() }
+              <TouchableHighlight onPress={ () => togglePlayPause() }
                                   style={ styles.controlButton }>
-                <Icon name={ videoPaused ? "pause" : "play" }
+                <Icon name={ shouldPlay ? "pause" : "play" }
                       size={ 28 } 
                       color="white" 
                       style={ styles.icon } /> 
               </TouchableHighlight>
-              <View style={ styles.durationContainer }>
+              {/* <View style={ styles.durationContainer }>
                   <Text style={ styles.duration }>{ Math.floor( duration / 60) + 'm ' }</Text>
                   <Text style={ styles.duration }>{ duration % 60 + 's' }</Text>
-                </View>
+                </View> */}
           </View>
     )
 }
