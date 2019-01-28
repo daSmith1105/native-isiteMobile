@@ -8,12 +8,10 @@
 //      see about moving event filter out of render?
 
 import React from 'react';
-import { StyleSheet, Text, View, TouchableHighlight, Linking, Image, SectionList, PixelRatio } from 'react-native';
-import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
+import { StyleSheet, Text, View, TouchableHighlight, Linking, Image, FlatList, ScrollView } from 'react-native';
 import MediaElement from './MediaElement';
 import moment from 'moment';
 
-let data;
 
 class MediaContainer extends React.Component {
 
@@ -21,22 +19,7 @@ class MediaContainer extends React.Component {
     super(props);
  
     this._renderItem = this._renderItem.bind(this);
-    this.scrollTo = this.scrollTo.bind(this);
-
-    // this.getItemLayout = sectionListGetItemLayout({
-    //     // The height of the row with rowData at the given sectionIndex and rowIndex
-    //     getItemHeight: (rowData, sectionIndex, rowIndex) => sectionIndex === 0 ? 100 : 50,
-
-    //     // These three properties are optional
-    //     getSeparatorHeight: () => 1 / PixelRatio.get(), // The height of your separators
-    //     getSectionHeaderHeight: () => 20, // The height of your section headers
-    //     getSectionFooterHeight: () => 10, // The height of your section footers
-    // })
-
-  }
-
-  componentDidMount() {
-    // this.sectionList.scrollToBottom();
+ 
   }
 
       _renderItem( { item } ) {
@@ -72,12 +55,10 @@ class MediaContainer extends React.Component {
               cached={ item.fCached }
               cachedProgress={ parseInt( item.dCacheProgress ) }
               requestVideo={ this.props.requestVideo }
-              progressBar= { this.props.progressBar }
               videoLoading={ this.props.videoLoading }
               videoReady={ this.props.videoReady }
               playVideo={ this.props.playVideo }
-              bID={ item.bID }  
-              currentComponent={ 'pb' + item.bID }  />           
+              bID={ item.bID }   />           
           )
         
     }
@@ -86,53 +67,36 @@ class MediaContainer extends React.Component {
       return item.bID;
     }
 
-    scrollTo(sectionIndex,itemIndex = 1 ) {
-    this.sectionList.scrollToLocation({
-        sectionIndex: sectionIndex,
-        itemIndex: itemIndex
-        });
-    }
-    //     let sectionIndex = ( data.length - 1);
-    //     let itemIndex = data[sectionIndex].data.length - 1;
-    //     this.sectionList.scrollToLocation(
-    //         {  
-    //             itemIndex,
-    //             sectionIndex: index,
-    //             animated: true
-    //         })
-    // }
-
 
   render() {
 
     const { currentEventList } = this.props;
 
-    data= [
-        {title: '12AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '00').reverse() },
-        {title: '1AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '01').reverse() },
-        {title: '2AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '02').reverse() },
-        {title: '3AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '03').reverse() },
-        {title: '4AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '04').reverse() },
-        {title: '5AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '05').reverse() },
-        {title: '6AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '06').reverse() },
-        {title: '7AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '07').reverse() },
-        {title: '8AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '08').reverse() },
-        {title: '9AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '09').reverse() },
-        {title: '10AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '10').reverse() },
-        {title: '11AM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '11').reverse() },
-        {title: '12PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '12').reverse() },
-        {title: '1PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '13').reverse() },
-        {title: '2PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '14').reverse() },
-        {title: '3PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '15').reverse() },
-        {title: '4PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '16').reverse() },
-        {title: '5PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '17').reverse() },
-        {title: '6PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '18').reverse() },
-        {title: '7PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '19').reverse() },
-        {title: '8PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '20').reverse() },
-        {title: '9PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '21').reverse() },
-        {title: '10PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '22').reverse() },
-        {title: '11PM', data: currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '23').reverse() }
-        ]
+    let data0 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '00').reverse();
+    let data1 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '01').reverse();
+    let data2 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '02').reverse();
+    let data3 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '03').reverse();
+    let data4 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '04').reverse();
+    let data5 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '05').reverse();
+    let data6 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '06').reverse();
+    let data7 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '07').reverse();
+    let data8 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '08').reverse();
+    let data9 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '09').reverse();
+    let data10 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '10').reverse();
+    let data11 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '11').reverse();
+    let data12 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '12').reverse();
+    let data13 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '13').reverse();
+    let data14 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '14').reverse();
+    let data15 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '15').reverse();
+    let data16 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '16').reverse();
+    let data17 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '17').reverse();
+    let data18 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '18').reverse();
+    let data19 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '19').reverse();
+    let data20 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '20').reverse();
+    let data21 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '21').reverse();
+    let data22 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '22').reverse();
+    let data23 = currentEventList.filter(s => s.sTimeStamp.slice(8,10) === '23').reverse();
+     
 
       return (
 
@@ -166,41 +130,280 @@ class MediaContainer extends React.Component {
             }
 
             { !this.props.loading && !this.props.fetchError  ? 
- 
-            <SectionList
-                style={ styles.eventList }
-                ref={(sectionList) => { this.sectionList = sectionList }}
+  <ScrollView style={ styles.eventList }
+              ref={ ref => this.scrollView = ref }
+              onContentSizeChange={( contentWidth, contentHeight ) => {        
+                  this.scrollView.scrollToEnd({ animated: false });
+              }}
+              inverted={true}>
+            <FlatList
+                data={data0}
                 renderItem={ this._renderItem }
-                renderSectionHeader={({section: {title}}) => (
-                    <Text style={{fontWeight: 'bold'}}>{title}</Text>
-                    )}
-                sections={ data }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
                 keyExtractor={ this.keyExtractor }
-                getItemLayout={this.getItemLayout}
-                /> :
+                initialNumToRender={ data0.length }
+                scrollEnabled={ false }
+                /> 
+                <FlatList
+                data={data1}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data1.length}
+                scrollEnabled={false}
+                />
+                <FlatList
+                data={data2}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data2.length}
+                scrollEnabled={false}
+                />
+                <FlatList
+                data={data3}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data3.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data4}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data4.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data5}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data5.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data6}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data6.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data7}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data7.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data8}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data8.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data9}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data9.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data10}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data10.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data11}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data11.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data12}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data12.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data13}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data13.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data14}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data14.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data15}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data15.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data16}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data16.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data17}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data17.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data18}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data18.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data19}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data19.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data20}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data20.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data21}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data21.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data22}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data22.length}
+                scrollEnabled={false}
+                />
+                 <FlatList
+                data={data23}
+                renderItem={ this._renderItem }
+                // getItemLayout={(data, index) => (
+                //   { length: 210, offset: 210 * index, index }
+                // )}
+                keyExtractor={ this.keyExtractor }
+                initialNumToRender={data23.length}
+                scrollEnabled={false}
+                />
+                </ScrollView>
+                :
                 null
             }
 
-            <View style={ styles.sectionSelector }>
-                <TouchableHighlight onPress={ () => this.scrollTo(0) }>
+            {/* <View style={ styles.sectionSelector }>
+                <TouchableHighlight onPress={ () => console.log('12am pressed') }>
+                    <Text style={ styles.selector }>12AM</Text>
+                </TouchableHighlight> */}
+                {/* <TouchableHighlight onPress={ () => console.log('1am pressed') }>
                     <Text style={ styles.selector }>1AM</Text>
                 </TouchableHighlight>
-                <TouchableHighlight onPress={ () => this.scrollTo(1) }>
-                    <Text style={ styles.selector }>2PM</Text>
+                <TouchableHighlight onPress={ () => console.log('2am pressed') }>
+                    <Text style={ styles.selector }>2AM</Text>
                 </TouchableHighlight>
-                <TouchableHighlight onPress={ () => this.scrollTo(2) }>
-                    <Text style={ styles.selector }>3PM</Text>
+                <TouchableHighlight onPress={ () => console.log('3am pressed') }>
+                    <Text style={ styles.selector }>3AM</Text>
                 </TouchableHighlight>
-                <TouchableHighlight onPress={ () => this.scrollTo(3) }>
-                    <Text style={ styles.selector }>4PM</Text>
+                <TouchableHighlight onPress={ () => console.log('4am pressed') }>
+                    <Text style={ styles.selector }>4AM</Text>
                 </TouchableHighlight>
-                <TouchableHighlight onPress={ () => this.scrollTo(4) }>
-                    <Text style={ styles.selector }>5PM</Text>
+                <TouchableHighlight onPress={ () => console.log('5am pressed') }>
+                    <Text style={ styles.selector }>5AM</Text>
                 </TouchableHighlight>
-                <TouchableHighlight onPress={ () => this.scrollTo(5) }>
-                    <Text style={ styles.selector }>6PM</Text>
-                </TouchableHighlight>
-            </View>
+                <TouchableHighlight onPress={ () => console.log('6am pressed') }>
+                    <Text style={ styles.selector }>6AM</Text>
+                </TouchableHighlight> */}
+            {/* </View> */}
 
         </View>
       )
@@ -226,8 +429,10 @@ const styles = StyleSheet.create({
     zIndex: 5,
   },
   eventList: {
+    flexGrow: 1,
     width: '95%',
     paddingTop: 24,
+    marginBottom: 36,
   },
   errorModal: {
     marginTop: -50,

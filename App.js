@@ -363,8 +363,11 @@ class App extends React.Component {
                     sImageTime: time })
   }
 
-  updateProgressBar(event, data) { 
-    this.setState({ [ event.target ]: data })
+  updateProgressBar(data) { 
+    console/log('made it this far')
+    this.setState({ progressBar: data },
+      () =>
+      console.log( 'current state: ' + this.state.progressBar ))
   }
 
   // video event functions
@@ -392,8 +395,9 @@ class App extends React.Component {
                             clearInterval(pollProgress) 
                           } 
 
-                          console.log( parseInt( data.dCacheProgress ) )
-                          this.updateProgress()
+                          console.log( parseInt( data.dCacheProgress ) ),
+                          this.setState({ progressBar:  parseInt( data.dCacheProgress ) },
+                           () => console.log( 'state > ' + this.state.progressBar ))
                         })
                       })
                       }.bind(this), 1000 )

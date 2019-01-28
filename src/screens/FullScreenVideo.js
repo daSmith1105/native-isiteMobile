@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     
   container: {
     flex: 1,
-    positiion: 'relative',
+    position: 'relative',
   },
   fullScreenHeader: {
     position: 'absolute',
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   mediaDownloadText: {
-    fontsize: 40,
+    fontSize: 40,
     color: 'white',
     position: 'absolute',
     top: '50%',

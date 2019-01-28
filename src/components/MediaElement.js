@@ -12,9 +12,47 @@ export default class MediaElement extends React.Component {
   constructor(props) {
     super(props);
       this.state = {
-        
+        progressBar: 0,
       }
-      this.exampleRef = React.createRef()
+      this.requestVideo = this.requestVideo.bind(this);
+    }
+
+    setCached() {
+      this.setState({ progressBar: 100 })
+    }
+
+    requestVideo( siteURL, bID ) {
+      console.log('Downloading video ... ');
+        fetch( siteURL + 'ajax.php?action=requestVideo&id=' + bID )
+          .then( response => {
+            if (response.status !== 200) {
+              console.log('Error. Status Code: ' + response.status);
+              return;
+            }
+            response.json().then( data => {
+  
+              if (data.status == 0 ) {
+  
+                  var pollProgress = 
+                    setInterval(function() {
+                      fetch( siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
+                        .then( response => {
+                          response.json().then( data => {
+  
+                            if (parseInt(data.dCacheProgress) == 100){  
+                              console.log('woohoo')
+                              this.setCached();
+                              clearInterval(pollProgress) 
+                            } 
+  
+                            console.log( parseInt( data.dCacheProgress ) ),
+                            this.setState({ progressBar:  parseInt( data.dCacheProgress ) })
+                          })
+                        })
+                        }.bind(this), 1000 )
+                }
+              })
+          })
     }
 
       render() {
@@ -32,14 +70,17 @@ export default class MediaElement extends React.Component {
             cached,
             cachedProgress,
             bID,
+            id,
             videoLoading,
             playVideo,
             sTimeStamp,
             siteURL,
             videoReady } = this.props;
+ 
 
           let timeStamp = sTimeStamp;
           let URL= siteURL + sImage;
+
                 return (
 
                     <View style={ styles.media }>  
@@ -49,25 +90,16 @@ export default class MediaElement extends React.Component {
 
 
                           {/* Video pre-loading ( default initial view) */}
-                          { sType == 'VIDEO' && parseInt( cachedProgress ) == 0 ?
-                              <TouchableHighlight onPress={ () => requestVideo('https://' + siteTag + '.dividia.net/', bID) } 
+                          { sType == 'VIDEO' && ( parseInt( cachedProgress ) == 0 ) && this.state.progressBar != 100 ?  // || this.state.progressBar == 0 
+                              <TouchableHighlight onPress={ () => this.requestVideo('https://' + siteTag + '.dividia.net/', bID) } 
                                                   style={ styles.videoBackground }>
                                 <Icon name="cloud-download" size={ 100 } color="white" style={ styles.cloudButton }/> 
                               </TouchableHighlight> :
                               null
                           }
 
-                          {/* Video is loading */}
-                          { sType == 'VIDEO' && videoLoading ?
-                              <TouchableHighlight onPress={ () => null } 
-                                                style={ styles.videoBackground }>
-                                <Icon name="spinner" size={ 100 } color="white" style={ styles.spinner }/>
-                              </TouchableHighlight> :
-                              null
-                          }
-
                           {/* Video is ready to play */}
-                          { sType == 'VIDEO' && parseInt( cachedProgress ) == 100  ?
+                          { sType == 'VIDEO' &&  ( parseInt( cachedProgress ) == 100  || this.state.progressBar == 100 ) ? // || this.state.progressBar == 100 
                               <TouchableHighlight onPress={ () => playVideo( sTimeStamp, date, time, duration )} 
                                                   style={ styles.videoBackground }>
                                 <Icon name="play-circle" size={ 100 } color="white" style={ styles.playButton }/> 
@@ -104,13 +136,12 @@ export default class MediaElement extends React.Component {
 
                           {/* Show progress bar for type 'VIDEO' */}
                               { sType == 'VIDEO' ?
-                                    <Text style={ styles.progress }>{ this.props.progressBar }</Text>
-                                      // <AnimatedBar
-                                      // style={ styles.progress }
-                                      // progress={ cached == 1 ? 100 : 0 }
-                                      // height={16}
-                                      // barColor="green"
-                                      // borderRadius={5} />
+                                      <AnimatedBar
+                                      style={ styles.progress }
+                                      progress={ cachedProgress == 100 || this.state.progressBar / 100  ? 1 : this.state.progressBar / 100} 
+                                      height={12}
+                                      barColor="green"
+                                      borderRadius={5} />
                                   : null
                               }
 
@@ -215,5 +246,6 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     borderRadius: 5,
     marginLeft: '1%',
+    zIndex: 1,
   },
 });

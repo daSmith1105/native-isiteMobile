@@ -186,7 +186,7 @@ export default class FullScreenTimelapse extends React.Component {
       width: '100%',
     },
     mediaDownloadText: {
-      fontsize: 40,
+      fontSize: 40,
       color: 'white',
       position: 'absolute',
       top: '50%',
