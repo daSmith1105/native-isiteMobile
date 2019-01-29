@@ -53,18 +53,17 @@ export default class FullScreenVideo extends React.Component {
 
         const { 
             toggleVideo,
-            sVideo,
             sVideoDate,
             sVideoTime,
-            sVideoDuration,
             downloadVideoEvent,
-            siteURL,
             mediaDownloadLoading,
             mediaDownloadSuccess,
             mediaDownloadFailed } = this.props;
 
         let URL = this.props.siteURL + this.props.sVideo;
-        let timeStamp = sVideoDate + sVideoTime;
+        console.log(URL);
+
+        let timeStamp = sVideoDate + ' ' + sVideoTime;
 
         const COLOR = '#92DCE5';
         const icon = (name, size = 36) => () => (
@@ -135,7 +134,6 @@ export default class FullScreenVideo extends React.Component {
                 showControlsOnLoad={ true }
                 isPortrait={ this.state.isPortrait }
                 switchToLandscape={ this.switchToLandscape() }
-              
               />
 
           </View>
@@ -205,7 +203,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   mediaDownloadText: {
-    fontSize: 40,
+    fontSize: 24,
     color: 'white',
     position: 'absolute',
     top: '50%',

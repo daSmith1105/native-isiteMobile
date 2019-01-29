@@ -23,9 +23,9 @@ class App extends React.Component {
 
     this.state = {
       isLoggedIn: false,
+      loginLoading: false,
       site: '', // full site name used in header
       siteTag: '', // short version of site used for URL
-      siteList: [ 'birch', 'gte', 'ashgrovejs' ],
       siteURL: '',
       projects: [],
       eventTypes: [ 'ALL', 'IMAGES', 'VIDEOS' ],
@@ -77,7 +77,6 @@ class App extends React.Component {
     this.toggleImage = this.toggleImage.bind(this);
     this.toggleVideo = this.toggleVideo.bind(this);
     this.setCurrentImage = this.setCurrentImage.bind(this);
-    this.requestVideo = this.requestVideo.bind(this);
     this.videoReady = this.videoReady.bind(this);
     this.setTimelapseStart = this.setTimelapseStart.bind(this);
     this.setTimelapseEnd = this.setTimelapseEnd.bind(this);
@@ -105,10 +104,10 @@ class App extends React.Component {
     this.loadNewCam = this.loadNewCam.bind(this);
     this.setCurrentEventList = this.setCurrentEventList.bind(this);
     this.toggleMediaDownloadStatus = this.toggleMediaDownloadStatus.bind(this);
-    this.updateProgressBar = this.updateProgressBar.bind(this);
     this.switchToPortrait = this.switchToPortrait.bind(this);
     this.switchtoLandscape = this.switchToLandscape.bind(this);
     this.orientationChangeHandler = this.orientationChangeHandler.bind(this);
+  
     }
 
   componentDidMount() {
@@ -118,7 +117,7 @@ class App extends React.Component {
         this.orientationChangeHandler
       );
       this.switchToPortrait();
-      this.retrieveSessionVariable()
+      this.retrieveSessionVariable();
   }
 
   orientationChangeHandler(dims) {
@@ -191,31 +190,52 @@ class App extends React.Component {
 
   // auth functions 
   validateLogin(userInput) {
-    let siteList = this.state.siteList;
+    this.setState({ loginLoading: true })
+    fetch( 'https://' + userInput + '.dividia.net/ajax.php?action=customerExists&domain=' + userInput + '.dividia.net')
+      .then( response => {
+        if (response.status === 404 ) {
+          console.log( 'Error logging in with user \"' +  userInput + '\"')
+          this.setState({ 
+            error: true,
+            loginLoading: false
+          },
+            function(){
+              setTimeout(
+                () => this.clearError(), 5000)
+              })
+              return;
+        }
 
-    if ( siteList.includes( userInput ) ) {
-      this.resolveSitename( userInput );
-      this.setState({ 
-        siteTag: userInput,
-        isLoggedIn: true
-      },
-        function() {
-          this.fetchNewByDate( today, 'ALL' )
-          this.fetchDataUsage()
-          this.checkForMultipleCams();
-          this.saveSessionVariable()
-      })
-    } else {
-      console.log( 'Error logging in with user \"' +  userInput + '\"')
-      this.setState({ 
-        error: true,
-      },
-        function(){
-          setTimeout(
-            () => this.clearError(), 5000)
+        response.json().then(data => {
+          if ( data.result === true ) {
+            this.resolveSitename( userInput );
+            this.setState({ 
+              siteTag: userInput,
+              isLoggedIn: true,
+              loginLoading: false
+            },
+              function() {
+                this.fetchNewByDate( today, 'ALL' )
+                this.fetchDataUsage()
+                this.checkForMultipleCams();
+                this.saveSessionVariable()
           })
-      }
-  }
+        } else if ( data.result === false ) {
+          console.log( 'Error logging in with user \"' +  userInput + '\"')
+          this.setState({ 
+            error: true,
+            loginLoading: false
+          },
+            function(){
+              setTimeout(
+                () => this.clearError(), 5000)
+              })
+          } else {
+            console.log('Other error.')
+          }
+      })
+  })
+}
 
   setLogout() {
     this.clearSessionVariable()
@@ -223,7 +243,6 @@ class App extends React.Component {
       isLoggedIn: false,
       site: '', // full site name used in header
       siteTag: '', // short version of site used for URL
-      siteList: [ 'birch', 'gte', 'ashgrovejs' ],
       siteURL: '',
       projects: [],
       eventTypes: [ 'ALL', 'IMAGES', 'VIDEOS' ],
@@ -249,7 +268,7 @@ class App extends React.Component {
       videoReady: false,
       dataUsage: '',
       maxData: '',
-      progressBar: '0',
+      progressBar: 0,
       snapShot: '',
       date: today,
       events: [],
@@ -264,6 +283,7 @@ class App extends React.Component {
       mediaDownloadLoading: false,
       mediaDownloadSuccess: false,
       mediaDownloadFailed: false,
+      isPortrait: true,
     }, function() {
           camCount = [];
           console.log( 'user session cleared' )
@@ -342,7 +362,7 @@ class App extends React.Component {
         console.log('Error. Status Code: ' + response.status);
         return;
       }
-      this.fetchNewByDate( this.toggleTimelapse.date, this.state.currentEventType )
+      this.fetchNewByDate( this.state.date, this.state.currentEventType )
       this.fetchDataUsage()
     })
   }
@@ -363,52 +383,15 @@ class App extends React.Component {
                     sImageTime: time })
   }
 
-  updateProgressBar(data) { 
-    console/log('made it this far')
-    this.setState({ progressBar: data },
-      () =>
-      console.log( 'current state: ' + this.state.progressBar ))
-  }
-
-  // video event functions
-
-  requestVideo( siteURL, bID ) {
-    console.log('Downloading video ... ');
-      fetch( siteURL + 'ajax.php?action=requestVideo&id=' + bID )
-        .then( response => {
-          if (response.status !== 200) {
-            console.log('Error. Status Code: ' + response.status);
-            return;
-          }
-          response.json().then( data => {
-
-            if (data.status == 0 ) {
-
-                var pollProgress = 
-                  setInterval(function() {
-                    fetch( siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
-                      .then( response => {
-                        response.json().then( data => {
-
-                          if (parseInt(data.dCacheProgress) == 100){  
-                            console.log('woohoo')
-                            clearInterval(pollProgress) 
-                          } 
-
-                          console.log( parseInt( data.dCacheProgress ) ),
-                          this.setState({ progressBar:  parseInt( data.dCacheProgress ) },
-                           () => console.log( 'state > ' + this.state.progressBar ))
-                        })
-                      })
-                      }.bind(this), 1000 )
-              }
-            })
-        })
-  }
-
   playVideo ( sTimeStamp, date, time, duration ) {
+    let videoURL;
+    if (this.state.projects.length > 1) {
+      videoURL = 'base/' + this.state.siteTag + '/cam' + (this.state.selectedCam + 1) + '/video/' + sTimeStamp + '.mp4';
+    } else {
+      videoURL = 'base/' + this.state.siteTag + '/video/' + sTimeStamp + '.mp4'
+    }
     this.setState({
-      sVideo: 'base/' + this.state.siteTag + '/video/' + sTimeStamp + '.mp4',
+      sVideo: videoURL,
       sVideoDate: date,
       sVideoTime: time,
       sVideoDuration: duration
@@ -430,6 +413,7 @@ class App extends React.Component {
       showTimelapse: !this.state.showTimelapse,
       showMainNav: false
       })
+      this.fetchNewByDate();
   }
 
   // timelapse event functions 
@@ -474,17 +458,14 @@ class App extends React.Component {
     this.setState({ 
       mediaDownloadLoading: true
     })
-    console.log(image)
     const fileUri = FileSystem.documentDirectory + 'image.jpg';
       await FileSystem.downloadAsync(
         image,
         fileUri
       )
         .then(({ uri }) => {
-          console.log( 'Finished downloading to ', fileUri );
           var promise = CameraRoll.saveToCameraRoll(fileUri, 'photo');
             promise.then(function(result) {
-              console.log('save succeeded ' + result);
               this.setState({ 
                 mediaDownloadLoading: false,
                 mediaDownloadSuccess: true 
@@ -493,8 +474,6 @@ class App extends React.Component {
             )
             }.bind(this))
             .catch(function(error) {
-              console.log('save failed ' + error);
-              console.log( fileUri )
             });
           })
           .catch(error => {
@@ -504,17 +483,14 @@ class App extends React.Component {
 
   async downloadVideoEvent( video ) {
     this.setState({ mediaDownloadLoading: true })
-    console.log(video)
     const fileUri = FileSystem.documentDirectory + 'video.mp4';
       await FileSystem.downloadAsync(
         video,
         fileUri
       )
         .then(({ uri }) => {
-          console.log( 'Finished downloading to ', fileUri );
           var promise = CameraRoll.saveToCameraRoll( fileUri, 'video' );
           promise.then(function(result) {
-            console.log('save succeeded ' + result);
             this.setState({ 
               mediaDownloadLoading: false,
               mediaDownloadSuccess: true 
@@ -530,8 +506,6 @@ class App extends React.Component {
             setTimeout(function() {
               this.setState({ mediaDownloadFailed: false })
             }, 5000)
-            console.log('save failed ' + error);
-            console.log( fileUri )
           });
         })
         .catch(error => {
@@ -540,7 +514,6 @@ class App extends React.Component {
   }
 
   setCurrentEventList( type ) {
-    console.log( 'type sent to currentEventList function > ' + type )
     switch (type.toString()) {
       case 'ALL':
         this.setState({ 
@@ -587,10 +560,10 @@ class App extends React.Component {
             this.setState({ loading: true })
             setTimeout(() => {
               this.fetchNewByDate( today, 'IMAGES')
-            }, 3500)
+            }, 4000)
             setTimeout(() => {
               this.setState({ loading: false })
-            }, 3500)    
+            }, 4100)    
           })
       .catch(err => {
         console.log('Fetch Error: ', err);
@@ -641,7 +614,6 @@ class App extends React.Component {
                 this.setState({ 
                   loading: false,
                   fetchError: true })
-                console.log( 'no events found throwing a fetch error.');
               } 
           })
         })
@@ -650,8 +622,7 @@ class App extends React.Component {
         this.setState({
           loading: false,
           fetchError: true,
-        },
-          () => console.log( 'Fetch failed - loading: ' + this.state.loading + ' - fetchError: ') + this.state.fetchError)
+        })
       })
     }
   
@@ -694,7 +665,6 @@ class App extends React.Component {
       this.setState({ loading: value }) :
       this.setState({ loading: !this.state.loading })
     }
-    console.log( 'loading: ' + this.state.loading )
   }
 
   // Toggle the main navigation menu from footer bar
@@ -732,16 +702,14 @@ class App extends React.Component {
   toggleLoginError() {
     this.setstate({ 
       error: !this.state.error 
-    },
-      () => console.log( 'Login error: ' + this.state.error ))
+    })
   }
 
   toggleFetchError() {
     this.setState({ 
       fetchError: !this.state.fetchError,
       loading: false
-    },
-    () => console.log('fetchError: ' + this.state.fetchError))
+    })
   }
 
   
@@ -762,8 +730,8 @@ class App extends React.Component {
                           site={ this.state.site }
                           siteTag={ this.state.siteTag }
                           siteURL={ this.state.siteURL }
-                          camArray = { camCount }
-                          checkForMultipleCams = { this.checkForMultipleCams }
+                          camArray={ camCount }
+                          checkForMultipleCams={ this.checkForMultipleCams }
                           toggleTimelapse={ this.toggleTimelapse }
                           toggleImage={ this.toggleImage }
                           timelapse={ this .state.showTimelapse }
@@ -785,7 +753,7 @@ class App extends React.Component {
                           currentEventType={ this.state.currentEventType }
                           currentEventList={ this.state.currentEventList }
                           getCurrentImage= { this.getCurrentImage }
-                          fetchNewByDate = { this.fetchNewByDate }
+                          fetchNewByDate={ this.fetchNewByDate }
                           events={ this.state.events }
                           images={ this.state.images }
                           videos={ this.state.videos }
@@ -818,14 +786,15 @@ class App extends React.Component {
                             validateLogin={ this.validateLogin }
                             noInput={ this.state.noInput }
                             error={ this.state.error }
-                            checkLogin={ this.checkLogin } /> :
+                            checkLogin={ this.checkLogin }
+                            loginLoading={ this.state.loginLoading } /> :
               null }    
 
             { this.state.isLoggedIn && this.state.showTimelapse  
                                     && !this.state.showFullVideo 
                                     && !this.state.showFullImage 
                                     && !this.state.showTimelapseVideo ? 
-              <TimelapseScreen site={ this.state.site }
+              <TimelapseScreen  site={ this.state.site }
                                 siteTag={ this.state.siteTag }
                                 siteURL={ this.state.siteURL }
                                 toggleTimelapse={ this.toggleTimelapse }

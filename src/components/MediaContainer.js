@@ -1,14 +1,9 @@
 //Contains logic to generate media array (elements), holds state of event filter
 
-//TODO: if video add duration of video to bottom right corner of MediaElement
-//      include progress bar for downloading and video spooling
-//      add loader icon, etc for initial load and loading between filters and date select
-//      handle the chance that there is no media available
-//      determine how to speed media element load times 
-//      see about moving event filter out of render?
+//TODO: determine how to speed media element load times 
 
 import React from 'react';
-import { StyleSheet, FlatList, Text, View, TouchableHighlight, Linking, Image, List } from 'react-native';
+import { StyleSheet, Text, View, TouchableHighlight, Linking, Image, FlatList } from 'react-native';
 import MediaElement from './MediaElement';
 import moment from 'moment';
 
@@ -19,26 +14,29 @@ class MediaContainer extends React.Component {
     super(props);
 
     this.state = {
-      data: []
+      data: this.props.currentEventList
     }
+ 
     this._renderItem = this._renderItem.bind(this);
+ 
   }
 
-      _renderItem({ item }) {
+      _renderItem( { item } ) {
           let imageURL;
           const year = item.sTimeStamp.slice(0, 4);
           const month = item.sTimeStamp.slice(4, 6);
           const day = item.sTimeStamp.slice(6, 8);
-          const hour = item.sTimeStamp.slice(8, 10);
+          let hour = item.sTimeStamp.slice(8, 10);
           const minute = item.sTimeStamp.slice(10, 12);
           const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
+          if( hour > 12 ) { hour = hour - 12 }
           const date = month + '/' + day + '/' + year;
           const time = hour + ':' + minute + ' ' + dayNight;
 
           if( item.sType == 'STILL' && item.sThumbnailM != null ) {  
             imageURL = 'https://' + this.props.siteTag + '.dividia.net/' + item.sThumbnailM;
-            } else {
-              imageURL = 'https://' + this.props.siteTag + '.dividia.net/thumbnail.php?&size=m&img=' + item.sImage;
+          } else {
+            imageURL = 'https://' + this.props.siteTag + '.dividia.net/thumbnail.php?&size=m&img=' + item.sImage;
           }
 
           return (
@@ -57,18 +55,21 @@ class MediaContainer extends React.Component {
               cached={ item.fCached }
               cachedProgress={ parseInt( item.dCacheProgress ) }
               requestVideo={ this.props.requestVideo }
-              progressBar= { this.props.progressBar }
               videoLoading={ this.props.videoLoading }
               videoReady={ this.props.videoReady }
               playVideo={ this.props.playVideo }
-              bID={ item.bID }  
-              currentComponent={ 'pb' + item.bID }  />           
-          )
-        
+              bID={ item.bID }   />           
+          ) 
+    }
+
+    keyExtractor (item) {
+      return item.bID;
     }
 
 
   render() {
+
+    const { currentEventList } = this.props;
 
       return (
 
@@ -102,18 +103,17 @@ class MediaContainer extends React.Component {
             }
 
             { !this.props.loading && !this.props.fetchError  ? 
- 
-                  <FlatList
-                    style={ styles.eventList }
-                    inverted
-                    extraData={ this.props }
-                    data={ this.props.currentEventList}
-                    renderItem={ this._renderItem }
-                    keyExtractor={ item => item.bID }  
-                    />
-            :
+                <FlatList style={ styles.eventList }
+                  data={ currentEventList }
+                  renderItem={ this._renderItem }
+                  inverted={ true }
+                  keyExtractor={ this.keyExtractor }
+                  keyboardShouldPersistTaps='always'
+                  />
+                :
                 null
             }
+
         </View>
       )
   }
@@ -132,8 +132,10 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   eventList: {
-    width: '95%',
+    flex: 1,
+    width: '90%',
     paddingTop: 24,
+    marginBottom: 5,
   },
   errorModal: {
     marginTop: -50,
@@ -178,7 +180,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
-    marginLeft: 10,
+    // marginLeft: 10,
   },
   loaderContainer: {
     borderWidth: 5,

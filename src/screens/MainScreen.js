@@ -7,8 +7,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import MainNav from '../navigation/MainNav';
 import QuickPicker from 'quick-picker';
-import MediaContainer from '../components/MediaContainer1';
-import QuickTimeSearch from '../components/QuickTimeSearch';
+import MediaContainer from '../components/MediaContainer';
 
 
 export default class MainScreen extends React.Component {
@@ -54,9 +53,6 @@ export default class MainScreen extends React.Component {
                             fetchError={ this.props.fetchError }
                             error={ this.props.error }
                             /> 
-                        
-
-            <QuickTimeSearch style={ styles.quickTimeSearch } />
           </View>
 
 {/* ************************************************** */}
@@ -103,10 +99,5 @@ const styles = StyleSheet.create({
   mediaContainer: {
     flex: 1,
     flexDirection: 'row',
-  },
-  mediaContent: {
-  
-  },
-  quickTimeSearch: {
   },
 });

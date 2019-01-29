@@ -13,6 +13,7 @@ export default class MediaElement extends React.Component {
     super(props);
       this.state = {
         progressBar: 0,
+        downloadError: false
       }
       this.requestVideo = this.requestVideo.bind(this);
     }
@@ -34,18 +35,23 @@ export default class MediaElement extends React.Component {
               if (data.status == 0 ) {
   
                   var pollProgress = 
+                    setTimeout(function() {
+                      if( this.state.progressBar === 0 ) {
+                        this.setState({ downloadError: true })
+                        clearInterval(pollProgress); 
+                      }
+                    }.bind(this), 10000)
+
                     setInterval(function() {
                       fetch( siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
                         .then( response => {
                           response.json().then( data => {
   
                             if (parseInt(data.dCacheProgress) == 100){  
-                              console.log('woohoo')
                               this.setCached();
                               clearInterval(pollProgress) 
                             } 
   
-                            console.log( parseInt( data.dCacheProgress ) ),
                             this.setState({ progressBar:  parseInt( data.dCacheProgress ) })
                           })
                         })
@@ -60,22 +66,16 @@ export default class MediaElement extends React.Component {
             date, 
             time, 
             toggleImage, 
-            downloadImageEvent, 
             siteTag,
             image, 
             duration, 
             sType, 
             sImage,
-            requestVideo,
-            cached,
             cachedProgress,
             bID,
-            id,
-            videoLoading,
             playVideo,
             sTimeStamp,
-            siteURL,
-            videoReady } = this.props;
+            siteURL } = this.props;
  
 
           let timeStamp = sTimeStamp;
@@ -109,20 +109,12 @@ export default class MediaElement extends React.Component {
                           
                           {/* Show image background if type is 'STILL' */}
                           { sType == 'STILL' ?
-                            <TouchableHighlight onPress={ () => null } 
+                            <TouchableHighlight onPress={ () => toggleImage( sImage, date, time ) } 
                               style={ styles.imageBackground }>
                               <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.imageLoading } >
                               <Image source={{ uri: image }} style={ styles.image } />
                               </ImageBackground>
                             </TouchableHighlight> :
-                            null
-                          }
-              
-                          {/* Expand button for type 'STILL' */}
-                          { sType == 'STILL' ?
-                            <TouchableHighlight onPress={ () => toggleImage( sImage, date, time ) } style={ styles.enlarge }>
-                                    <Icon name="expand" size={ 20 } color="white" />     
-                            </TouchableHighlight>  :
                             null
                           }
 
@@ -136,27 +128,22 @@ export default class MediaElement extends React.Component {
 
                           {/* Show progress bar for type 'VIDEO' */}
                               { sType == 'VIDEO' ?
-                                      <AnimatedBar
+                                  <AnimatedBar
                                       style={ styles.progress }
                                       progress={ cachedProgress == 100 || this.state.progressBar / 100  ? 1 : this.state.progressBar / 100} 
                                       height={12}
                                       barColor="green"
-                                      borderRadius={5} />
-                                  : null
-                              }
+                                      borderRadius={5} /> : 
+                                      null }
+                            { this.state.downloadError ?
+                                <Text style={ styles.downloadError }>Error Retrieving Video</Text> :
+                                null
+                            }
 
 
                           <MediaElementHeader style={ styles.mediaHeader }
                                               date={ date }
                                               time={ time } />
-
-                        {/* Show download button if type is 'STILL' */}                
-                        { sType == 'STILL' ?
-                          <TouchableHighlight onPress={ () => downloadImageEvent( URL ) } style={ styles.download }>
-                              <Icon name="arrow-circle-down" size={ 20 } color="white" />
-                          </TouchableHighlight> :
-                          null
-                        }
                         
                     </View>
                 )
@@ -234,10 +221,15 @@ const styles = StyleSheet.create({
   },
   download: {
     position: 'absolute',
-    top: -32,
+    top: -34,
     right: 10,
+    backgroundColor: 'green',
+    borderRadius: 50,
+    zIndex: 5,
+  },
+  downloadIcon: {
     padding: 10,
-    zIndex: 3,
+    zIndex: 6,
   },
   progress: {
     marginTop: 2,
@@ -247,5 +239,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginLeft: '1%',
     zIndex: 1,
+  },
+  downloadError: {
+    fontSize: 20,
+    color: 'red',
+    position: 'absolute',
+    bottom: 52,
+    left: '10%'
   },
 });

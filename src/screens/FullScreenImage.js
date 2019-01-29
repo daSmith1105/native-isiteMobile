@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Image, TouchableHighlight, Text, ImageBackground, Dimensions } from 'react-native';
+import { StyleSheet, View, Image, TouchableHighlight, Text, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ScreenOrientation } from 'expo';
 
@@ -90,16 +90,12 @@ export default class FullScreenImage extends React.Component {
                 null
                 }
             </View>
-
-              {/* <View style={ styles.imageContainer }>
-                <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.imageLoading } > */}
-                    <Image style={ styles.image }
-                            source={{ uri: URL }}
-                            resizeMode='contain'
-                            />
-                {/* </ImageBackground> */}
-            {/* </View> */}
-          </View>
+    
+              <Image style={ styles.image }
+                      source={{ uri: URL }}
+                      resizeMode='contain'
+                      />
+    </View>
         );
     }
 }
@@ -167,7 +163,7 @@ export default class FullScreenImage extends React.Component {
       width: '100%',
     },
     mediaDownloadText: {
-      fontSize: 40,
+      fontSize: 24,
       color: 'white',
       position: 'absolute',
       top: '50%',

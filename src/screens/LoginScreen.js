@@ -25,8 +25,8 @@ class LoginScreen extends React.Component {
         return (
         <View style={ styles.container }>
           <View style={ styles.imageContainer }>
-          <Image source={ require('../../assets/images/dividia.png')}
-                 style={ styles.dividiaIcon } />
+            <Image source={ require('../../assets/images/dividia.png')}
+                  style={ styles.dividiaIcon } />
           </View>
           <Image source={ require('../../assets/images/i-site.png')}
                  style={ styles.isiteIcon } />
@@ -39,7 +39,7 @@ class LoginScreen extends React.Component {
             </View>
           </View>
 
-          { this.props.error & this.state.textInput == '' ?
+          { this.props.error ?
             <Text style={ styles.error }>'{ this.state.text }'' not found. Please try again.</Text> : 
             null
           }
@@ -53,14 +53,22 @@ class LoginScreen extends React.Component {
             <Text style={ styles.domain}>.divida.net</Text>
           </View>
 
-            <TouchableHighlight onPress={ this.validateInput } 
-                                style={ styles.submitContainer }>
-              <View style={ styles.innerSubmitContainer }>
-                <Text style={ styles.submitText }>Continue</Text>
-                <Icon name="arrow-right" size={ 32 } color="black" style={ styles.icon } /> 
-                </View>
-            </TouchableHighlight>
-
+            { this.props.loginLoading ? 
+                <TouchableHighlight onPress={ () => null } 
+                                    style={ styles.submitContainer }>
+                  <View style={ styles.innerSubmitContainer }>
+                  <Text style={ styles.submitTextLoading }>Checking</Text>
+                  <Icon name="user-secret" size={ 32 } color="grey" style={ styles.icon } /> 
+                  </View>
+                </TouchableHighlight> :
+                <TouchableHighlight onPress={ this.validateInput } 
+                                   style={ styles.submitContainer }>
+                  <View style={ styles.innerSubmitContainer }>
+                    <Text style={ styles.submitText }>Continue</Text>
+                    <Icon name="arrow-right" size={ 32 } color="black" style={ styles.icon } /> 
+                  </View>
+                </TouchableHighlight>
+            }
         </View>
         )
     }
@@ -160,5 +168,10 @@ const styles = StyleSheet.create({
   submitText: {
     fontSize: 26,
     marginRight: 10,
+  },
+  submitTextLoading: {
+    fontSize: 26,
+    marginRight: 10,
+    color: 'grey'
   }
 });

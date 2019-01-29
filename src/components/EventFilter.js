@@ -22,7 +22,6 @@ class EventFilter extends React.Component {
 
     confirmFilter() {
         QuickPicker.close()
-        console.log( this.state.selectedFilter)
         if ( this.state.selectedFilter !== this.props.currentEventType ) {
             this.props.updateEventType( this.state.selectedFilter.toString() )
         } else {

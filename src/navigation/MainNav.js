@@ -42,8 +42,6 @@ class MainNav extends React.Component {
         QuickPicker.close()
         this.props.toggleMainNav();
         this.props.handleCamSelect(parseInt( this.state.currentCam.slice(4,6) ) )
-
-        console.log('current cam from picker: ' + this.state.currentCam )
     }
 
     closeCamSelect() {

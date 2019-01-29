@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableHighlight, TextInput, Image, Button } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import TimelapseButton from '../../src/components/TimelapseButton';
 import Header from '../../src/components/Header';
 import Touchable from '@appandflow/touchable';
