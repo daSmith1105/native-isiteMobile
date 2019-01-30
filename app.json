@@ -28,9 +28,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "net.dividia.iSiteMobile"
-    },
-    "infoPlist": { 
-      "NSPhotoLibraryAddUsageDescription": "This app requests use of the camera roll to save small length videos and still images to their device."
-    }  
+    }
   }
 }

@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
         width: moderateScale(200),
     },
     companyLogo: {
-        width: moderateScale(140),
-        height: verticalScale(50),
+        width: moderateScale(130, .5),
+        height: moderateScale(45, .5),
         zIndex: 1,
         overflow: 'visible',
     },

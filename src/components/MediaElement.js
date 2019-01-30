@@ -243,10 +243,10 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   downloadError: {
-    fontSize: moderateScale(20, -.4),
+    fontSize: moderateScale(20, .4),
     color: 'red',
     position: 'absolute',
-    bottom: moderateScale(52),
+    bottom: moderateScale(52, .1),
     left: '10%'
   },
 });
