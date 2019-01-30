@@ -5,6 +5,8 @@ import { StyleSheet, View, ImageBackground } from 'react-native';
 import { Hamburger } from './NavButtons';
 import DateSelect from './DateSelect';
 import EventFilter from './EventFilter';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+
 
 const width = '100%';
 
@@ -49,19 +51,19 @@ function Footer (props) {
 
 const styles = StyleSheet.create({
     footer: {
-        width,
+        width: width,
         height: width,
         position: 'absolute',
         top: 0,
         left: 0,
     },
     footerContainer: {
-        width,
+        width: width,
         position: 'absolute',
         bottom: 0,
         left: 0,
         backgroundColor: 'grey',
-        height: 70,
+        height: verticalScale(70),
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         alignItems: 'center',
@@ -70,7 +72,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         left: 0,
-        height: 70,
+        height: verticalScale(70),
         width,
     },
 });

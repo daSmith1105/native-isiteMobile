@@ -4,6 +4,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableHighlight, TextInput, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 class LoginScreen extends React.Component {
   constructor(props) {
@@ -58,14 +59,14 @@ class LoginScreen extends React.Component {
                                     style={ styles.submitContainer }>
                   <View style={ styles.innerSubmitContainer }>
                   <Text style={ styles.submitTextLoading }>Checking</Text>
-                  <Icon name="user-secret" size={ 32 } color="grey" style={ styles.icon } /> 
+                  <Icon name="user-secret" size={ moderateScale(32) } color="grey" style={ styles.icon } /> 
                   </View>
                 </TouchableHighlight> :
                 <TouchableHighlight onPress={ this.validateInput } 
                                    style={ styles.submitContainer }>
                   <View style={ styles.innerSubmitContainer }>
                     <Text style={ styles.submitText }>Continue</Text>
-                    <Icon name="arrow-right" size={ 32 } color="black" style={ styles.icon } /> 
+                    <Icon name="arrow-right" size={ moderateScale(32) } color="black" style={ styles.icon } /> 
                   </View>
                 </TouchableHighlight>
             }
@@ -79,36 +80,36 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 40,
+    width: '100%',
   },
   imageContainer: {
-    height: 78,
-    width: 400,
+    height: verticalScale(78),
+    width: moderateScale(400),
     justifyContent: 'center',
     alignItems: 'center',
     padding: 5,
     flexDirection: 'row',
   },
   dividiaIcon: {
-    height: '80%',
-    width: '80%',
-    marginBottom: 10,
-    marginTop: 10,
+    height: verticalScale(60),
+    width: moderateScale(300),
+    overflow: 'visible',
   },
   isiteIcon: {
-    height: 120,
-    width: 120,
+    height: verticalScale(120),
+    width: moderateScale(120),
     marginBottom: 10,
+    overflow: 'visible',
   },
   bold: {
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: moderateScale(18, .2),
     marginBottom: 2,
   },
   error: {
-    fontSize: 18,
+    fontSize: moderateScale(18, .2),
     color: 'red',
     marginTop: -22,
   },
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   directive1: {
-    fontSize: 30,
+    fontSize: moderateScale(30, .2),
     marginBottom: 5,
     fontWeight: 'bold',
   },
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   directive2: {
-    fontSize: 16,
+    fontSize: moderateScale(16, .2),
     marginRight: 5,
   },
   inputContainer: {
@@ -141,20 +142,22 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   loginInput: {
-    width: 160,
+    width: moderateScale(160),
+    height: verticalScale(40),
     borderWidth: 2,
     padding: 5,
     borderColor: 'grey',
     borderRadius: 5,
-    fontSize: 24,
+    fontSize: moderateScale(24, .2),
     textAlign: 'center',
   },
   domain: {
-    fontSize: 24,
-    marginLeft: 10,
+    fontSize: moderateScale(24, .2),
+    marginLeft: moderateScale(10),
   },
   submitContainer: {
-    width: 240,
+    width: moderateScale(240),
+    height: moderateScale(50),
     marginTop: 40,
     backgroundColor: 'lightgreen',
     alignItems: 'center',
@@ -163,14 +166,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   innerSubmitContainer: {
+    alignItems: 'center',
     flexDirection: 'row',
+    height: verticalScale(40),
   },
   submitText: {
-    fontSize: 26,
+    fontSize: moderateScale(26, .2),
     marginRight: 10,
   },
   submitTextLoading: {
-    fontSize: 26,
+    fontSize: moderateScale(26, .2),
     marginRight: 10,
     color: 'grey'
   }

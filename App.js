@@ -47,8 +47,6 @@ class App extends React.Component {
       sTimelapse: '',
       sTimelapseStart: new Date,
       sTimelapseEnd: new Date,
-      videoLoading: false,
-      videoReady: false,
       dataUsage: '',
       maxData: '',
       progressBar: 0,
@@ -59,8 +57,6 @@ class App extends React.Component {
       videos: [],
       loading: false,
       fetchError: false,
-      videoPaused: false,
-      videoReload: false,
       done: false,
       renderEventsList: false,
       mediaDownloadLoading: false,
@@ -77,7 +73,6 @@ class App extends React.Component {
     this.toggleImage = this.toggleImage.bind(this);
     this.toggleVideo = this.toggleVideo.bind(this);
     this.setCurrentImage = this.setCurrentImage.bind(this);
-    this.videoReady = this.videoReady.bind(this);
     this.setTimelapseStart = this.setTimelapseStart.bind(this);
     this.setTimelapseEnd = this.setTimelapseEnd.bind(this);
     this.setTimelapse= this.setTimelapse.bind(this);
@@ -399,13 +394,6 @@ class App extends React.Component {
     this.toggleVideo();
   }
 
-  videoReady( bID ) {
-    clearInterval(pollProgress)
-    this.setState({ 
-      videoLoading: false,
-      videoReady: true 
-    })
-  }
 
   toggleVideo() {
     this.setState({ 
@@ -836,10 +824,6 @@ class App extends React.Component {
                                 sVideoDuration={ this.state.sVideoDuration}
                                 siteURL={ this.state.siteURL }
                                 downloadVideoEvent={ this.downloadVideoEvent }
-                                videoReload={ this.state.videoReload }
-                                videoPaused={ this.state.videoPaused }
-                                toggleVideoPaused={ this.toggleVideoPaused } 
-                                toggleVideoReload={ this.toggleVideoReload }
                                 mediaDownloadLoading={ this.state.mediaDownloadLoading }
                                 mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
                                 mediaDownloadFailed={ this.state.mediaDownloadFailed }
@@ -852,11 +836,6 @@ class App extends React.Component {
                                    sTimelapse={ this.state.sTimelapse }
                                    siteTag={ this.state.siteTag }
                                    downloadVideoEvent={ this.downloadVideoEvent }
-                                  //  CHANGE THESE VALUES
-                                   videoReload={ this.state.videoReload }
-                                   videoPaused={ this.state.videoPaused }
-                                   toggleVideoPaused={ this.toggleVideoPaused } 
-                                   toggleVideoReload={ this.toggleVideoReload } 
                                    mediaDownloadLoading={ this.state.mediaDownloadLoading }
                                    mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
                                    mediaDownloadFailed={ this.state.mediaDownloadFailed }

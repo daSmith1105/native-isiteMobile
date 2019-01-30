@@ -9,6 +9,7 @@ import Touchable from '@appandflow/touchable';
 import QuickPicker from 'quick-picker';
 import PickerTopRow from './PickerTopRow';
 import moment from 'moment';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 class DateSelect extends React.Component {
     constructor(props) {
@@ -65,7 +66,7 @@ class DateSelect extends React.Component {
                         onPress={ this._onPress } 
                         style={ styles.dateSelectTouch }>
                     <View style={ styles.innerContent }>
-                            <Icon name="calendar" size={ 28 } color="black" style={ styles.icon } /> 
+                            <Icon name="calendar" size={ moderateScale(28) } color="black" style={ styles.icon } /> 
                     </View>
                 </Touchable>
         </View>
@@ -78,10 +79,10 @@ const styles = StyleSheet.create({
     dateSelect: {
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 5,
+        paddingTop: verticalScale(5),
     },
     dateSelectTouch: {
-        height: 46,
+        height: verticalScale(46),
     },
     innerContent: {
         justifyContent: 'center',

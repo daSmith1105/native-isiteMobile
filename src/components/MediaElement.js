@@ -7,6 +7,7 @@ import { StyleSheet, View, TouchableHighlight, Image, ImageBackground, Text } fr
 import MediaElementHeader from './MediaElementHeader';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AnimatedBar from 'react-native-animated-bar';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 export default class MediaElement extends React.Component {
   constructor(props) {
@@ -93,7 +94,7 @@ export default class MediaElement extends React.Component {
                           { sType == 'VIDEO' && ( parseInt( cachedProgress ) == 0 ) && this.state.progressBar != 100 ?  // || this.state.progressBar == 0 
                               <TouchableHighlight onPress={ () => this.requestVideo('https://' + siteTag + '.dividia.net/', bID) } 
                                                   style={ styles.videoBackground }>
-                                <Icon name="cloud-download" size={ 100 } color="white" style={ styles.cloudButton }/> 
+                                <Icon name="cloud-download" size={ moderateScale(100, .3) } color="white" style={ styles.cloudButton }/> 
                               </TouchableHighlight> :
                               null
                           }
@@ -102,7 +103,7 @@ export default class MediaElement extends React.Component {
                           { sType == 'VIDEO' &&  ( parseInt( cachedProgress ) == 100  || this.state.progressBar == 100 ) ? // || this.state.progressBar == 100 
                               <TouchableHighlight onPress={ () => playVideo( sTimeStamp, date, time, duration )} 
                                                   style={ styles.videoBackground }>
-                                <Icon name="play-circle" size={ 100 } color="white" style={ styles.playButton }/> 
+                                <Icon name="play-circle" size={ moderateScale(100, .3) } color="white" style={ styles.playButton }/> 
                               </TouchableHighlight> :
                               null
                           }
@@ -131,7 +132,7 @@ export default class MediaElement extends React.Component {
                                   <AnimatedBar
                                       style={ styles.progress }
                                       progress={ cachedProgress == 100 || this.state.progressBar / 100  ? 1 : this.state.progressBar / 100} 
-                                      height={12}
+                                      height={moderateScale(12, .25)}
                                       barColor="green"
                                       borderRadius={5} /> : 
                                       null }
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 5,
     width: '100%',
-    height: 200,
+    height: verticalScale(200),
     paddingBottom: -100,
   },
   mediaHeader: {
@@ -176,20 +177,20 @@ const styles = StyleSheet.create({
   image: {
     borderRadius: 5,
     width: '100%',
-    height: '100%',
+    height: verticalScale(200),
     zIndex: 1,
   },
   imageBackground: {
     borderRadius: 5,
     marginTop: -30,
     width: '100%',
-    height: 200,
+    height: verticalScale(200),
     justifyContent: 'center',
     alignItems: 'center',
   },
   imageLoading: {
     width: '100%',
-    height: '100%',
+    height: verticalScale(200),
     justifyContent: 'center',
     backgroundColor: 'white',
     alignItems: 'center',
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: -30,
     width: '100%',
-    height: 200,
+    height: verticalScale(200),
     backgroundColor: 'dodgerblue',
     justifyContent: 'center',
     alignItems: 'center',
@@ -213,9 +214,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   duration: {
-    marginTop: -40,
-    marginLeft: '75%',
-    fontSize: 16,
+    textAlign: 'right',
+    marginTop: moderateScale(-40, .2),
+    marginRight: moderateScale(20, .2),
+    fontSize: moderateScale(16, .2),
     fontWeight: 'bold',
     color: 'white',
   },
@@ -232,7 +234,7 @@ const styles = StyleSheet.create({
     zIndex: 6,
   },
   progress: {
-    marginTop: 2,
+    marginTop: 2 ,
     width: '98%',
     borderWidth: 2,
     borderColor: 'white',
@@ -241,10 +243,10 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   downloadError: {
-    fontSize: 20,
+    fontSize: moderateScale(20, -.4),
     color: 'red',
     position: 'absolute',
-    bottom: 52,
+    bottom: moderateScale(52),
     left: '10%'
   },
 });

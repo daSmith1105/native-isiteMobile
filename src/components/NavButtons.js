@@ -3,6 +3,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableHighlight, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 const width = '90%';
 
@@ -25,7 +26,7 @@ const width = '90%';
     const Hamburger = ( props => {
         return (
             <TouchableOpacity onPress={ props.call } style={ styles.hamburger }>
-                <Icon name="bars" size={ 34 } color="black" style={ styles.hambergerIcon } />
+                <Icon name="bars" size={ moderateScale(34) } color="black" style={ styles.hambergerIcon } />
             </TouchableOpacity>
         )
     });
@@ -35,29 +36,29 @@ const width = '90%';
 const styles = StyleSheet.create({
     navButton: {
         backgroundColor: 'lightgrey',
-        height: 50,
+        height: verticalScale(50),
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginBottom: verticalScale(20),
         width
     },
     navButtonText: {
-        fontSize: 24,
+        fontSize: moderateScale(24, .2),
         color: 'black'
     },
     navClose: {
         backgroundColor: 'red',
-        height: 60,
+        height: verticalScale(60),
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginBottom: scale(20),
         zIndex: 10,
     },
     navCloseText: {
-        fontSize: 32,
+        fontSize: moderateScale(32, .2),
         color: 'white',
     },
     hamburger: {
-        marginTop: -10,
+        marginTop: verticalScale(-10),
     },
 });

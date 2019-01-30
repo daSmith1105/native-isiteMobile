@@ -6,6 +6,7 @@ import Touchable from '@appandflow/touchable';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import QuickPicker from 'quick-picker';
 import PickerTopRow from './PickerTopRow';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 
 class EventFilter extends React.Component {
@@ -36,6 +37,7 @@ class EventFilter extends React.Component {
     _onPress = () => {
         QuickPicker.open({ 
             items: this.props.eventTypes, 
+            textStyle: { fontSize: moderateScale(26, .3) },
             topRow: <PickerTopRow   pickerTitle={'Select Filter'} 
                                     pickerConfirm={'SELECT'}
                                     close={ this.closeFilter }
@@ -53,7 +55,7 @@ class EventFilter extends React.Component {
                         onPress={ this._onPress } 
                         style={ styles.eventFilterTouch }>
                     <View style={ styles.innerContent }>
-                            <Icon name="filter" size={ 28 } color="black" style={ styles.icon } /> 
+                            <Icon name="filter" size={ moderateScale(28) } color="black" style={ styles.icon } /> 
                     </View>
                 </Touchable>
         </View>
@@ -64,10 +66,10 @@ const styles = StyleSheet.create({
     eventFilterSelect: {
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 5,
+        paddingTop: verticalScale(5),
     },
     eventFilterTouch: {
-        height: 46,
+        height: verticalScale(46),
     },
     innerContent: {
         justifyContent: 'center',

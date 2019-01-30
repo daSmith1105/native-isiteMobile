@@ -4,6 +4,7 @@ import { WebBrowser } from 'expo';
 import { NavButton, NavCloseButton } from '../components/NavButtons';
 import QuickPicker from 'quick-picker';
 import PickerTopRow from '../components/PickerTopRow';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 const width = '100%';
 
@@ -54,6 +55,7 @@ class MainNav extends React.Component {
         console.log( 'camValue > ' + camValue )
         QuickPicker.open({ 
             items: this.props.camArray, 
+            textStyle: { fontSize: moderateScale(26, .3) },
             topRow: <PickerTopRow   pickerTitle={'Select Camera'} 
                                     pickerConfirm={'SELECT'}
                                     close={ this.closeCamSelect }
@@ -121,7 +123,7 @@ const styles = StyleSheet.create({
         height: 1000,
     },
     camSelected: {
-        fontSize: 30,
+        fontSize: moderateScale(30, .2),
         color: 'white',
         justifyContent: 'center',
         alignItems: 'center',
@@ -130,20 +132,20 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.9)',
         borderTopWidth: 0.8,
         borderColor: 'lightgrey',
-        height: 430,
+        height: verticalScale(430),
     },
     alert: {
         color: 'white',
-        fontSize: 26,
+        fontSize: moderateScale(26, .2),
     },
     touchContainer: {
-        marginTop: 20,
+        marginTop: verticalScale(20),
         alignItems: 'center',
-        height: 340,
+        height: verticalScale(340),
     },  
     dividiaLink: {
         color: 'white',
-        fontSize: 24,
+        fontSize: moderateScale(24, .2),
         textDecorationLine: 'underline',
     },
    

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 
 export default function MediaElementHeader (props) {
@@ -22,14 +23,14 @@ export default function MediaElementHeader (props) {
 
 const styles = StyleSheet.create({
   mediaHeader: {
-    height: 30,
+    height: moderateScale(30, .4),
     backgroundColor: 'rgba(0,0,0,.6)',
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingRight: 10,
-    paddingLeft: 10,
+    paddingLeft: scale(10),
     position: 'absolute',
     top: -30,
     left: 0,
@@ -40,13 +41,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   date: {
-    fontSize: 16,
+    fontSize: moderateScale(16, .25),
     fontWeight: 'bold',
     color: 'white',
-    marginRight: 10,
+    marginRight: moderateScale(10),
   },
   time: {
-    fontSize: 16,
+    fontSize: moderateScale(16, .25),
     fontWeight: 'bold',
     color: 'white',
   },

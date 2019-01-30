@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableHighlight } from 'react-native';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
    const TimelapseButton = ( props => {
         return (
@@ -15,16 +16,16 @@ import { StyleSheet, Text, TouchableHighlight } from 'react-native';
 const styles = StyleSheet.create({
     timelapseButton: {
         backgroundColor: 'lightgrey',
-        height: 40,
+        height: verticalScale(40),
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 16,
-        width: 120,
-        padding: 4,
-        margin: 5,
+        marginBottom: verticalScale(16),
+        width: moderateScale(120),
+        padding: moderateScale(4),
+        margin: moderateScale(5),
         borderRadius: 10,
     },
     timelapseButtonText: {
-        fontSize: 18,
+        fontSize: moderateScale(18, .4),
     }
 });

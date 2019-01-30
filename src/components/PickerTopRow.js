@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableHighlight } from 'react-native';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 const PickerTopRow = (props) => {
     return (
@@ -24,26 +25,27 @@ const styles = StyleSheet.create({
     pickerTopRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingRight: 15,
-        paddingLeft: 15,  
-        paddingTop: 10,  
+        paddingRight: moderateScale(15),
+        paddingLeft: moderateScale(15),  
+        paddingTop: verticalScale(10),  
+      
     },
     pickerClose: {
 
     },
     closeText: {
-        fontSize: 20,
+        fontSize: moderateScale(20, .2),
         color: 'red',    
     },
     pickerTitle: {
-        fontSize: 18,
+        fontSize: moderateScale(18, .2),
      
     },
     confirmSelection: {
 
     },
     confirmText: {
-        fontSize: 20, 
+        fontSize: moderateScale(20, .2), 
         color: 'blue',   
     },
 });

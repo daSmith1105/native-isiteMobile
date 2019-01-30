@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Image, TouchableHighlight, Text, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ScreenOrientation } from 'expo';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 
 export default class FullScreenImage extends React.Component {
@@ -65,11 +66,11 @@ export default class FullScreenImage extends React.Component {
 
             <View style={ styles.fullScreenHeader }>
               <TouchableHighlight onPress={ () => toggleImage() } style={ styles.back}>
-                          <Icon name="arrow-left" size={ 30 } color="white" />             
+                          <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
               </TouchableHighlight>
 
               <TouchableHighlight onPress={ () => downloadImageEvent( URL )  } style={ styles.download}>
-                <Icon name="arrow-circle-down" size={ 50 } color="white" />
+                <Icon name="arrow-circle-down" size={ moderateScale(50) } color="white" />
               </TouchableHighlight>
 
             </View>
@@ -109,10 +110,10 @@ export default class FullScreenImage extends React.Component {
     },
     fullScreenHeader: {
       position: 'absolute',
-      top: 20,
+      top: moderateScale(20, -.05),
       flexDirection: 'row',
       justifyContent: 'space-between',
-      padding: 5,
+      padding: moderateScale(5),
       zIndex: 2,
       backgroundColor: 'rgba(0,0,0,0.0)',
       width: '100%',
@@ -124,7 +125,7 @@ export default class FullScreenImage extends React.Component {
       right: 0,
       margin: 'auto',
       color: 'white',
-      fontSize: 16,
+      fontSize: moderateScale(16, .2),
       backgroundColor: 'rgba(0,0,0,0.3)',
       borderRadius: 5,
       zIndex: 2,
@@ -135,22 +136,22 @@ export default class FullScreenImage extends React.Component {
       zIndex: 1,
     },
     icon: {
-      marginTop: 15,
-      marginBottom: 15
+      marginTop: moderateScale(15),
+      marginBottom: moderateScale(15),
     },
     download: {
       borderRadius: 50,
       backgroundColor: 'grey',
-      paddingLeft: 3,
-      paddingRight: 3,
+      paddingLeft: moderateScale(3),
+      paddingRight: moderateScale(3),
     },
     back: {
       borderRadius: 50,
       backgroundColor: 'grey',
-      paddingLeft: 9,
-      paddingRight: 11,
-      paddingTop: 6,
-      paddingBottom: 10,
+      paddingLeft: moderateScale(9),
+      paddingRight: moderateScale(11),
+      paddingTop: moderateScale(6),
+      paddingBottom: moderateScale(10),
       borderWidth: 2,
       borderColor: 'white'
     },
@@ -163,12 +164,12 @@ export default class FullScreenImage extends React.Component {
       width: '100%',
     },
     mediaDownloadText: {
-      fontSize: 24,
+      fontSize: moderateScale(24, .2),
       color: 'white',
       position: 'absolute',
       top: '50%',
       alignItems: 'center',
       justifyContent: 'center',
-      margin: 5,
+      margin: moderateScale(5),
     }
   });

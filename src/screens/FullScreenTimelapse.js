@@ -5,6 +5,7 @@ import VideoPlayer from '@expo/videoplayer';
 import { Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ScreenOrientation } from 'expo';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 export default class FullScreenTimelapse extends React.Component {
 
@@ -75,11 +76,11 @@ export default class FullScreenTimelapse extends React.Component {
 
           <View style={ styles.fullScreenHeader }>
             <TouchableHighlight onPress={ () => toggleTimelapseVideo() } style={ styles.back }>
-                        <Icon name="arrow-left" size={ 30 } color="white" />             
+                        <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
             </TouchableHighlight> 
 
             <TouchableHighlight onPress={ () => downloadVideoEvent( sTimelapse ) } style={ styles.download }>
-                      <Icon name="arrow-circle-down" size={ 50 } color="white" />
+                      <Icon name="arrow-circle-down" size={ moderateScale(50) } color="white" />
           </TouchableHighlight>
 
           </View>
@@ -117,7 +118,7 @@ export default class FullScreenTimelapse extends React.Component {
                 thumbImage={require('../../assets/images/thumb.png')}
                 textStyle={{
                   color: COLOR,
-                  fontSize: 12,
+                  fontSize: moderateScale(12),
                 }}
                 showFullscreenButton={ false }
                 playFromPositionMillis={ 0 }
@@ -142,13 +143,14 @@ export default class FullScreenTimelapse extends React.Component {
     container: {
       flex: 1,
       position: 'relative',
+      justifyContent: 'center',
     },
     fullScreenHeader: {
       position: 'absolute',
-      top: 20,
+      top: moderateScale(20, -.8),
       flexDirection: 'row',
       justifyContent: 'space-between',
-      padding: 5,
+      padding: scale(10),
       zIndex: 2,
       backgroundColor: 'rgba(0,0,0,0.0)',
       width: '100%',
@@ -158,22 +160,22 @@ export default class FullScreenTimelapse extends React.Component {
       zIndex: 1,
     },
     icon: {
-      marginTop: 15,
-      marginBottom: 15
+      marginTop: scale(15),
+      marginBottom: scale(15),
     },
     download: {
-      borderRadius: 50,
+      borderRadius: moderateScale(50),
       backgroundColor: 'grey',
-      paddingLeft: 3,
-      paddingRight: 3,
+      paddingLeft: moderateScale(3),
+      paddingRight: moderateScale(3),
     },
     back: {
-      borderRadius: 50,
+      borderRadius: moderateScale(50),
       backgroundColor: 'grey',
-      paddingLeft: 9,
-      paddingRight: 11,
-      paddingTop: 6,
-      paddingBottom: 10,
+      paddingLeft: moderateScale(9),
+      paddingRight: moderateScale(11),
+      paddingTop: moderateScale(6),
+      paddingBottom: moderateScale(10),
       borderWidth: 2,
       borderColor: 'white'
     },
@@ -186,7 +188,7 @@ export default class FullScreenTimelapse extends React.Component {
       width: '100%',
     },
     mediaDownloadText: {
-      fontSize: 24,
+      fontSize: moderateScale(24, .2),
       color: 'white',
       position: 'absolute',
       top: '50%',

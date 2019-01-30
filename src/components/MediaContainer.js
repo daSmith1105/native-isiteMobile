@@ -6,7 +6,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableHighlight, Linking, Image, FlatList } from 'react-native';
 import MediaElement from './MediaElement';
 import moment from 'moment';
-
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 class MediaContainer extends React.Component {
 
@@ -125,8 +125,8 @@ export default MediaContainer;
 const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
-    paddingBottom: 40,
-    paddingTop: 10,
+    paddingBottom: scale(40),
+    paddingTop: scale(10),
     justifyContent: 'center',
     alignItems: 'center',
     width: '80%',
@@ -138,40 +138,40 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   errorModal: {
-    marginTop: -50,
+    marginTop: moderateScale(-50),
     width: '90%',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
     borderWidth: 4,
     borderColor: 'yellow',
-    padding: 10,
-    marginLeft: 10,
+    padding: moderateScale(10),
+    marginLeft: moderateScale(10),
   },
   error: {
-    fontSize: 24,
+    fontSize: moderateScale(24, .2),
     textAlign: 'center',
-    marginBottom: 14,
+    marginBottom: moderateScale(14),
   },
   errorContact: {
-    fontSize: 20,
+    fontSize: moderateScale(20, .2),
     textAlign: 'center',
-    marginBottom: 14,
+    marginBottom: moderateScale(14),
   },
   phone: {
-    fontSize: 20,
+    fontSize: moderateScale(20, .2),
     textAlign: 'center',
-    marginBottom: 14,
+    marginBottom: moderateScale(14),
   },
   support: {
-    fontSize: 20,
+    fontSize: moderateScale(20, .2),
     color: 'blue',
     textAlign: 'center',
-    marginTop: 10,
-    paddingBottom: 10,
+    marginTop: moderateScale(10),
+    paddingBottom: moderateScale(10),
   },
   loader: {
-    width: 260,
+    width: moderateScale(260),
     borderRadius: 10,
     alignItems: 'center',
     backgroundColor: 'white',
@@ -179,8 +179,7 @@ const styles = StyleSheet.create({
     width: '90%',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
-    // marginLeft: 10,
+    padding: moderateScale(10),
   },
   loaderContainer: {
     borderWidth: 5,
@@ -189,19 +188,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
-    marginTop: 20,
+    marginTop: moderateScale(20),
     width: '100%',
-    paddingBottom: 10,
+    paddingBottom: moderateScale(10),
   },
   loaderText: {
-    fontSize: 28,
+    fontSize: moderateScale(28, .2),
     color: '#0075A2',
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: moderateScale(10),
   },
   loaderIcon: {
-    width: 200,
-    height: 200,
+    width: moderateScale(200),
+    height: moderateScale(200),
     borderRadius: 10,
     textAlign: 'center',
     backgroundColor: 'white'

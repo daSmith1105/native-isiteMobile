@@ -5,6 +5,7 @@ import VideoPlayer from '@expo/videoplayer';
 import { Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ScreenOrientation } from 'expo';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 
 export default class FullScreenVideo extends React.Component {
@@ -66,10 +67,10 @@ export default class FullScreenVideo extends React.Component {
         let timeStamp = sVideoDate + ' ' + sVideoTime;
 
         const COLOR = '#92DCE5';
-        const icon = (name, size = 36) => () => (
+        const icon = (name) => () => (
           <Ionicons
             name={name}
-            size={size}
+            size={36}
             color={COLOR}
             style={{ textAlign: 'center' }}
           />
@@ -79,11 +80,11 @@ export default class FullScreenVideo extends React.Component {
 
             <View style={ styles.fullScreenHeader }>
               <TouchableHighlight onPress={ () => toggleVideo() } style={ styles.back }>
-                <Icon name="arrow-left" size={ 30 } color="white" />             
+                <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
               </TouchableHighlight> 
 
               <TouchableHighlight onPress={ () => downloadVideoEvent( URL ) } style={ styles.download }>
-                <Icon name="arrow-circle-down" size={ 45 } color="white" />
+                <Icon name="arrow-circle-down" size={ moderateScale(45) } color="white" />
               </TouchableHighlight> 
 
             </View>
@@ -117,13 +118,13 @@ export default class FullScreenVideo extends React.Component {
                 }}
                 playIcon={icon('ios-play')}
                 pauseIcon={icon('ios-pause')}
-                fullscreenEnterIcon={icon('ios-expand-outline', 28)}
-                fullscreenExitIcon={icon('ios-contract-outline', 28)}
+                fullscreenEnterIcon={icon('ios-expand-outline', moderateScale(28))}
+                fullscreenExitIcon={icon('ios-contract-outline', moderateScale(28))}
                 trackImage={require('../../assets/images/track.png')}
                 thumbImage={require('../../assets/images/thumb.png')}
                 textStyle={{
                   color: COLOR,
-                  fontSize: 12,
+                  fontSize: moderateScale(12),
                 }}
                 showFullscreenButton={ false }
                 playFromPositionMillis={ 0 }
@@ -146,13 +147,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: 'relative',
+    justifyContent: 'center',
   },
   fullScreenHeader: {
     position: 'absolute',
-      top: 20,
+      top: moderateScale(20, -.02),
       flexDirection: 'row',
       justifyContent: 'space-between',
-      padding: 5,
+      padding: moderateScale(5),
       zIndex: 2,
       backgroundColor: 'rgba(0,0,0,0.0)',
       width: '100%',
@@ -168,29 +170,29 @@ const styles = StyleSheet.create({
     right: 0,
     margin: 'auto',
     color: 'white',
-    fontSize: 16,
+    fontSize: moderateScale(16, .2),
     backgroundColor: 'rgba(0,0,0,0.3)',
     borderRadius: 5,
     zIndex: 2,
     textAlign: 'center'
   },
   icon: {
-    marginTop: 15,
-    marginBottom: 15
+    marginTop: moderateScale(15),
+    marginBottom: moderateScale(15),
   },
   download: {
     borderRadius: 50,
     backgroundColor: 'grey',
-    paddingLeft: 3,
-    paddingRight: 3,
+    paddingLeft: moderateScale(3),
+    paddingRight: moderateScale(3),
   },
   back: {
     borderRadius: 50,
     backgroundColor: 'grey',
-    paddingLeft: 7,
-    paddingRight: 7,
-    paddingTop: 4,
-    paddingBottom: 6,
+    paddingLeft: moderateScale(7),
+    paddingRight: moderateScale(7),
+    paddingTop: moderateScale(4),
+    paddingBottom: moderateScale(6),
     borderWidth: 2,
     borderColor: 'white'
   },
@@ -203,12 +205,12 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   mediaDownloadText: {
-    fontSize: 24,
+    fontSize: moderateScale(24, .2),
     color: 'white',
     position: 'absolute',
     top: '50%',
     alignItems: 'center',
     justifyContent: 'center',
-    margin: 5,
+    margin: moderateScale(5),
   }
 });

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 const width = '100%';
 
@@ -31,55 +32,56 @@ const Header = (props) => {
 
 const styles = StyleSheet.create({
     header: {
-        flexDirection: 'column',
-        height: 100, 
-        alignItems: 'flex-start',
+        justifyContent: 'center',
+        alignItems: 'space-between',
+        height: verticalScale(110), 
         backgroundColor: 'white',
-        width: width,
+        width: scale(350),
+        paddingRight: scale(10),
+        paddingLeft: scale(10),
+        paddingTop: verticalScale(20)
     },
     logosContainer: {
+        flex: 1,
         flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingTop: 20,
-        paddingRight: 10,
-        paddingLeft: 10,
-        width: '100%',
+        width: scale(330),
+        height: verticalScale(65),
+        justifyContent: 'space-between'
     },
     imageContainer: {
-        flex: 2,
-        padding: 5,
-        alignItems: 'center',
+        alignItems: 'space-around',
         justifyContent: 'center',
-        marginRight: 10,
-        height: 60,
-        width: '75%',
+        height: verticalScale(65),
+        width: moderateScale(200),
     },
     companyLogo: {
-        width: '90%',
-        height: '73%',
+        width: moderateScale(140),
+        height: verticalScale(50),
         zIndex: 1,
         overflow: 'visible',
     },
     productLogo: {
-        width: 75,
-        height: 70,
-        flex: .5,
+        width: moderateScale(65),
+        height: verticalScale(60),
+        overflow: 'visible',
     },
     statusContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        marginLeft: 12,
-        marginTop: -14,
-        width: '75%'
+        position: 'absolute',
+        top: verticalScale(86),
+        left: scale(16),
     },
     statusData: {
         flex: 1,
-        flexDirection: 'row',
+        flexDirection: 'row',   
     },
     customer: {
-        marginRight: 10,
+        marginRight: moderateScale(10),
+        fontSize: moderateScale(14),
     },
     data: {
+        fontSize: moderateScale(14),
     },
 });
 

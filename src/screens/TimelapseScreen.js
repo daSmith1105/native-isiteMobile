@@ -6,6 +6,7 @@ import Touchable from '@appandflow/touchable';
 import QuickPicker from 'quick-picker';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 class TimelapseScreen extends React.Component {
   constructor(props) {
@@ -71,10 +72,6 @@ class TimelapseScreen extends React.Component {
         QuickPicker.open({ 
             pickerType: "date",
             mode: 'date',
-            // topRow: <PickerTopRow   pickerTitle={'Select Date'} 
-            //                         pickerConfirm={'SELECT'}
-            //                         close={ this.closeDate }
-            //                         confirmText={'CONFIRM'} />,
             selectedValue: this.props.timelapseStart,
             maximumDate: today,
             onValueChange: (selectedValueFromPicker) => this.props.setTimelapseStart( selectedValueFromPicker )                                                                  
@@ -86,10 +83,6 @@ class TimelapseScreen extends React.Component {
         QuickPicker.open({ 
             pickerType: "date",
             mode: 'date',
-            // topRow: <PickerTopRow   pickerTitle={'Select Date'} 
-            //                         pickerConfirm={'SELECT'}
-            //                         close={ this.closeDate }
-            //                         confirmText={'CONFIRM'} />,
             selectedValue: this.props.timelapseEnd,
             maximumDate: today,
             onValueChange: (selectedValueFromPicker) => this.props.setTimelapseEnd( selectedValueFromPicker )
@@ -153,7 +146,7 @@ class TimelapseScreen extends React.Component {
                                     native={ false } 
                                     onPress={ this.props.toggleTimelapse } 
                                     style={ styles.back }>
-                            <Icon name="arrow-left" size={ 28 } color="black" style={ styles.icon } /> 
+                            <Icon name="arrow-left" size={ moderateScale(28) } color="black" style={ styles.icon } /> 
                             <Text style={ styles.dateText }>Back to app</Text>
                         </Touchable>
         </View>
@@ -180,35 +173,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
-    paddingBottom: 40,
+    paddingBottom: verticalScale(40),
   },
   timelapseHeading: {
-    fontSize: 28,
-    marginBottom: 10,
+    fontSize: moderateScale(28, .2),
+    marginBottom: verticalScale(10),
   },
   selectionHeading: {
-    fontSize: 16,
+    fontSize: moderateScale(16, .2),
     backgroundColor: 'lightgrey',
-    padding: 5,
+    padding: scale(5),
     borderRadius: 10,
     width: '100%',
     textAlign: 'center',
-    marginBottom: 5,
+    marginBottom: scale(5),
   },
   dateSelectContainer: {
     // backgroundColor: 'blue',
     width: '100%',
-    paddingTop: 16,
+    paddingTop: verticalScale(16),
     alignItems: 'center',
   },
   labelContainer: {
     flexDirection: 'row',
-    marginBottom: 10,
+    marginBottom: verticalScale(10),
   },
   labelText: {
-    fontSize: 20,
-    marginLeft: 20,
-    marginRight: 20,
+    fontSize: moderateScale(20, .2),
+    marginLeft: scale(20),
+    marginRight: scale(20),
   },
   dateContainer: {
     flexDirection: 'row',
@@ -216,31 +209,30 @@ const styles = StyleSheet.create({
   },
   dateSelect: {
     flexDirection: 'row',
-    marginRight: 10,
-    marginLeft: 10,
-    marginBottom: 15,
+    marginRight: scale(10),
+    marginLeft: scale(10),
+    marginBottom: verticalScale(15),
   },
   dateText: {
-    fontSize: 20,
-    marginLeft: 10,
-    marginTop: 3,
+    fontSize: moderateScale(20, .2),
+    marginLeft: scale(10),
+    marginTop: verticalScale(3),
   },
   submitButton: {
   },
   buttonContainer: {
     width: '100%',
-    paddingTop: 16,
-    // backgroundColor: 'green',
+    paddingTop: verticalScale(16),
     alignItems: 'center',
-    marginTop: -10,
+    marginTop: verticalScale(-10),
   },
   buttonRow: {
     flexDirection: 'row',
   },
   back: {
     position: 'absolute',
-    bottom: 24,
-    left: 30,
+    bottom: scale(24),
+    left: moderateScale(30),
     flexDirection: 'row',
   },
 });
