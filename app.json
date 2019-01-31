@@ -23,7 +23,8 @@
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": [
-      "**/*"
+      "assets/images/*",
+      "assets/icons*"
     ],
     "ios": {
       "supportsTablet": true,
