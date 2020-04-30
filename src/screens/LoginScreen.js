@@ -2,7 +2,7 @@
 //      implement quickSearch feature on the right hand side of screen
 
 import React from 'react';
-import { StyleSheet, Text, View, TouchableHighlight, TextInput, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableHighlight, TextInput, Image, KeyboardAvoidingView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
@@ -13,10 +13,9 @@ class LoginScreen extends React.Component {
       text: '',
       textInput: ''
     }
-    this.validateInput = this.validateInput.bind(this);
   }
 
-  validateInput() {
+  validateInput = () => {
     this.props.validateLogin( this.state.text )
     this.setState({ textInput: '' })
     }
@@ -24,7 +23,7 @@ class LoginScreen extends React.Component {
     render() {
 
         return (
-        <View style={ styles.container }>
+        <KeyboardAvoidingView style={styles.container} behavior="padding" enabled keyboardVerticalOffset={100}>
           <View style={ styles.imageContainer }>
             <Image source={ require('../../assets/images/dividia.png')}
                   style={ styles.dividiaIcon } />
@@ -38,7 +37,7 @@ class LoginScreen extends React.Component {
               <Text style={ styles.directive2 }>Enter your site's</Text>
               <Text style={ styles.bold }>Camera URL</Text>
             </View>
-          </View>
+          </View>  
 
           { this.props.error ?
             <Text style={ styles.error }>'{ this.state.text }'' not found. Please try again.</Text> : 
@@ -70,7 +69,7 @@ class LoginScreen extends React.Component {
                   </View>
                 </TouchableHighlight>
             }
-        </View>
+        </KeyboardAvoidingView>
         )
     }
 }

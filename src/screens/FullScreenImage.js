@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, View, Image, TouchableHighlight, Text, Dimensions } from 'react-native';
+import { StyleSheet, View, Image, TouchableHighlight, Text, Dimensions, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { ScreenOrientation } from 'expo';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 
@@ -12,38 +12,22 @@ export default class FullScreenImage extends React.Component {
     this.state = {
         isPortrait: false,
       };
-
-    this.orientationChangeHandler = this.orientationChangeHandler.bind(this);
-    this.switchToLandscape = this.switchToLandscape.bind(this);
-    this.switchToPortrait = this.switchToPortrait.bind(this);
   }
 
-  componentWillMount() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
-      Dimensions.addEventListener(
-        'change',
-        this.orientationChangeHandler
-      );
-      this.switchToLandscape();
+  componentDidMount = () => {
+    this.switchToLandscape();
   }
 
-  componentWillUnmount() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+  componentWillUnmount = () => {
+     this.switchToPortrait();
   }
 
-  orientationChangeHandler(dims) {
-    const { width, height } = dims.window;
-    const isLandscape = width > height;
-    this.setState({ isPortrait: !isLandscape });
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.ALL);
+  switchToLandscape = () => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
   }
 
-  switchToLandscape() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.LANDSCAPE);
-  }
-
-  switchToPortrait() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+  switchToPortrait = () => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
   }
 
     render() {
@@ -65,17 +49,17 @@ export default class FullScreenImage extends React.Component {
           <View style={ styles.container }>
 
             <View style={ styles.fullScreenHeader }>
-              <TouchableHighlight onPress={ () => toggleImage() } style={ styles.back}>
-                          <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
+              <TouchableHighlight onPress={ () => { toggleImage() }} style={ styles.back}>
+                <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
               </TouchableHighlight>
+
+              <Text style={ styles.timestamp }>{ timeStamp }</Text>
 
               <TouchableHighlight onPress={ () => downloadImageEvent( URL )  } style={ styles.download}>
                 <Icon name="arrow-circle-down" size={ moderateScale(50) } color="white" />
               </TouchableHighlight>
 
             </View>
-
-            <Text style={ styles.timestamp }>{ timeStamp }</Text>
 
             <View style={ styles.mediaDownloadStatus }>
                 { mediaDownloadLoading && ( !mediaDownloadSuccess || !mediaDownloadFailed ) ? 
@@ -91,11 +75,18 @@ export default class FullScreenImage extends React.Component {
                 null
                 }
             </View>
-    
+            <ScrollView maximumZoomScale={3} 
+                        minimumZoomScale={1} 
+                        contentContainerStyle={{  flexDirection: 'row', 
+                                                  alignItems: 'center', 
+                                                  justifyContent: 'center', 
+                                                  height: Dimensions.get('window').height,
+                                                  width: Dimensions.get('window').width, }}>
               <Image style={ styles.image }
                       source={{ uri: URL }}
-                      resizeMode='contain'
-                      />
+                      width={ Dimensions.get('window').width }
+                      height={ Dimensions.get('window').height } />
+            </ScrollView>
     </View>
         );
     }
@@ -107,29 +98,24 @@ export default class FullScreenImage extends React.Component {
     container: {
       flex: 1,
       position: 'relative',
+      justifyContent: 'center',
+      backgroundColor: 'black'
     },
     fullScreenHeader: {
-      position: 'absolute',
-      top: moderateScale(20, -.05),
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      padding: moderateScale(5),
-      zIndex: 2,
-      backgroundColor: 'rgba(0,0,0,0.0)',
-      width: '100%',
+      zIndex: 5, 
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      justifyContent: 'space-around', 
+      position: 'absolute', 
+      top: 0, 
+      right: 0, 
+      width: '100%', 
+      height: moderateScale(64), 
+      backgroundColor: 'rgba(0,0,0,.4)'
     },
     timestamp: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      margin: 'auto',
       color: 'white',
-      fontSize: moderateScale(16, .2),
-      backgroundColor: 'rgba(0,0,0,0.3)',
-      borderRadius: 5,
-      zIndex: 2,
-      textAlign: 'center'
+      fontSize: moderateScale(16, .2)
     },
     image: {
       flex: 1,

@@ -1,54 +1,40 @@
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Text, Dimensions } from 'react-native';
-import { Video } from 'expo';
-import VideoPlayer from '@expo/videoplayer';
+import { StyleSheet, View, TouchableHighlight, Text, Dimensions, ScrollView } from 'react-native';
+import { Video } from 'expo-av';
+import VideoPlayer from 'expo-video-player';
 import { Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { ScreenOrientation } from 'expo';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 
 export default class FullScreenVideo extends React.Component {
     constructor( props) {
-        super(props);
+      super(props);
 
-        this.state = {
-            isPortrait: false,
-          };
-
-        this.orientationChangeHandler = this.orientationChangeHandler.bind(this);
-        this.switchToLandscape = this.switchToLandscape.bind(this);
-        this.switchToPortrait = this.switchToPortrait.bind(this);
+      this.state = {
+          isPortrait: false,
+          isPlaying: true,
+          totalDuration: 0,
+          currentTime: 0
+        };
     }
 
-      componentWillMount() {
-        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.Portrait);
-        Dimensions.addEventListener(
-          'change',
-          this.orientationChangeHandler
-        );
-      }
-      componentWillUnmount() {
-        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
-        Dimensions.removeEventListener('change', this.orientationChangeHandler);
-      }
+  componentDidMount = () => {
+    this.switchToLandscape();
+  }
 
-      orientationChangeHandler(dims) {
-        const { width, height } = dims.window;
-        const isLandscape = width > height;
-        this.setState({ isPortrait: !isLandscape });
-        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.ALL);
-      }
-    
-      switchToLandscape() {
-        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.LANDSCAPE);
-      }
-    
-      switchToPortrait() {
-        ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
-      }
-    
-    
+  componentWillUnmount = () => {
+     this.switchToPortrait();
+  }
+
+  switchToLandscape = () => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
+  }
+
+  switchToPortrait = () => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+  }
 
     render() {
 
@@ -62,7 +48,6 @@ export default class FullScreenVideo extends React.Component {
             mediaDownloadFailed } = this.props;
 
         let URL = this.props.siteURL + this.props.sVideo;
-        console.log(URL);
 
         let timeStamp = sVideoDate + ' ' + sVideoTime;
 
@@ -77,19 +62,20 @@ export default class FullScreenVideo extends React.Component {
         );
         return (
           <View style={ styles.container }>
-
             <View style={ styles.fullScreenHeader }>
               <TouchableHighlight onPress={ () => toggleVideo() } style={ styles.back }>
                 <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
               </TouchableHighlight> 
 
+              <View style={{ flexDirection: 'column' }}>
+                <Text style={ styles.timestamp }>{ timeStamp }</Text>
+                <Text style={ styles.time }>Clip time remaining: {( (this.state.totalDuration - this.state.currentTime) + 1 ).toString()}s</Text>
+              </View>
+      
               <TouchableHighlight onPress={ () => downloadVideoEvent( URL ) } style={ styles.download }>
                 <Icon name="arrow-circle-down" size={ moderateScale(45) } color="white" />
               </TouchableHighlight> 
-
             </View>
-
-            <Text style={ styles.timestamp }>{ timeStamp }</Text>
 
             <View style={ styles.mediaDownloadStatus }>
                 { mediaDownloadLoading && ( !mediaDownloadSuccess || !mediaDownloadFailed ) ? 
@@ -106,22 +92,31 @@ export default class FullScreenVideo extends React.Component {
                 }
             </View> 
 
+            <ScrollView maximumZoomScale={3} 
+                          minimumZoomScale={1} 
+                          contentContainerStyle={{  flexDirection: 'row', 
+                                                    alignItems: 'center', 
+                                                    justifyContent: 'center', 
+                                                    height: Dimensions.get('window').height,
+                                                    width: Dimensions.get('window').width }}>
               <VideoPlayer
+                width={ Dimensions.get('window').width }
                 style={ styles.videoPlayer }
                 videoProps={{
-                  shouldPlay: false,
-                  resizeMode: Video.RESIZE_MODE_COVER,
+                  shouldPlay: true,
+                  resizeMode: Video.RESIZE_MODE_CONTAIN,
                   source: {
                     uri: URL,
                   },
-                  isMuted: false,
+                  isMuted: true
                 }}
+                inFullscreen={true}
                 playIcon={icon('ios-play')}
                 pauseIcon={icon('ios-pause')}
-                fullscreenEnterIcon={icon('ios-expand-outline', moderateScale(28))}
-                fullscreenExitIcon={icon('ios-contract-outline', moderateScale(28))}
-                trackImage={require('../../assets/images/track.png')}
-                thumbImage={require('../../assets/images/thumb.png')}
+                // fullscreenEnterIcon={icon('ios-expand-outline', moderateScale(28))}
+                // fullscreenExitIcon={icon('ios-contract-outline', moderateScale(28))}
+                // trackImage={require('../../assets/images/track.png')}
+                // thumbImage={require('../../assets/images/thumb.png')}
                 textStyle={{
                   color: COLOR,
                   fontSize: moderateScale(12),
@@ -130,13 +125,15 @@ export default class FullScreenVideo extends React.Component {
                 playFromPositionMillis={ 0 }
                 fadeInDuration={ 200 }
                 fadeOutDuration={ 600 }
-                quickFadeOutDuration={ 200 }
+                quickFadeOutDuration={ 240 }
                 hideControlsTimerDuration={ 2200 }
-                showControlsOnLoad={ true }
+                // showControlsOnLoad={ true }
                 isPortrait={ this.state.isPortrait }
                 switchToLandscape={ this.switchToLandscape() }
+                // playbackCallback={ (e) => console.log(e)}
+                playbackCallback={ (e) => this.setState({ isPlaying: e.isPlaying, currentTime: Math.floor(e.positionMillis / 1000), totalDuration: Math.floor(e.durationMillis / 1000) }) }
               />
-
+            </ScrollView>
           </View>
         )
       }
@@ -148,33 +145,31 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
     justifyContent: 'center',
+    backgroundColor: 'black'
   },
   fullScreenHeader: {
-    position: 'absolute',
-      top: moderateScale(20, -.02),
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      padding: moderateScale(5),
-      zIndex: 2,
-      backgroundColor: 'rgba(0,0,0,0.0)',
-      width: '100%',
+    zIndex: 5, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-around', 
+    position: 'absolute', 
+    top: 0, 
+    right: 0, 
+    width: '100%', 
+    height: moderateScale(64), 
+    backgroundColor: 'rgba(0,0,0,.4)'
   },
   videoPlayer: {
-    flex: 1,
-    zIndex: 1,
+    height: Dimensions.get('window').width,
+    width: Dimensions.get('window').height,
   },
   timestamp: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    margin: 'auto',
     color: 'white',
     fontSize: moderateScale(16, .2),
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 5,
-    zIndex: 2,
-    textAlign: 'center'
+  },
+  time: {
+    color: 'white',
+    fontSize: moderateScale(16, .2)
   },
   icon: {
     marginTop: moderateScale(15),

@@ -1,10 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Text, Dimensions } from 'react-native';
-import { Video } from 'expo';
-import VideoPlayer from '@expo/videoplayer';
+import { StyleSheet, View, TouchableHighlight, Text, Dimensions, ScrollView } from 'react-native';
+import { Video } from 'expo-av';
+import VideoPlayer from 'expo-video-player';
 import { Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { ScreenOrientation } from 'expo';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 export default class FullScreenTimelapse extends React.Component {
@@ -14,38 +14,32 @@ export default class FullScreenTimelapse extends React.Component {
 
     this.state = {
         isPortrait: false,
+        isPlaying: true,
+        totalDuration: 0,
+        currentTime: 0
       };
-
-    this.orientationChangeHandler = this.orientationChangeHandler.bind(this);
-    this.switchToLandscape = this.switchToLandscape.bind(this);
-    this.switchToPortrait = this.switchToPortrait.bind(this);
-}
-
-  componentWillMount() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.Portrait);
-    Dimensions.addEventListener(
-      'change',
-      this.orientationChangeHandler
-    );
-  }
-  componentWillUnmount() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
-    Dimensions.removeEventListener('change', this.orientationChangeHandler);
   }
 
-  orientationChangeHandler(dims) {
-    const { width, height } = dims.window;
-    const isLandscape = width > height;
-    this.setState({ isPortrait: !isLandscape });
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.ALL);
+  componentDidMount = () => {
+    this.switchToLandscape();
+    this.setState({ 
+        isPortrait: false,
+        isPlaying: true,
+        totalDuration: 0,
+        currentTime: 0
+    })
   }
 
-  switchToLandscape() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.LANDSCAPE);
+  componentWillUnmount = () => {
+     this.switchToPortrait();
   }
 
-  switchToPortrait() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+  switchToLandscape = () => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
+  }
+
+  switchToPortrait = () => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
   }
 
   render() {
@@ -73,16 +67,14 @@ export default class FullScreenTimelapse extends React.Component {
 
     return (
         <View style={ styles.container }>
-
           <View style={ styles.fullScreenHeader }>
-            <TouchableHighlight onPress={ () => toggleTimelapseVideo() } style={ styles.back }>
-                        <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
-            </TouchableHighlight> 
-
-            <TouchableHighlight onPress={ () => downloadVideoEvent( sTimelapse ) } style={ styles.download }>
-                      <Icon name="arrow-circle-down" size={ moderateScale(50) } color="white" />
-          </TouchableHighlight>
-
+              <TouchableHighlight onPress={ () => toggleTimelapseVideo() } style={ styles.back }>
+                          <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
+              </TouchableHighlight> 
+              <Text style={ styles.time }>Clip time remaining: { this.state.totalDuration > 0 && this.state.totalDuration !== this.state.currentTime ? ( (this.state.totalDuration - this.state.currentTime) + 1 ).toString() : '0' }s</Text>
+              <TouchableHighlight onPress={ () => downloadVideoEvent( sTimelapse ) } style={ styles.download }>
+                        <Icon name="arrow-circle-down" size={ moderateScale(50) } color="white" />
+            </TouchableHighlight>
           </View>
 
           <View style={ styles.mediaDownloadStatus }>
@@ -99,101 +91,114 @@ export default class FullScreenTimelapse extends React.Component {
               null
               }
           </View>
-           
-          <VideoPlayer
-                style={ styles.videoPlayer }
-                videoProps={{
-                  shouldPlay: false,
-                  resizeMode: Video.RESIZE_MODE_COVER,
-                  source: {
-                    uri: sTimelapse,
-                  },
-                  isMuted: false,
-                }}
-                playIcon={icon('ios-play')}
-                pauseIcon={icon('ios-pause')}
-                fullscreenEnterIcon={icon('ios-expand-outline', 28)}
-                fullscreenExitIcon={icon('ios-contract-outline', 28)}
-                trackImage={require('../../assets/images/track.png')}
-                thumbImage={require('../../assets/images/thumb.png')}
-                textStyle={{
-                  color: COLOR,
-                  fontSize: moderateScale(12),
-                }}
-                showFullscreenButton={ false }
-                playFromPositionMillis={ 0 }
-                fadeInDuration={ 200 }
-                fadeOutDuration={ 600 }
-                quickFadeOutDuration={ 200 }
-                hideControlsTimerDuration={ 3000 }
-                showControlsOnLoad={ true }
-                isPortrait={ this.state.isPortrait }
-                switchToLandscape={ this.switchToLandscape() }
-              
-              />
-
+              <ScrollView maximumZoomScale={3} 
+                          minimumZoomScale={1} 
+                          contentContainerStyle={{  flexDirection: 'row', 
+                                                    alignItems: 'center', 
+                                                    justifyContent: 'center', 
+                                                    height: Dimensions.get('window').height,
+                                                    width: Dimensions.get('window').width, }}>
+                <VideoPlayer
+                  width={ Dimensions.get('window').width }
+                  style={ styles.videoPlayer }
+                  videoProps={{
+                    shouldPlay: false,
+                    resizeMode: Video.RESIZE_MODE_CONTAIN,
+                    source: {
+                      uri: sTimelapse,
+                    },
+                    isMuted: false,
+                  }}
+                  playIcon={icon('ios-play')}
+                  pauseIcon={icon('ios-pause')}
+                  fullscreenEnterIcon={icon('ios-expand-outline', 28)}
+                  fullscreenExitIcon={icon('ios-contract-outline', 28)}
+                  trackImage={require('../../assets/images/track.png')}
+                  thumbImage={require('../../assets/images/thumb.png')}
+                  textStyle={{
+                    color: COLOR,
+                    fontSize: moderateScale(12),
+                  }}
+                  showFullscreenButton={ false }
+                  playFromPositionMillis={ 0 }
+                  fadeInDuration={ 200 }
+                  fadeOutDuration={ 600 }
+                  quickFadeOutDuration={ 200 }
+                  hideControlsTimerDuration={ 3000 }
+                  showControlsOnLoad={ true }
+                  isPortrait={ false }
+                  playbackCallback={ (e) => this.setState({ isPlaying: e.isPlaying, currentTime: Math.floor(e.positionMillis / 1000), totalDuration: Math.floor(e.durationMillis / 1000) }) }
+                />
+            </ScrollView>      
         </View> 
     );
   }
 }
 
-    
-  const styles = StyleSheet.create({
-    
-    container: {
-      flex: 1,
-      position: 'relative',
-      justifyContent: 'center',
-    },
-    fullScreenHeader: {
-      position: 'absolute',
-      top: moderateScale(20, -.8),
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      padding: scale(10),
-      zIndex: 2,
-      backgroundColor: 'rgba(0,0,0,0.0)',
-      width: '100%',
-    },
-    videoPlayer: {
-      flex: 1,
-      zIndex: 1,
-    },
-    icon: {
-      marginTop: scale(15),
-      marginBottom: scale(15),
-    },
-    download: {
-      borderRadius: moderateScale(50),
-      backgroundColor: 'grey',
-      paddingLeft: moderateScale(3),
-      paddingRight: moderateScale(3),
-    },
-    back: {
-      borderRadius: moderateScale(50),
-      backgroundColor: 'grey',
-      paddingLeft: moderateScale(9),
-      paddingRight: moderateScale(11),
-      paddingTop: moderateScale(6),
-      paddingBottom: moderateScale(10),
-      borderWidth: 2,
-      borderColor: 'white'
-    },
-    mediaDownloadStatus: {
-      position: 'absolute',
-      top: '50%',
-      zIndex: 5,
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '100%',
-    },
-    mediaDownloadText: {
-      fontSize: moderateScale(24, .2),
-      color: 'white',
-      position: 'absolute',
-      top: '50%',
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: 5,
-    }
-  });
+
+const styles = StyleSheet.create({
+  
+  container: {
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'center',
+    backgroundColor: 'black'
+  },
+  fullScreenHeader: {
+    zIndex: 5, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-around', 
+    position: 'absolute', 
+    top: 0, 
+    right: 0, 
+    width: '100%', 
+    height: moderateScale(64), 
+    backgroundColor: 'rgba(0,0,0,.4)'
+  },
+  videoPlayer: {
+    height: Dimensions.get('window').width,
+    width: Dimensions.get('window').height,
+  },
+  icon: {
+    marginTop: scale(15),
+    marginBottom: scale(15),
+  },
+  time: {
+    color: 'white',
+    fontSize: moderateScale(16, .2),
+  },
+  download: {
+    borderRadius: moderateScale(50),
+    backgroundColor: 'grey',
+    paddingLeft: moderateScale(3),
+    paddingRight: moderateScale(3),
+  },
+  back: {
+    borderRadius: moderateScale(50),
+    backgroundColor: 'grey',
+    paddingLeft: moderateScale(9),
+    paddingRight: moderateScale(11),
+    paddingTop: moderateScale(6),
+    paddingBottom: moderateScale(10),
+    borderWidth: 2,
+    borderColor: 'white'
+  },
+  mediaDownloadStatus: {
+    position: 'absolute',
+    top: '50%',
+    zIndex: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  mediaDownloadText: {
+    fontSize: moderateScale(24, .2),
+    color: 'white',
+    position: 'absolute',
+    top: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 5,
+  }
+});

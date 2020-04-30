@@ -1,10 +1,8 @@
-//TODO: implement navigation to handle login and redirect to main screen
-// May need this proxy for fetch requests:
-   // let proxy = 'https://cors-anywhere.herokuapp.com/';
-
 import React from 'react';
-import { StyleSheet, StatusBar, View, AsyncStorage, CameraRoll, Dimensions } from 'react-native';
-import { FileSystem, ScreenOrientation } from 'expo';
+import { StyleSheet, StatusBar, View, AsyncStorage, Dimensions } from 'react-native';
+import CameraRoll from "@react-native-community/cameraroll";
+import * as ScreenOrientation from 'expo-screen-orientation';
+import * as FileSystem from 'expo-file-system';
 import MainScreen from './src/screens/MainScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import TimelapseScreen from './src/screens/TimelapseScreen';
@@ -28,7 +26,18 @@ class App extends React.Component {
       siteTag: '', // short version of site used for URL
       siteURL: '',
       projects: [],
-      eventTypes: [ 'ALL', 'IMAGES', 'VIDEOS' ],
+      eventTypes: [ 'ALL', 
+                    '-----------------',
+                    'IMAGES', 
+                    'IMAGE & VEHICLE', 
+                    'IMAGE & PEOPLE',
+                    'IMAGE & BOTH',
+                    '-----------------',
+                    'VIDEOS',
+                    'VIDEO & VEHICLE', 
+                    'VIDEO & PEOPLE',
+                    'VIDEO & BOTH',
+                  ],
       currentEventType: 'ALL',
       currentEventList: [],
       selectedCam: 0,
@@ -64,49 +73,11 @@ class App extends React.Component {
       mediaDownloadFailed: false,
       isPortrait: true,
     }
-
-    this.setLogout = this.setLogout.bind(this);
-    this.validateLogin = this.validateLogin.bind(this);
-    this.resolveSitename = this.resolveSitename.bind(this);
-    this.toggleTimelapse = this.toggleTimelapse.bind(this);
-    this.toggleTimelapseVideo = this.toggleTimelapseVideo.bind(this);
-    this.toggleImage = this.toggleImage.bind(this);
-    this.toggleVideo = this.toggleVideo.bind(this);
-    this.setCurrentImage = this.setCurrentImage.bind(this);
-    this.setTimelapseStart = this.setTimelapseStart.bind(this);
-    this.setTimelapseEnd = this.setTimelapseEnd.bind(this);
-    this.setTimelapse= this.setTimelapse.bind(this);
-    this.playVideo = this.playVideo.bind(this);
-    this.downloadImageEvent = this.downloadImageEvent.bind(this);
-    this.downloadVideoEvent = this.downloadVideoEvent.bind(this);
-    this.checkForMultipleCams = this.checkForMultipleCams.bind(this);
-    this.handleCamSelect = this.handleCamSelect.bind(this);
-    this.updateEventType = this.updateEventType.bind(this);
-    this.getCurrentImage = this.getCurrentImage.bind(this);
-    this.fetchSnapShot = this.fetchSnapShot.bind(this);
-    this.fetchNewByDate = this.fetchNewByDate.bind(this);
-    this.setDate = this.setDate.bind(this);
-    this.fetchDataUsage = this.fetchDataUsage.bind(this);
-    this.toggleLoading = this.toggleLoading.bind(this);
-    this.toggleMainNav = this.toggleMainNav.bind(this);
-    this.getTimelapseDay = this.getTimelapseDay.bind(this);
-    this.getTimelapseWeek = this.getTimelapseWeek.bind(this);
-    this.getTimelapseMonth = this.getTimelapseMonth.bind(this);
-    this.getTimelapseProject = this.getTimelapseProject.bind(this);
-    this.toggleLoginError = this.toggleLoginError.bind(this);
-    this.toggleFetchError = this.toggleFetchError.bind(this);
-    this.saveSessionVariable = this.saveSessionVariable.bind(this);
-    this.loadNewCam = this.loadNewCam.bind(this);
-    this.setCurrentEventList = this.setCurrentEventList.bind(this);
-    this.toggleMediaDownloadStatus = this.toggleMediaDownloadStatus.bind(this);
-    this.switchToPortrait = this.switchToPortrait.bind(this);
-    this.switchtoLandscape = this.switchToLandscape.bind(this);
-    this.orientationChangeHandler = this.orientationChangeHandler.bind(this);
   
-    }
+  }
 
-  componentDidMount() {
-      ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+  componentDidMount = () => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
       Dimensions.addEventListener(
         'change',
         this.orientationChangeHandler
@@ -115,22 +86,21 @@ class App extends React.Component {
       this.retrieveSessionVariable();
   }
 
-  orientationChangeHandler(dims) {
+  orientationChangeHandler = (dims) => {
     const { width, height } = dims.window;
     const isLandscape = width > height;
     this.setState({ isPortrait: !isLandscape });
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.ALL);
   }
 
-  switchToLandscape() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.LANDSCAPE);
+  switchToLandscape = () => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
   }
 
-  switchToPortrait() {
-    ScreenOrientation.allowAsync(ScreenOrientation.Orientation.PORTRAIT);
+  switchToPortrait = () => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
   }
 
-  async saveSessionVariable() { 
+  saveSessionVariable = async () => { 
     // eventually resue with (key, value)
     try {
       // await AsyncStorage.setItem( key.toString(), value );
@@ -142,7 +112,7 @@ class App extends React.Component {
     }
   }
 
-  async retrieveSessionVariable() {
+  retrieveSessionVariable = async () => {
     // eventually redo with (key, value)
     try {
       const vSiteTag = await AsyncStorage.getItem('siteTag');
@@ -171,7 +141,7 @@ class App extends React.Component {
 
   }
 
-  async clearSessionVariable() {
+  clearSessionVariable = async () => {
     try {
       // await AsyncStorage.removeItem( key.toString());
       await AsyncStorage.removeItem( 'isLoggedIn')
@@ -184,12 +154,11 @@ class App extends React.Component {
   
 
   // auth functions 
-  validateLogin(userInput) {
+  validateLogin = async(userInput) => {
     this.setState({ loginLoading: true })
-    fetch( 'https://' + userInput + '.dividia.net/ajax.php?action=customerExists&domain=' + userInput + '.dividia.net')
+    await fetch( 'https://' + userInput + '.dividia.net/ajax.php?action=customerExists&domain=' + userInput + '.dividia.net')
       .then( response => {
-        if (response.status === 404 ) {
-          console.log( 'Error logging in with user \"' +  userInput + '\"')
+        if (!response.ok ) {
           this.setState({ 
             error: true,
             loginLoading: false
@@ -198,22 +167,24 @@ class App extends React.Component {
               setTimeout(
                 () => this.clearError(), 5000)
               })
-              return;
+              throw new Error( 'Error logging in with user \"' +  userInput + '\"')
         }
 
-        response.json().then(data => {
-          if ( data.result === true ) {
-            this.resolveSitename( userInput );
-            this.setState({ 
-              siteTag: userInput,
-              isLoggedIn: true,
-              loginLoading: false
-            },
-              function() {
-                this.fetchNewByDate( today, 'ALL' )
-                this.fetchDataUsage()
-                this.checkForMultipleCams();
-                this.saveSessionVariable()
+        return response.json()
+      })
+      .then(data => {
+        if ( data.result === true ) {
+          this.resolveSitename( userInput );
+          this.setState({ 
+            siteTag: userInput,
+            isLoggedIn: true,
+            loginLoading: false
+          },
+            function() {
+              this.fetchNewByDate( today, 'ALL' )
+              this.fetchDataUsage()
+              this.checkForMultipleCams();
+              this.saveSessionVariable()
           })
         } else if ( data.result === false ) {
           console.log( 'Error logging in with user \"' +  userInput + '\"')
@@ -229,10 +200,20 @@ class App extends React.Component {
             console.log('Other error.')
           }
       })
-  })
+      .catch( error => {
+        console.log(error);
+        this.setState({ 
+          error: true,
+          loginLoading: false
+        },
+          function(){
+            setTimeout(
+              () => this.clearError(), 5000)
+            })
+      })
 }
 
-  setLogout() {
+  setLogout = () => {
     this.clearSessionVariable()
     this.setState({   isLoggedIn: false,
       isLoggedIn: false,
@@ -240,7 +221,18 @@ class App extends React.Component {
       siteTag: '', // short version of site used for URL
       siteURL: '',
       projects: [],
-      eventTypes: [ 'ALL', 'IMAGES', 'VIDEOS' ],
+      eventTypes: [ 'ALL', 
+                    '-----------------',
+                    'IMAGES', 
+                    'IMAGE & VEHICLE', 
+                    'IMAGE & PEOPLE',
+                    'IMAGE & BOTH',
+                    '-----------------',
+                    'VIDEOS',
+                    'VIDEO & VEHICLE', 
+                    'VIDEO & PEOPLE',
+                    'VIDEO & BOTH',
+                  ],
       currentEventType: 'ALL',
       currentEventList: [],
       selectedCam: 0,
@@ -287,7 +279,7 @@ class App extends React.Component {
     })
   }
 
-  resolveSitename( site ) {
+  resolveSitename = (site) => {
     if ( site == 'gte' ) {
         this.setState({ 
           site: 'GoldenTriangle Estates',
@@ -300,16 +292,21 @@ class App extends React.Component {
         siteURL: 'https://' + site + '.dividia.net/'  
       })
     } else if ( site == 'ashgrovejs' ) {
-      this.setState({ site: 'Ashgrove Cement',
-      siteTag: site,
-      siteURL: 'https://' + site + '.dividia.net/'  
-      }) 
+        this.setState({ site: 'Ashgrove Cement',
+          siteTag: site,
+          siteURL: 'https://' + site + '.dividia.net/'  
+        }) 
+    } else if ( site == 'daniels' ) {
+        this.setState({ site: "Daniel's Ranch",
+          siteTag: site,
+          siteURL: 'https://' + site + '.dividia.net/'  
+        }) 
     } else {
       console.log('site not found')
     }
   }
 
-  clearError() {
+  clearError = () => {
     this.setState({ 
       error: false,
       fetchError: false
@@ -319,52 +316,54 @@ class App extends React.Component {
   //General data functions
 
   // Check for multiple cameras
-  checkForMultipleCams() {
+  checkForMultipleCams = async() => {
     fetch( 'https://' + this.state.siteTag + '.dividia.net/ajax.php?action=getProjects')
       .then( response => {
-            if (response.status !== 200) {
-              console.log('Error. Status Code: ' + response.status);
-              return;
+        if (!response.ok) {
+          throw new Error('Error. Status Code: ' + response.status);
+        }
+        return response.json()
+      })
+      .then(data => {
+        this.setState({
+            projects: data,
+          }, function(){ 
+            for( let x = 0; x < this.state.projects.length; x++ ){
+              camCount.push('Cam ' + (x + 1).toString())
             }
-            response.json().then(data => {
-              this.setState({
-                 projects: data,
-                }, function(){ 
-                  for( let x = 0; x < this.state.projects.length; x++ ){
-                    camCount.push('Cam ' + (x + 1).toString())
-                  }
-                 });
-            })
+            });
+      })
       .catch(err => {
         console.log('Fetch Error: ', err);
-            });
-        })
+      });
   }
 
   // dataUasage functions
 
-  handleCamSelect(cam) {
+  handleCamSelect = (cam) => {
     this.setState({ selectedCam: ( cam - 1 ) }, () =>
       this.loadNewCam(cam - 1) )
   }
 
   // load selected cam events from multiple cam select 
 
-  loadNewCam( newCam ) {
-    fetch( 'https://' + this.state.siteTag + '.dividia.net/index.php?setproject=' + newCam )
+  loadNewCam = async(newCam) => {
+    await fetch( 'https://' + this.state.siteTag + '.dividia.net/index.php?setproject=' + newCam )
     .then( response => {
-      if (response.status !== 200) {
-        console.log('Error. Status Code: ' + response.status);
-        return;
+      if (!response.ok) {
+        throw new Error('Error. Status Code: ' + response.status);
       }
       this.fetchNewByDate( this.state.date, this.state.currentEventType )
       this.fetchDataUsage()
+    })
+    .catch( error => {
+      console.log(error)
     })
   }
 
   // image event functions
 
-  toggleImage( image, date, time ) {
+  toggleImage = (image, date, time) => {
     this.setCurrentImage(image, date, time);
     this.setState({ 
       showFullImage: !this.state.showFullImage,
@@ -372,13 +371,13 @@ class App extends React.Component {
     })
   }
 
-  setCurrentImage(image, date, time ) {
+  setCurrentImage = (image, date, time ) => {
     this.setState({ sImage: image,
                     sImageDate: date,
                     sImageTime: time })
   }
 
-  playVideo ( sTimeStamp, date, time, duration ) {
+  playVideo = (sTimeStamp, date, time, duration) => {
     let videoURL;
     if (this.state.projects.length > 1) {
       videoURL = 'base/' + this.state.siteTag + '/cam' + (this.state.selectedCam + 1) + '/video/' + sTimeStamp + '.mp4';
@@ -391,46 +390,46 @@ class App extends React.Component {
       sVideoTime: time,
       sVideoDuration: duration
     })
-    this.toggleVideo();
+    // this.toggleVideo();
   }
+//************** |||||||||||||  *********************/
 
-
-  toggleVideo() {
+  toggleVideo = () => {
     this.setState({ 
       showFullVideo: !this.state.showFullVideo,
       showTimelapse: !this.state.showTimelapse,
       showMainNav: false
-      })
-      this.fetchNewByDate();
+    })
+    this.fetchNewByDate();
   }
 
   // timelapse event functions 
 
-  setTimelapse(url) {
+  setTimelapse = (url) => {
     this.setState({ 
       sTimelapse: url,
      })
   }
 
-  setTimelapseStart(value) {
+  setTimelapseStart = (value) => {
     this.setState({ sTimelapseStart: value })
   }
 
-  setTimelapseEnd(value) {
+  setTimelapseEnd = (value) => {
     this.setState({ sTimelapseEnd: value })
   }
 
-  toggleTimelapse() {
+  toggleTimelapse = () => {
     this.setState({ 
       showTimelapse: !this.state.showTimelapse,
       showMainNav: false })
   }
   
-  toggleTimelapseVideo() {
+  toggleTimelapseVideo = () => {
     this.setState({ showTimelapseVideo: !this.state.showTimelapseVideo })
   }
 
-  toggleMediaDownloadStatus() {
+  toggleMediaDownloadStatus = () => {
       setTimeout(() => {
       this.setState({ 
         mediaDownloadSuccess: false,
@@ -442,41 +441,35 @@ class App extends React.Component {
 
   // event download function
 
-  async downloadImageEvent( image ) {
+  downloadImageEvent = async (image) => {
     this.setState({ 
       mediaDownloadLoading: true
     })
     const fileUri = FileSystem.documentDirectory + 'image.jpg';
-      await FileSystem.downloadAsync(
-        image,
-        fileUri
-      )
-        .then(({ uri }) => {
-          var promise = CameraRoll.saveToCameraRoll(fileUri, 'photo');
-            promise.then(function(result) {
-              this.setState({ 
-                mediaDownloadLoading: false,
-                mediaDownloadSuccess: true 
-              }, 
-                this.toggleMediaDownloadStatus 
-            )
-            }.bind(this))
-            .catch(function(error) {
-            });
-          })
-          .catch(error => {
-            console.error(error);
+      await FileSystem.downloadAsync( image,  fileUri )
+      .then(({ uri }) => {
+        var promise = CameraRoll.saveToCameraRoll(fileUri, 'photo');
+          promise.then(function(result) {
+            this.setState({ 
+              mediaDownloadLoading: false,
+              mediaDownloadSuccess: true 
+            }, 
+              this.toggleMediaDownloadStatus 
+          )
+          }.bind(this))
+          .catch(function(error) {
           });
+        })
+        .catch(error => {
+          console.error(error);
+        });
   }
 
-  async downloadVideoEvent( video ) {
+  downloadVideoEvent = async (video) => {
     this.setState({ mediaDownloadLoading: true })
     const fileUri = FileSystem.documentDirectory + 'video.mp4';
-      await FileSystem.downloadAsync(
-        video,
-        fileUri
-      )
-        .then(({ uri }) => {
+      await FileSystem.downloadAsync( video, fileUri )
+        .then(({uri}) => {
           var promise = CameraRoll.saveToCameraRoll( fileUri, 'video' );
           promise.then(function(result) {
             this.setState({ 
@@ -501,7 +494,7 @@ class App extends React.Component {
         });
   }
 
-  setCurrentEventList( type ) {
+  setCurrentEventList = (type) => {
     switch (type.toString()) {
       case 'ALL':
         this.setState({ 
@@ -513,9 +506,39 @@ class App extends React.Component {
           currentEventList: this.state.images
         })
       break;
+      case 'IMAGE & VEHICLE':
+        this.setState({ 
+          currentEventList: this.state.images.filter( i => i.oTags.indexOf('vehicle') > -1 && i.oTags.indexOf('person') < 0 )
+        })
+      break;
+      case 'IMAGE & PEOPLE':
+        this.setState({ 
+          currentEventList: this.state.images.filter( i => i.oTags.indexOf('person') > -1 && i.oTags.indexOf('vehicle') < 0 )
+        })
+      break;
+      case 'IMAGE & BOTH':
+        this.setState({ 
+          currentEventList: this.state.images.filter( i => i.oTags.indexOf('person') > -1 && i.oTags.indexOf('vehicle') > -1 )
+        })
+      break;
       case 'VIDEOS':
         this.setState({ 
           currentEventList: this.state.videos
+        })
+      break;
+      case 'VIDEO & VEHICLE':
+        this.setState({ 
+          currentEventList: this.state.videos.filter( i => i.oTags.indexOf('vehicle') > -1 && i.oTags.indexOf('person') < 0 )
+        })
+      break;
+      case 'VIDEO & PEOPLE':
+        this.setState({ 
+          currentEventList: this.state.videos.filter( i => i.oTags.indexOf('person') > -1 && i.oTags.indexOf('vehicle') < 0 )
+        })
+      break;
+      case 'VIDEO & BOTH':
+        this.setState({ 
+          currentEventList: this.state.videos.filter( i => i.oTags.indexOf('person') > -1 && i.oTags.indexOf('vehicle') > -1 )
         })
       break;
       default: 
@@ -525,41 +548,39 @@ class App extends React.Component {
     }
   }
 
-  updateEventType( type ) {
+  updateEventType = (type) => {
     this.setState({ currentEventType: type },
       () => this.setCurrentEventList( type ))
   }
 
 // Get a current image from the snapshot button in footer bar
-  getCurrentImage() {
+  getCurrentImage = () => {
     this.fetchSnapShot()
     this.toggleMainNav()
-    }
+  }
   
-
   // Fetch current snapshot image
-  fetchSnapShot() {
-    fetch( 'https://' + this.state.siteTag + '.dividia.net/ajax.php?action=requestStill' )
+  fetchSnapShot = async() => {
+    await fetch( 'https://' + this.state.siteTag + '.dividia.net/ajax.php?action=requestStill' )
       .then( response => {
-            if (response.status !== 200) {
-              console.log('Error. Status Code: ' + response.status);
-              return;
-            }
-            this.setState({ loading: true })
-            setTimeout(() => {
-              this.fetchNewByDate( today, 'IMAGES')
-            }, 4000)
-            setTimeout(() => {
-              this.setState({ loading: false })
-            }, 4100)    
-          })
+        if (!response.ok) {
+          throw new Error('Error. Status Code: ' + response.status);
+        }
+        this.setState({ loading: true })
+        setTimeout(() => {
+          this.fetchNewByDate( today, 'IMAGES')
+        }, 4000)
+        setTimeout(() => {
+          this.setState({ loading: false })
+        }, 4100)    
+      })
       .catch(err => {
         console.log('Fetch Error: ', err);
       });
     }
 
-    // Fetch all events by date and save filtered results to state
-  fetchNewByDate( uDate, sFilterType ) {
+  // Fetch all events by date and save filtered results to state
+  fetchNewByDate = async(uDate, sFilterType) => {
     let date;
     let filterType;
 
@@ -579,47 +600,48 @@ class App extends React.Component {
           fetchError: false,
           date: date,
       });
-    fetch( 'https://' + this.state.siteTag + '.dividia.net/ajax.php?action=getEvents&date=' + this.state.date )
+    await fetch( 'https://' + this.state.siteTag + '.dividia.net/ajax.php?action=getEvents&date=' + this.state.date )
     .then( response => {
-          if (response.status !== 200) {
-            console.log('ooops, could not connect to server')
-          }
-          response.json().then(data => {
-              if( data.length > 0 ) {  
-                // .reverse()
-              let images = data.filter(d => d.sType === "STILL").reverse();
-              let videos = data.filter(d => d.sType === "VIDEO").reverse();
-              this.setState({
-                 events: data.reverse(),
-                 images,
-                 videos,
-                 currentEventType: filterType
-              }, () => {
-                this.setCurrentEventList( this.state.currentEventType)
-                this.setState({ loading: false })
-              })    
-              } else {
-                this.setState({ 
-                  loading: false,
-                  fetchError: true })
-              } 
-          })
-        })
-      .catch( err => {
-        console.log('Fetch Error: ', err);
-        this.setState({
+      if (!response.ok) {
+        throw new Error('ooops, could not connect to server')
+      }
+      return response.json()
+    })
+    .then(data => {
+      if( data.length > 0 ) {  
+        // .reverse()
+      let images = data.filter(d => d.sType === "STILL").reverse();
+      let videos = data.filter(d => d.sType === "VIDEO").reverse();
+      this.setState({
+          events: data.reverse(),
+          images,
+          videos,
+          currentEventType: filterType
+      }, () => {
+        this.setCurrentEventList( this.state.currentEventType)
+        this.setState({ loading: false })
+      })    
+      } else {
+        this.setState({ 
           loading: false,
-          fetchError: true,
-        })
+          fetchError: true })
+      } 
+    })
+    .catch( err => {
+      console.log('Fetch Error: ', err);
+      this.setState({
+        loading: false,
+        fetchError: true,
       })
-    }
+    })
+  }
   
 
 
   // Set new date and fetch events for new date
-  setDate( selectedDate ) {
+  setDate = (selectedDate) => {
     this.setState({ 
-      date: moment(selectedDate).format('MM/DD/YY'),
+      date: moment(new Date(selectedDate)).format('MM/DD/YY'),
      }, 
     () => { 
       console.log('New state of date is: ' + this.state.date)
@@ -628,27 +650,27 @@ class App extends React.Component {
   }
 
 // Fetch dataUsage
-  fetchDataUsage() {
-    fetch( 'https://' + this.state.siteTag + `.dividia.net/ajax.php?action=getBandwidthUsage`)
+  fetchDataUsage = async () => {
+    await fetch( 'https://' + this.state.siteTag + `.dividia.net/ajax.php?action=getBandwidthUsage`)
     .then( response => {
-          if (response.status !== 200) {
-            console.log('Error. Status Code: ' + response.status);
-            return;
-          }
-          response.json().then(data => {
-                  this.setState({ 
-                    dataUsage: data.bTotal.toString().slice(0,3), 
-                    maxData: data.bDataPlanGB 
-                  })
-                })
-            })
-      .catch(err => {
-        console.log('Fetch Error: ', err);
-            });
-        }
+      if (!response.ok) {
+        throw new Error('Error. Status Code: ' + response.status);
+      }
+      return response.json()
+    })
+    .then(data => {
+      this.setState({ 
+        dataUsage: data.bTotal.toString().slice(0,3), 
+        maxData: data.bDataPlanGB 
+      })
+    })
+    .catch(err => {
+      console.log('Fetch Error: ', err);
+    });
+  }
 
 // Toggle loader for waiting on events fetch
-  toggleLoading(value) {
+  toggleLoading = (value)=> {
     { value ? 
       this.setState({ loading: value }) :
       this.setState({ loading: !this.state.loading })
@@ -656,51 +678,86 @@ class App extends React.Component {
   }
 
   // Toggle the main navigation menu from footer bar
-  toggleMainNav() {
+  toggleMainNav = () => {
     this.setState({ showMainNav: !this.state.showMainNav });
   }
 
-  getTimelapseDay() {
+  // add loading indicator in state and push to timelapse and video components for loading prior to displaying video
+  getTimelapseDay = async() => {
     console.log('loading timelapse Day ... ');
-    const today = moment().format('YYYY/MM/DD');
-      fetch( this.state.siteURL + 'timelapse.php?start=' + today + '&end=' + today )
+    const today = moment(new Date()).format('YYYY/MM/DD');
+      await fetch( this.state.siteURL + 'timelapse.php?start=' + today + '&end=' + today )
+      .then( res => {
+        if(!res.ok ){
+          throw new Error('could not get timelapse day')
+        }
+        return res.json()
+      })
+      .catch( error => {
+        console.log(error)
+      })
   }
 
-  getTimelapseWeek() {
+  getTimelapseWeek = async() => {
     console.log('loading timelapse Week ... ');
-    const today = moment().format('YYYY/MM/DD');
-    const lastWeek = moment().subtract(7,'d').format('YYYY/MM/DD');
-      fetch( this.state.siteURL + 'timelapse.php?start=' + lastWeek + '&end=' + today )
+    const today = moment(new Date()).format('YYYY/MM/DD');
+    const lastWeek = moment(new Date()).subtract(7,'d').format('YYYY/MM/DD');
+      await fetch( this.state.siteURL + 'timelapse.php?start=' + lastWeek + '&end=' + today )
+      .then( res => {
+        if(!res.ok ){
+          throw new Error('could not get timelapse week')
+        }
+        return res.json()
+      })
+      .catch( error => {
+        console.log(error)
+      })
   }
 
-  getTimelapseMonth() {
+  getTimelapseMonth = async() => {
     console.log('loading timelapse Month ... ');
-    const today = moment().format('YYYY/MM/DD');
-    const lastMonth = moment().subtract(30,'d').format('YYYY/MM/DD');
-      fetch( this.state.siteURL + 'timelapse.php?start=' + lastMonth + '&end=' + today )
+    const today = moment(new Date()).format('YYYY/MM/DD');
+    const lastMonth = moment(new Date()).subtract(30,'d').format('YYYY/MM/DD');
+      await fetch( this.state.siteURL + 'timelapse.php?start=' + lastMonth + '&end=' + today )
+      .then( res => {
+        if(!res.ok ){
+          throw new Error('could not get timelapse month')
+        }
+        return res.json()
+      })
+      .catch( error => {
+        console.log(error)
+      })
   }
 
-  getTimelapseProject() {
+  getTimelapseProject = async() => {
     console.log('loading timelapse Entire Project ... ');
-    const today = moment().format('YYYY/MM/DD');
-    const fiveYears = moment().subtract(1800,'d').format('YYYY/MM/DD');
-      fetch( this.state.siteURL + 'timelapse.php?start=' + fiveYears + '&end=' + today )
+    const today = moment(new Date()).format('YYYY/MM/DD');
+    const fiveYears = moment(new Date()).subtract(1800,'d').format('YYYY/MM/DD');
+      await fetch( this.state.siteURL + 'timelapse.php?start=' + fiveYears + '&end=' + today )
+      .then( res => {
+        if(!res.ok ){
+          throw new Error('could not get timelapse entire project')
+        }
+        return res.json()
+      })
+      .catch( error => {
+        console.log(error)
+      })
   }
   
-  toggleLoginError() {
+  toggleLoginError = () => {
     this.setstate({ 
       error: !this.state.error 
     })
   }
 
-  toggleFetchError() {
+  toggleFetchError = () => {
     this.setState({ 
       fetchError: !this.state.fetchError,
       loading: false
     })
   }
-
-  
 
   render() {
 

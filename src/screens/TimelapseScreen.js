@@ -11,64 +11,62 @@ import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 class TimelapseScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-     
-    }
-
-    this.requestWeek = this.requestWeek.bind(this);
-    this.requestDay = this.requestDay.bind(this);
-    this.requestMonth= this.requestMonth.bind(this);
-    this.requestProject= this.requestProject.bind(this);
-    this.requestByDateRange = this.requestByDateRange.bind(this);
-    this._onPressS = this._onPressS.bind(this);
-    this._onPressE = this._onPressE.bind(this);
-    this.closeDate = this.closeDate.bind(this);
 
   }
 
     
-    requestDay() {
-        const today = moment().format('YYYY/MM/DD');
-        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + today + '&end=' + today )
+    requestDay = async() => {
+        const today = moment(new Date()).format('YYYY/MM/DD');
+        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + today + '&end=' + today )
+        .then( () => {
+          this.props.toggleTimelapseVideo()
+        })
+    }
+
+    requestWeek = async() => {
+        const today = moment(new Date()).format('YYYY/MM/DD');
+        const lastWeek = moment(new Date()).subtract(7,'d').format('YYYY/MM/DD');
+        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastWeek + '&end=' + today )
+        .then( () => {
         this.props.toggleTimelapseVideo()
+        })
     }
 
-    requestWeek() {
-        const today = moment().format('YYYY/MM/DD');
-        const lastWeek = moment().subtract(7,'d').format('YYYY/MM/DD');
-        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastWeek + '&end=' + today )
+    requestMonth = async() => {
+        const today = moment(new Date()).format('YYYY/MM/DD');
+        const lastMonth = moment(new Date()).subtract(30,'d').format('YYYY/MM/DD');
+        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastMonth + '&end=' + today )
+        .then( () => {
         this.props.toggleTimelapseVideo()
+        })
     }
 
-    requestMonth() {
-        const today = moment().format('YYYY/MM/DD');
-        const lastMonth = moment().subtract(30,'d').format('YYYY/MM/DD');
-        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastMonth + '&end=' + today )
-        this.props.toggleTimelapseVideo()
+    requestProject = async() => {
+        const today = moment(new Date()).format('YYYY/MM/DD');
+        const fiveYears = moment(new Date()).subtract(1800,'d').format('YYYY/MM/DD');
+        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + fiveYears + '&end=' + today )
+        .then( () => {
+        this.props.toggleTimelapseVideo()     
+        })     
     }
 
-    requestProject() {
-        const today = moment().format('YYYY/MM/DD');
-        const fiveYears = moment().subtract(1800,'d').format('YYYY/MM/DD');
-        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + fiveYears + '&end=' + today )
-        this.props.toggleTimelapseVideo()          
-    }
-
-    requestByDateRange() {
+    requestByDateRange = async() => {
         let start = this.props.timelapseStart.toString().slice(2, -1);
         let end = this.props.timelapseEnd.toString().slice(2, -1);
-        let s = moment(start).format('YYYY/MM/DD');
-        let e = moment(end).format('YYYY/MM/DD');
-        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + s + '&end=' + e )
+        let s = moment(new Date(start)).format('YYYY/MM/DD');
+        let e = moment(new Date(end)).format('YYYY/MM/DD');
+        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + s + '&end=' + e )
+        .then( () => {
         this.props.toggleTimelapseVideo()   
+        })
     }
 
-      closeDate() {
+      closeDate = () => {
         QuickPicker.close()
     }
 
     _onPressS = () => {
-        const today = new Date;
+        const today = new Date();
         QuickPicker.open({ 
             pickerType: "date",
             mode: 'date',
@@ -79,7 +77,7 @@ class TimelapseScreen extends React.Component {
     }
 
     _onPressE = () => {
-        const today = new Date;
+        const today = new Date();
         QuickPicker.open({ 
             pickerType: "date",
             mode: 'date',
@@ -113,7 +111,7 @@ class TimelapseScreen extends React.Component {
                                     onPress={ this._onPressS } 
                                     style={ styles.dateSelect }>
                             <Icon name="calendar" size={ 28 } color="black" style={ styles.icon } /> 
-                            <Text style={ styles.dateText }>{ moment(this.props.timelapseStart.toString()).format('MM/DD/YY') }</Text>
+                            <Text style={ styles.dateText }>{ moment(new Date(this.props.timelapseStart)).format('MM/DD/YY') }</Text>
                         </Touchable>
 
 
@@ -122,7 +120,7 @@ class TimelapseScreen extends React.Component {
                                     onPress={ this._onPressE } 
                                     style={ styles.dateSelect }>
                             <Icon name="calendar" size={ 28 } color="black" style={ styles.icon } /> 
-                            <Text style={ styles.dateText }>{ moment(this.props.timelapseEnd.toString()).format('MM/DD/YY') }</Text>
+                            <Text style={ styles.dateText }>{ moment(new Date(this.props.timelapseEnd)).format('MM/DD/YY') }</Text>
                         </Touchable>
                     </View>
                     <TimelapseButton title={'Play'} call={ this.requestByDateRange }/>

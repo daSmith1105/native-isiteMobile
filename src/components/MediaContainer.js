@@ -3,7 +3,7 @@
 //TODO: determine how to speed media element load times 
 
 import React from 'react';
-import { StyleSheet, Text, View, TouchableHighlight, Linking, Image, FlatList } from 'react-native';
+import { StyleSheet, Text, View, TouchableHighlight, Linking, Image, FlatList, Button } from 'react-native';
 import MediaElement from './MediaElement';
 import moment from 'moment';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
@@ -16,12 +16,9 @@ class MediaContainer extends React.Component {
     this.state = {
       data: this.props.currentEventList
     }
- 
-    this._renderItem = this._renderItem.bind(this);
- 
   }
 
-      _renderItem( { item } ) {
+      _renderItem = ({ item }) => {
           let imageURL;
           const year = item.sTimeStamp.slice(0, 4);
           const month = item.sTimeStamp.slice(4, 6);
@@ -58,13 +55,39 @@ class MediaContainer extends React.Component {
               videoLoading={ this.props.videoLoading }
               videoReady={ this.props.videoReady }
               playVideo={ this.props.playVideo }
-              bID={ item.bID }   />           
+              bID={ item.bID }
+              tags={ item.oTags || [] } />           
           ) 
     }
 
-    keyExtractor (item) {
-      return item.bID;
-    }
+  keyExtractor (item) {
+    return item.bID;
+  }
+  
+  _listEmptyComponent = () => {
+    return (
+        <View>
+            <Text style={{ fontSize: scale(30), textAlign: 'center', marginTop: 40 }}>Nothing to display</Text>
+            <View style={{  padding: 5, 
+                            borderColor: 'grey', 
+                            borderWidth: 2, 
+                            borderRadius: 5, 
+                            fontSize: scale(20), 
+                            color: 'grey', 
+                            width: '60%', 
+                            maxWidth: 400,
+                            marginRight: 'auto',
+                            marginLeft: 'auto',
+                            marginTop: verticalScale(30) }}>
+            <Button
+              title="Refresh"
+              color="grey"
+              onPress={() => this.props.fetchNewByDate() }
+            />
+            </View>
+        </View>
+    )
+  }
 
 
   render() {
@@ -106,9 +129,10 @@ class MediaContainer extends React.Component {
                 <FlatList style={ styles.eventList }
                   data={ currentEventList }
                   renderItem={ this._renderItem }
-                  inverted={ true }
+                  inverted={ currentEventList.length > 0 ? true : false }
                   keyExtractor={ this.keyExtractor }
                   keyboardShouldPersistTaps='always'
+                  ListEmptyComponent={this._listEmptyComponent}
                   />
                 :
                 null
@@ -125,8 +149,8 @@ export default MediaContainer;
 const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
-    paddingBottom: scale(40),
-    paddingTop: scale(10),
+    paddingTop: verticalScale(40),
+    marginTop: verticalScale(-30),
     justifyContent: 'center',
     alignItems: 'center',
     width: '80%',
@@ -134,8 +158,6 @@ const styles = StyleSheet.create({
   eventList: {
     flex: 1,
     width: '90%',
-    paddingTop: 24,
-    marginBottom: 5,
   },
   errorModal: {
     marginTop: moderateScale(-50),
@@ -202,7 +224,6 @@ const styles = StyleSheet.create({
     width: moderateScale(200),
     height: moderateScale(200),
     borderRadius: 10,
-    textAlign: 'center',
     backgroundColor: 'white'
   }
 });

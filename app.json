@@ -5,7 +5,6 @@
     "version": "1.0.0",
     "slug": "iSiteMobile",
     "privacy": "public",
-    "sdkVersion": "32.0.0",
     "platforms": [
       "ios",
       "android"
@@ -13,7 +12,7 @@
     "android": {
       "package": "net.dividia.iSiteMobile"
     },
-    "orientation": "default",
+
     "primaryColor": "#DAA520",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -28,6 +27,7 @@
     ],
     "ios": {
       "supportsTablet": true,
+      "requireFullScreen": true,
       "bundleIdentifier": "net.dividia.iSiteMobile"
     }
   }

@@ -8,6 +8,7 @@ import Footer from '../components/Footer';
 import MainNav from '../navigation/MainNav';
 import QuickPicker from 'quick-picker';
 import MediaContainer from '../components/MediaContainer';
+import { verticalScale } from 'react-native-size-matters';
 
 
 export default class MainScreen extends React.Component {
@@ -20,7 +21,7 @@ export default class MainScreen extends React.Component {
 {/* ************************************************** */}
       {/* Header component containing logos and customer / data usage information */}
 {/* ************************************************** */}
-          <Header  site={ this.props.site } 
+          <Header   site={ this.props.site } 
                     dataUsage={ this.props.dataUsage }
                     maxData={ this.props.maxData} />
 
@@ -52,6 +53,7 @@ export default class MainScreen extends React.Component {
                             toggleFetchError={ this.props.toggleFetchError }
                             fetchError={ this.props.fetchError }
                             error={ this.props.error }
+                            fetchNewByDate={ this.props.fetchNewByDate }
                             /> 
           </View>
 
@@ -69,7 +71,7 @@ export default class MainScreen extends React.Component {
                      doLogout={ this.props.setLogout }
                      toggleTimelapse={ this.props.toggleTimelapse } /> : 
 
-            <View>
+            <View style={{ height: verticalScale(80) }}>
               <Footer toggleMainNav={ this.props.toggleMainNav }
                       currentEventType={ this.props.currentEventType }
                       eventTypes={ this.props.eventTypes }
@@ -99,5 +101,6 @@ const styles = StyleSheet.create({
   mediaContainer: {
     flex: 1,
     flexDirection: 'row',
+    paddingTop: 40
   },
 });

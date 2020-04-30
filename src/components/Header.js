@@ -1,7 +1,7 @@
 // Contains: Company and Product Logos, Customer/Site name, Data usage information
 
 import React from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 const width = '100%';
@@ -14,10 +14,15 @@ const Header = (props) => {
       <View style={ styles.header }>
 
         <View style={ styles.logosContainer }>
-            <View style={ styles.imageContainer }>
+
+            <View style={{ padding: 5, backgroundColor: 'white', width: '68%', height: moderateScale(48), overflow: 'visible' }}> 
                 <Image source={ require('../../assets/images/dividia.png') } style={ styles.companyLogo } />
             </View>
-            <Image source={ require('../../assets/images/i-site.png') } style={ styles.productLogo } />
+
+            <View style={{ padding: 5, backgroundColor: 'white', width: '18%', height: moderateScale(60) }}> 
+                <Image source={ require('../../assets/images/i-site.png') } style={ styles.productLogo } />
+            </View>
+
         </View>
  
         <View style={ styles.statusContainer }>
@@ -32,44 +37,38 @@ const Header = (props) => {
 
 const styles = StyleSheet.create({
     header: {
+        position: 'relative',
+        top: 0, 
+        left: 0, 
         justifyContent: 'center',
-        alignItems: 'space-between',
-        height: verticalScale(110), 
+        alignItems: 'center',
+        height: verticalScale(70), 
         backgroundColor: 'white',
-        width: scale(350),
-        paddingRight: scale(10),
-        paddingLeft: scale(10),
-        paddingTop: verticalScale(20)
+        width: Dimensions.get('window').width,
     },
     logosContainer: {
-        flex: 1,
         flexDirection: 'row',
-        width: scale(330),
-        height: verticalScale(65),
-        justifyContent: 'space-between'
-    },
-    imageContainer: {
-        alignItems: 'space-around',
-        justifyContent: 'center',
-        height: verticalScale(65),
-        width: moderateScale(200),
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: Dimensions.get('window').width,
+        padding: 10,
+        marginTop: 20
     },
     companyLogo: {
-        width: moderateScale(130, .5),
-        height: moderateScale(45, .5),
-        zIndex: 1,
-        overflow: 'visible',
+        width: '100%%',
+        height: '100%',
+        overflow: 'visible'
     },
     productLogo: {
-        width: moderateScale(65),
-        height: verticalScale(60),
-        overflow: 'visible',
+        width: '100%',
+        height: '100%',
+        overflow: 'visible'
     },
     statusContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',
         position: 'absolute',
-        top: verticalScale(86),
+        top: verticalScale(80),
         left: scale(16),
     },
     statusData: {

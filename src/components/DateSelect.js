@@ -18,12 +18,9 @@ class DateSelect extends React.Component {
         this.state = {
             selectedDate: new Date
         }
-
-        this.confirmDate = this.confirmDate.bind(this);
-        this.closeDate = this.closeDate.bind(this);
     }
 
-    confirmDate() {
+    confirmDate = () => {
         if (moment(this.state.selectedDate).format('MM/DD/YY') != this.props.date) {
             this.props.setDate(this.state.selectedDate);
             QuickPicker.close()
@@ -33,7 +30,7 @@ class DateSelect extends React.Component {
         }
     }
 
-    closeDate() {
+    closeDate = () => {
         QuickPicker.close()
     }
 

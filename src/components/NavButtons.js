@@ -40,7 +40,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: verticalScale(20),
-        width
+        borderRadius: 5,
+        width: width
     },
     navButtonText: {
         fontSize: moderateScale(24, .2),

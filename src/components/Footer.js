@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         backgroundColor: 'grey',
-        height: verticalScale(70),
+        height: verticalScale(60),
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         alignItems: 'center',

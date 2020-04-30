@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { WebBrowser } from 'expo';
+import * as WebBrowser from 'expo-web-browser';
 import { NavButton, NavCloseButton } from '../components/NavButtons';
 import QuickPicker from 'quick-picker';
 import PickerTopRow from '../components/PickerTopRow';
@@ -15,41 +15,34 @@ class MainNav extends React.Component {
         this.state = {
             currentCam: this.props.camArray[0]
         }
-
-        this.timelapse = this.timelapse.bind(this);
-        this.logout = this.logout.bind(this);
-        this.openDividiaURL = this.openDividiaURL.bind(this);
-        this.confirmCamSelect = this.confirmCamSelect.bind(this);
-        this.closeCamSelect = this.closeCamSelect.bind(this);
-        this._onPress = this._onPress.bind(this);
     }
 
-    timelapse() {
+    timelapse = () => {
         this.props.toggleTimelapse;
         this.props.toggleMainNav();
     }
 
-    logout() {
+    logout = () => {
         this.props.toggleMainNav();
         this.props.doLogout();
     }
 
-    openDividiaURL() {
+    openDividiaURL = () => {
         this.props.toggleMainNav();
         WebBrowser.openBrowserAsync('http://www.dividia.net');
     }
 
-    confirmCamSelect() {
+    confirmCamSelect = () => {
         QuickPicker.close()
         this.props.toggleMainNav();
         this.props.handleCamSelect(parseInt( this.state.currentCam.slice(4,6) ) )
     }
 
-    closeCamSelect() {
+    closeCamSelect = () => {
         QuickPicker.close()
     }
 
-    _onPress() {
+    _onPress = () => {
         this.props.toggleMainNav;
         let camValue = 'Cam ' + (this.props.selectedCam + 1).toString();
         console.log( 'camValue > ' + camValue )

@@ -21,14 +21,14 @@ const PickerTopRow = (props) => {
         </View>
     )
 }
+
 const styles = StyleSheet.create({
     pickerTopRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingRight: moderateScale(15),
         paddingLeft: moderateScale(15),  
-        paddingTop: verticalScale(10),  
-      
+        paddingTop: verticalScale(10)
     },
     pickerClose: {
 

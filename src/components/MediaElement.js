@@ -3,10 +3,11 @@
 //Video overlay image (if video)
 
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Image, ImageBackground, Text } from 'react-native';
+import { StyleSheet, View, TouchableHighlight, TouchableOpacity, Image, ImageBackground, Text, ActivityIndicator } from 'react-native';
 import MediaElementHeader from './MediaElementHeader';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import AnimatedBar from 'react-native-animated-bar';
+import Icon5 from 'react-native-vector-icons/FontAwesome5';
+import AnimatedBar from './AnimatedBar';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 export default class MediaElement extends React.Component {
@@ -14,17 +15,17 @@ export default class MediaElement extends React.Component {
     super(props);
       this.state = {
         progressBar: 0,
-        downloadError: false
+        downloadError: false,
+        downloadingVideo: false
       }
-      this.requestVideo = this.requestVideo.bind(this);
     }
 
     setCached() {
-      this.setState({ progressBar: 100 })
+      this.setState({ progressBar: 100, downloadingVideo: false })
     }
 
-    requestVideo( siteURL, bID ) {
-      console.log('Downloading video ... ');
+    requestVideo = (siteURL, bID) => {
+      this.setState({ downloadingVideo: true })
         fetch( siteURL + 'ajax.php?action=requestVideo&id=' + bID )
           .then( response => {
             if (response.status !== 200) {
@@ -69,7 +70,6 @@ export default class MediaElement extends React.Component {
             toggleImage, 
             siteTag,
             image, 
-            duration, 
             sType, 
             sImage,
             cachedProgress,
@@ -81,89 +81,162 @@ export default class MediaElement extends React.Component {
 
           let timeStamp = sTimeStamp;
           let URL= siteURL + sImage;
+          const duration = Math.floor(this.props.duration / 60) + 'm ' + this.props.duration % 60 + 's';
 
                 return (
 
                     <View style={ styles.media }>  
 
-                      {/* Overlayed video event icon tied to status */}
+                      { sType == 'VIDEO' ?
+                            <View style={ styles.containerStyle }>
 
+                              { this.state.downloadingVideo ?
+                              // video downloading state = true
+                                <TouchableOpacity style={ styles.mediaContainerStyle }>
+                                    <View style={ styles.mediaButtonStyle }>
+                                      <ActivityIndicator size={moderateScale(20, .2)} color="white" />
+                                      <Text style={ styles.buttonTextStyle }>Downloading Video</Text>
+                                    </View>
+                                  </TouchableOpacity> :
+                              // progress bar is = 0
+                                  parseInt( cachedProgress ) === 0 && this.state.progressBar !== 100 ? 
+                                    <TouchableOpacity onPress={ () => !this.state.downloadingVideo && this.requestVideo('https://' + siteTag + '.dividia.net/', bID) }
+                                                      style={ styles.mediaContainerStyle }>
+                                      <View style={ styles.mediaButtonStyle }>
+                                        <Icon name="cloud-download" size={ moderateScale(20, .2) } color="white" /> 
+                                        <Text style={ styles.buttonTextStyle }>Load Video</Text>
+                                      </View>
+                                    </TouchableOpacity> :
+                              // progress bar = 100
+                                  <TouchableOpacity onPress={ () => playVideo( sTimeStamp, date, time, duration )} 
+                                                    style={ styles.mediaPlayContainerStyle }>
+                                    <View style={ styles.mediaButtonStyle }>
+                                      <Icon name="play" size={ moderateScale(20, .2) } color="white" /> 
+                                      <Text style={ styles.buttonTextStyle }>Play Video</Text>
+                                    </View>
+                                  </TouchableOpacity>
+                              }
 
+                              {/* Show progress bar for type 'VIDEO' */}
+                              { this.state.downloadingVideo ? 
+                                <AnimatedBar
+                                        style={ styles.progress }
+                                        progress={ cachedProgress == 100 || this.state.progressBar / 100  ? 1 : this.state.progressBar / 100} 
+                                        height={moderateScale(12, .25)}
+                                        barColor="green"
+                                        borderRadius={5} /> :
+                                <View style={{ height: moderateScale(12, .25), width: '95%' }}></View>
+                              }
 
-                          {/* Video pre-loading ( default initial view) */}
-                          { sType == 'VIDEO' && ( parseInt( cachedProgress ) == 0 ) && this.state.progressBar != 100 ?  // || this.state.progressBar == 0 
-                              <TouchableHighlight onPress={ () => this.requestVideo('https://' + siteTag + '.dividia.net/', bID) } 
-                                                  style={ styles.videoBackground }>
-                                <Icon name="cloud-download" size={ moderateScale(100, .3) } color="white" style={ styles.cloudButton }/> 
-                              </TouchableHighlight> :
-                              null
-                          }
+                            {/* Show video duration for type 'VIDEO' */}
+                              <Text style={ styles.duration }>
+                                { duration }
+                              </Text>
 
-                          {/* Video is ready to play */}
-                          { sType == 'VIDEO' &&  ( parseInt( cachedProgress ) == 100  || this.state.progressBar == 100 ) ? // || this.state.progressBar == 100 
-                              <TouchableHighlight onPress={ () => playVideo( sTimeStamp, date, time, duration )} 
-                                                  style={ styles.videoBackground }>
-                                <Icon name="play-circle" size={ moderateScale(100, .3) } color="white" style={ styles.playButton }/> 
-                              </TouchableHighlight> :
-                              null
-                          }
+                              { this.state.downloadError ?
+                                  <Text style={ styles.downloadError }>Error Retrieving Video</Text> :
+                                  null
+                              } 
+                            </View> :
+                         null
+                      }
                           
-                          {/* Show image background if type is 'STILL' */}
-                          { sType == 'STILL' ?
-                            <TouchableHighlight onPress={ () => toggleImage( sImage, date, time ) } 
-                              style={ styles.imageBackground }>
-                              <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.imageLoading } >
-                              <Image source={{ uri: image }} style={ styles.image } />
-                              </ImageBackground>
-                            </TouchableHighlight> :
-                            null
-                          }
+                    {/* Show image background if type is 'STILL' */}
+                      { sType == 'STILL' ?
+                        <TouchableHighlight onPress={ () => toggleImage( sImage, date, time ) } 
+                          style={ styles.imageBackground }>
+                          <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.imageLoading } >
+                          <Image source={{ uri: image }} style={ styles.image } />
+                          </ImageBackground>
+                        </TouchableHighlight> :
+                        null
+                      }
 
-                          {/* Show video duration for type 'VIDEO' */}
-                          { sType == 'VIDEO' ?
-                            <Text style={ styles.duration }>
-                              { Math.floor(duration / 60) + 'm ' + duration % 60 + 's' }
-                            </Text> :
-                            null 
-                          }
+                    {/* Header for VIDEO and STILL media types */}
+                        <MediaElementHeader style={ styles.mediaHeader }
+                                            date={ date }
+                                            time={ time }
+                                            type={ sType }
+                                            tags={ this.props.tags } /> 
 
-                          {/* Show progress bar for type 'VIDEO' */}
-                              { sType == 'VIDEO' ?
-                                  <AnimatedBar
-                                      style={ styles.progress }
-                                      progress={ cachedProgress == 100 || this.state.progressBar / 100  ? 1 : this.state.progressBar / 100} 
-                                      height={moderateScale(12, .25)}
-                                      barColor="green"
-                                      borderRadius={5} /> : 
-                                      null }
-                            { this.state.downloadError ?
-                                <Text style={ styles.downloadError }>Error Retrieving Video</Text> :
-                                null
-                            }
-
-
-                          <MediaElementHeader style={ styles.mediaHeader }
-                                              date={ date }
-                                              time={ time } />
-                        
                     </View>
                 )
               }
             }
 
 const styles = StyleSheet.create({
+  containerStyle: {
+    height: verticalScale(50), 
+    width: '100%', 
+    borderBottomRightRadius: 5, 
+    borderBottomLeftRadius: 5, 
+    backgroundColor: 'dodgerblue',
+    padding: scale(5),
+    position: 'relative'
+  },
+  mediaContainerStyle: {
+    height: '70%', 
+    width: '70%', 
+    marginTop: scale(8), 
+    flexDirection: "row", 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    padding: scale(2), 
+    paddingLeft: scale(5), 
+    paddingRight: scale(5), 
+    borderWidth: 2, 
+    borderColor: 'white', 
+    borderRadius: 5
+  },
+  mediaPlayContainerStyle: {
+    backgroundColor: 'rgba(0,0,0,.3)', 
+    height: '70%', 
+    width: '70%', 
+    marginTop: scale(8), 
+    flexDirection: "row", 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    padding: scale(2), 
+    paddingLeft: scale(5), 
+    paddingRight: scale(5), 
+    borderWidth: 2, 
+    borderColor: 'rgba(0,0,0,.3)', 
+    borderRadius: 5
+  },
+  mediaButtonStyle: {
+    height: '100%', 
+    width: '100%', 
+    flexDirection: "row", 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    padding: 0,
+    height: 40
+  },
+  buttonTextStyle: {
+    marginLeft: 8, 
+    fontWeight: 'bold', 
+    fontSize: moderateScale(18, .2), 
+    color: 'white'
+  },
   media: {
     borderRadius: 5,
-    marginTop: 5,
-    marginBottom: 5,
+    marginTop: scale(10),
+    paddingTop: moderateScale(1, 10),
+    marginBottom: 30,
     width: '100%',
-    height: verticalScale(200),
-    paddingBottom: -100,
+    maxWidth: 900,
+    height: 'auto',
+    position: 'relative',
+    marginRight: 'auto',
+    marginLeft: 'auto'
   },
   mediaHeader: {
     position: 'absolute',
     top: 0,
     left: 0,
+    width: '100%',
+    borderTopRightRadius: 5,
+    borderTopLeftRadius: 5,
   },
   enlarge: {
     marginTop: -40,
@@ -182,7 +255,8 @@ const styles = StyleSheet.create({
   },
   imageBackground: {
     borderRadius: 5,
-    marginTop: -30,
+    marginTop: verticalScale(-22),
+    // paddingTop: moderateScale(30),
     width: '100%',
     height: verticalScale(200),
     justifyContent: 'center',
@@ -214,12 +288,12 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   duration: {
-    textAlign: 'right',
-    marginTop: moderateScale(-40, .2),
-    marginRight: moderateScale(20, .2),
     fontSize: moderateScale(16, .2),
     fontWeight: 'bold',
     color: 'white',
+    position: 'absolute',
+    bottom: verticalScale(14),
+    right: scale(10)
   },
   download: {
     position: 'absolute',
@@ -234,13 +308,15 @@ const styles = StyleSheet.create({
     zIndex: 6,
   },
   progress: {
-    marginTop: 2 ,
     width: '98%',
     borderWidth: 2,
     borderColor: 'white',
     borderRadius: 5,
-    marginLeft: '1%',
     zIndex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0, 
+    marginLeft: '1%'
   },
   downloadError: {
     fontSize: moderateScale(20, .4),
