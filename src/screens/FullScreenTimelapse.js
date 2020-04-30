@@ -16,7 +16,10 @@ export default class FullScreenTimelapse extends React.Component {
         isPortrait: false,
         isPlaying: true,
         totalDuration: 0,
-        currentTime: 0
+        currentTime: 0,
+        loadingText: 'Building Timelapse ... ',
+        rate: .5,
+        rateIndex: 2
       };
   }
 
@@ -26,8 +29,11 @@ export default class FullScreenTimelapse extends React.Component {
         isPortrait: false,
         isPlaying: true,
         totalDuration: 0,
-        currentTime: 0
+        currentTime: 0,
+        loadingText: 'Building Timelapse ... '
     })
+    setTimeout(() => this.setState({ loadingText: 'Processing Video ... ' }), 1000)
+    setTimeout(() => this.setState({ loadingText: 'Finishing Build ... ' }), 2000)
   }
 
   componentWillUnmount = () => {
@@ -35,11 +41,21 @@ export default class FullScreenTimelapse extends React.Component {
   }
 
   switchToLandscape = () => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
   }
 
   switchToPortrait = () => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+  }
+
+  sweepRate = () => {
+    const rates = [ .175, .25, .5, 1 ];
+    let currentRateIndex = this.state.rateIndex;
+    let newRateIndex = currentRateIndex < 3 ? currentRateIndex + 1 : 0;
+    this.setState({
+      rate: rates[newRateIndex],
+      rateIndex: newRateIndex
+    })
   }
 
   render() {
@@ -97,8 +113,10 @@ export default class FullScreenTimelapse extends React.Component {
                                                     alignItems: 'center', 
                                                     justifyContent: 'center', 
                                                     height: Dimensions.get('window').height,
-                                                    width: Dimensions.get('window').width, }}>
+                                                    width: Dimensions.get('window').width,
+                                                    position: 'relative' }}>
                 <VideoPlayer
+                
                   width={ Dimensions.get('window').width }
                   style={ styles.videoPlayer }
                   videoProps={{
@@ -108,6 +126,7 @@ export default class FullScreenTimelapse extends React.Component {
                       uri: sTimelapse,
                     },
                     isMuted: false,
+                    rate: this.state.rate
                   }}
                   playIcon={icon('ios-play')}
                   pauseIcon={icon('ios-pause')}
@@ -121,6 +140,7 @@ export default class FullScreenTimelapse extends React.Component {
                   }}
                   showFullscreenButton={ false }
                   playFromPositionMillis={ 0 }
+                  inFullScreen={true}
                   fadeInDuration={ 200 }
                   fadeOutDuration={ 600 }
                   quickFadeOutDuration={ 200 }
@@ -129,6 +149,16 @@ export default class FullScreenTimelapse extends React.Component {
                   isPortrait={ false }
                   playbackCallback={ (e) => this.setState({ isPlaying: e.isPlaying, currentTime: Math.floor(e.positionMillis / 1000), totalDuration: Math.floor(e.durationMillis / 1000) }) }
                 />
+              { this.state.totalDuration < 1 ? 
+                <View style={{ zIndex: 60, height: Dimensions.get('window').width, width: Dimensions.get('window').height, position: 'absolute', top: 0, left: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
+                  <Text style={{ padding: 40, color: 'white', fontSize: scale(20)}}>{this.state.loadingText}</Text> 
+                </View> :
+                null
+              }
+               <Text style={{ position: 'absolute', bottom: scale(10), right: scale(10), fontWeight: 'bold', padding: scale(5), color: 'white', backgroundColor: 'rgba(0,0,0,.5)', fontSize: scale(20), borderColor: 'transparent', borderRadius: 10 }}
+                    onPress={ this.sweepRate }>
+                {this.state.rate} X
+              </Text>
             </ScrollView>      
         </View> 
     );

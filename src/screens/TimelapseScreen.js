@@ -17,37 +17,25 @@ class TimelapseScreen extends React.Component {
     
     requestDay = async() => {
         const today = moment(new Date()).format('YYYY/MM/DD');
-        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + today + '&end=' + today )
-        .then( () => {
-          this.props.toggleTimelapseVideo()
-        })
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + today + '&end=' + today )
     }
 
     requestWeek = async() => {
         const today = moment(new Date()).format('YYYY/MM/DD');
         const lastWeek = moment(new Date()).subtract(7,'d').format('YYYY/MM/DD');
-        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastWeek + '&end=' + today )
-        .then( () => {
-        this.props.toggleTimelapseVideo()
-        })
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastWeek + '&end=' + today )
     }
 
     requestMonth = async() => {
         const today = moment(new Date()).format('YYYY/MM/DD');
         const lastMonth = moment(new Date()).subtract(30,'d').format('YYYY/MM/DD');
-        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastMonth + '&end=' + today )
-        .then( () => {
-        this.props.toggleTimelapseVideo()
-        })
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + lastMonth + '&end=' + today )
     }
 
     requestProject = async() => {
         const today = moment(new Date()).format('YYYY/MM/DD');
         const fiveYears = moment(new Date()).subtract(1800,'d').format('YYYY/MM/DD');
-        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + fiveYears + '&end=' + today )
-        .then( () => {
-        this.props.toggleTimelapseVideo()     
-        })     
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + fiveYears + '&end=' + today )   
     }
 
     requestByDateRange = async() => {
@@ -55,10 +43,7 @@ class TimelapseScreen extends React.Component {
         let end = this.props.timelapseEnd.toString().slice(2, -1);
         let s = moment(new Date(start)).format('YYYY/MM/DD');
         let e = moment(new Date(end)).format('YYYY/MM/DD');
-        const set = await this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + s + '&end=' + e )
-        .then( () => {
-        this.props.toggleTimelapseVideo()   
-        })
+        this.props.setTimelapse( this.props.siteURL + 'timelapse.php?start=' + s + '&end=' + e )
     }
 
       closeDate = () => {

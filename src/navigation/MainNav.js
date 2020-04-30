@@ -22,9 +22,9 @@ class MainNav extends React.Component {
         this.props.toggleMainNav();
     }
 
-    logout = () => {
+    logout = async() => {
+        await this.props.doLogout();
         this.props.toggleMainNav();
-        this.props.doLogout();
     }
 
     openDividiaURL = () => {

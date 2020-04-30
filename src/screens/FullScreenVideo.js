@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { RECORDING_OPTION_IOS_BIT_RATE_STRATEGY_CONSTANT } from 'expo-av/build/Audio';
 
 
 export default class FullScreenVideo extends React.Component {
@@ -16,7 +17,9 @@ export default class FullScreenVideo extends React.Component {
           isPortrait: false,
           isPlaying: true,
           totalDuration: 0,
-          currentTime: 0
+          currentTime: 0,
+          rate: 1,
+          rateIndex: 1
         };
     }
 
@@ -29,11 +32,21 @@ export default class FullScreenVideo extends React.Component {
   }
 
   switchToLandscape = () => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
   }
 
   switchToPortrait = () => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+  }
+
+  sweepRate = () => {
+    const rates = [ .5, 1, 2, 3, 4, 5 ];
+    let currentRateIndex = this.state.rateIndex;
+    let newRateIndex = currentRateIndex < 5 ? currentRateIndex + 1 : 0;
+    this.setState({
+      rate: rates[newRateIndex],
+      rateIndex: newRateIndex
+    })
   }
 
     render() {
@@ -69,7 +82,7 @@ export default class FullScreenVideo extends React.Component {
 
               <View style={{ flexDirection: 'column' }}>
                 <Text style={ styles.timestamp }>{ timeStamp }</Text>
-                <Text style={ styles.time }>Clip time remaining: {( (this.state.totalDuration - this.state.currentTime) + 1 ).toString()}s</Text>
+                <Text style={ styles.time }>Clip time remaining: { this.state.totalDuration > 0 && this.state.totalDuration !== this.state.currentTime ? ( (this.state.totalDuration - this.state.currentTime) + 1 ).toString() : '0' }s</Text>
               </View>
       
               <TouchableHighlight onPress={ () => downloadVideoEvent( URL ) } style={ styles.download }>
@@ -93,12 +106,12 @@ export default class FullScreenVideo extends React.Component {
             </View> 
 
             <ScrollView maximumZoomScale={3} 
-                          minimumZoomScale={1} 
-                          contentContainerStyle={{  flexDirection: 'row', 
-                                                    alignItems: 'center', 
-                                                    justifyContent: 'center', 
-                                                    height: Dimensions.get('window').height,
-                                                    width: Dimensions.get('window').width }}>
+                        minimumZoomScale={1} 
+                        contentContainerStyle={{  flexDirection: 'row', 
+                                                  alignItems: 'center', 
+                                                  justifyContent: 'center', 
+                                                  height: Dimensions.get('window').height,
+                                                  width: Dimensions.get('window').width }}>
               <VideoPlayer
                 width={ Dimensions.get('window').width }
                 style={ styles.videoPlayer }
@@ -108,15 +121,16 @@ export default class FullScreenVideo extends React.Component {
                   source: {
                     uri: URL,
                   },
-                  isMuted: true
+                  isMuted: true,
+                  rate: this.state.rate
                 }}
                 inFullscreen={true}
                 playIcon={icon('ios-play')}
                 pauseIcon={icon('ios-pause')}
-                // fullscreenEnterIcon={icon('ios-expand-outline', moderateScale(28))}
-                // fullscreenExitIcon={icon('ios-contract-outline', moderateScale(28))}
-                // trackImage={require('../../assets/images/track.png')}
-                // thumbImage={require('../../assets/images/thumb.png')}
+                fullscreenEnterIcon={icon('ios-expand-outline', moderateScale(28))}
+                fullscreenExitIcon={icon('ios-contract-outline', moderateScale(28))}
+                trackImage={require('../../assets/images/track.png')}
+                thumbImage={require('../../assets/images/thumb.png')}
                 textStyle={{
                   color: COLOR,
                   fontSize: moderateScale(12),
@@ -130,9 +144,12 @@ export default class FullScreenVideo extends React.Component {
                 // showControlsOnLoad={ true }
                 isPortrait={ this.state.isPortrait }
                 switchToLandscape={ this.switchToLandscape() }
-                // playbackCallback={ (e) => console.log(e)}
                 playbackCallback={ (e) => this.setState({ isPlaying: e.isPlaying, currentTime: Math.floor(e.positionMillis / 1000), totalDuration: Math.floor(e.durationMillis / 1000) }) }
               />
+              <Text style={{ position: 'absolute', bottom: scale(10), right: scale(10), fontWeight: 'bold', padding: scale(5), color: 'white', backgroundColor: 'rgba(0,0,0,.5)', fontSize: scale(20), borderColor: 'transparent', borderRadius: 10 }}
+                    onPress={ this.sweepRate }>
+                {this.state.rate} X
+              </Text>
             </ScrollView>
           </View>
         )

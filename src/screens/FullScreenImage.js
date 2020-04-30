@@ -14,22 +14,6 @@ export default class FullScreenImage extends React.Component {
       };
   }
 
-  componentDidMount = () => {
-    this.switchToLandscape();
-  }
-
-  componentWillUnmount = () => {
-     this.switchToPortrait();
-  }
-
-  switchToLandscape = () => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
-  }
-
-  switchToPortrait = () => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-  }
-
     render() {
 
       const { siteURL, 
@@ -80,8 +64,8 @@ export default class FullScreenImage extends React.Component {
                         contentContainerStyle={{  flexDirection: 'row', 
                                                   alignItems: 'center', 
                                                   justifyContent: 'center', 
-                                                  height: Dimensions.get('window').height,
-                                                  width: Dimensions.get('window').width, }}>
+                                                  height: '100%',
+                                                  width: '100%' }}>
               <Image style={ styles.image }
                       source={{ uri: URL }}
                       width={ Dimensions.get('window').width }

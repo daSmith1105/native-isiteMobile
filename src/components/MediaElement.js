@@ -20,6 +20,14 @@ export default class MediaElement extends React.Component {
       }
     }
 
+    componentWillUnmount = () => {
+      this.setState({
+        progressBar: 0,
+        downloadError: false,
+        downloadingVideo: false
+      })
+    }
+
     setCached() {
       this.setState({ progressBar: 100, downloadingVideo: false })
     }
@@ -28,38 +36,48 @@ export default class MediaElement extends React.Component {
       this.setState({ downloadingVideo: true })
         fetch( siteURL + 'ajax.php?action=requestVideo&id=' + bID )
           .then( response => {
-            if (response.status !== 200) {
-              console.log('Error. Status Code: ' + response.status);
-              return;
+            if (!response.ok) {
+              throw new Error('Error. Status Code: ' + response.status);
             }
-            response.json().then( data => {
-  
-              if (data.status == 0 ) {
-  
-                  var pollProgress = 
-                    setTimeout(function() {
-                      if( this.state.progressBar === 0 ) {
-                        this.setState({ downloadError: true })
-                        clearInterval(pollProgress); 
-                      }
-                    }.bind(this), 10000)
+            return response.json()
+          })
+          .then( data => {
+            if (data.status == 0 ) {
+              const pollProgress = 
+                setTimeout(() => {
+                  if( this.state.progressBar === 0 ) {
+                    this.setState({ downloadError: true })
+                    clearInterval(this.pollProgress); 
+                  }
+                }, 10000)
 
-                    setInterval(function() {
-                      fetch( siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
-                        .then( response => {
-                          response.json().then( data => {
-  
-                            if (parseInt(data.dCacheProgress) == 100){  
-                              this.setCached();
-                              clearInterval(pollProgress) 
-                            } 
-  
-                            this.setState({ progressBar:  parseInt( data.dCacheProgress ) })
-                          })
-                        })
-                        }.bind(this), 1000 )
-                }
-              })
+                setInterval( () => {
+                  fetch( siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
+                    .then( response => {
+                      if(!response.ok) {
+                        throw new Error('could not get event cache progress')
+                      }
+                      return response.json()
+                    })
+                    .then( data => {
+                      if (parseInt(data.dCacheProgress) == 100){  
+                        this.setCached();
+                        clearInterval(this.pollProgress); 
+                      } 
+
+                      this.setState({ progressBar: parseInt( data.dCacheProgress ) })
+                    })
+                    .catch( error => {
+                      throw new Error( error )
+                    })
+                }, 500 )
+              } else {
+                throw new Error('cache progress error')
+              }
+          })
+          .catch ( error => {
+            console.log('Regest video error: ', error)
+            clearInterval(this.pollProgress); 
           })
     }
 
