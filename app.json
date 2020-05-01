@@ -2,7 +2,7 @@
   "expo": {
     "name": "Dividia iSite",
     "icon": "./assets/images/icon.png",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "slug": "iSiteMobile",
     "privacy": "public",
     "platforms": [
@@ -10,7 +10,8 @@
       "android"
     ],
     "android": {
-      "package": "net.dividia.iSiteMobile"
+      "package": "net.dividia.iSiteMobile",
+      "versionCode": 1
     },
 
     "primaryColor": "#DAA520",
