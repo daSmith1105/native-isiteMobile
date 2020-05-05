@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, StatusBar, View, AsyncStorage, Dimensions } from 'react-native';
+import { StyleSheet, StatusBar, View, AsyncStorage } from 'react-native';
+import { DeviceMotion } from 'expo-sensors';
 import * as MediaLibrary from 'expo-media-library'
-import * as ScreenOrientation from 'expo-screen-orientation';
 import * as FileSystem from 'expo-file-system';
 import MainScreen from './src/screens/MainScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -20,6 +20,8 @@ class App extends React.Component {
     super(props);
 
     this.state = {
+      objectDetectionEnabled: false,
+      orientation: 'portrait',
       isLoggedIn: false,
       loginLoading: false,
       site: '', // full site name used in header
@@ -27,17 +29,25 @@ class App extends React.Component {
       siteURL: '',
       projects: [],
       eventTypes: [ 'ALL', 
-                    '-----------------',
                     'IMAGES', 
-                    'IMAGE & VEHICLE', 
-                    'IMAGE & PEOPLE',
-                    'IMAGE & BOTH',
-                    '-----------------',
-                    'VIDEOS',
-                    'VIDEO & VEHICLE', 
-                    'VIDEO & PEOPLE',
-                    'VIDEO & BOTH',
+                    'VIDEOS'
                   ],
+      eventTypesWithObj: [ 'ALL', 
+                          '-----------------',
+                          'ANY & VEHICLE',
+                          'ANY & PEOPLE',
+                          'ANY & BOTH',
+                          '-----------------',
+                          'IMAGES', 
+                          'IMAGE & VEHICLE', 
+                          'IMAGE & PEOPLE',
+                          'IMAGE & BOTH',
+                          '-----------------',
+                          'VIDEOS',
+                          'VIDEO & VEHICLE', 
+                          'VIDEO & PEOPLE',
+                          'VIDEO & BOTH',
+                        ],
       currentEventType: 'ALL',
       currentEventList: [],
       selectedCam: 0,
@@ -71,14 +81,19 @@ class App extends React.Component {
       mediaDownloadLoading: false,
       mediaDownloadSuccess: false,
       mediaDownloadFailed: false,
-      isPortrait: true,
     }
   
   }
 
   componentDidMount = () => {
-      this.switchToPortrait();
       this.retrieveSessionVariable();
+  // Use DeviceMotion module to get the device rotation (Euler angle)
+      DeviceMotion.addListener(({rotation}) => {
+        const alpha = Math.abs(rotation.alpha);
+        this.setState({
+          orientation: alpha > 3 || (alpha > 0 && alpha < 0.5) ? 'portrait' : 'landscape'
+        });
+      });
   }
 
   orientationChangeHandler = (dims) => {
@@ -87,16 +102,8 @@ class App extends React.Component {
     this.setState({ isPortrait: !isLandscape });
   }
 
-  switchToLandscape = () => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-  }
-
-  switchToPortrait = () => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-  }
-
   saveSessionVariable = async () => { 
-    // eventually resue with (key, value)
+    // eventually reuse with (key, value)
     try {
       // await AsyncStorage.setItem( key.toString(), value );
       await AsyncStorage.setItem( 'isLoggedIn', 'true' );
@@ -126,9 +133,9 @@ class App extends React.Component {
         this.setState({ isLoggedIn: false })
       }
 
-        this.fetchNewByDate( today, 'ALL')
-        this.fetchDataUsage()
-        this.checkForMultipleCams();
+      this.fetchNewByDate( today )
+      this.fetchDataUsage()
+      this.checkForMultipleCams();
 
     } catch( error ) {
       console.log( 'Retrieving session variable from local storage FAILED ' + error.message )
@@ -176,7 +183,7 @@ class App extends React.Component {
             loginLoading: false
           },
             function() {
-              this.fetchNewByDate( today, 'ALL' )
+              this.fetchNewByDate( today )
               this.fetchDataUsage()
               this.checkForMultipleCams();
               this.saveSessionVariable()
@@ -211,24 +218,33 @@ class App extends React.Component {
   setLogout = async() => {
     camCount = []
     await this.clearSessionVariable();
-    this.setState({   isLoggedIn: false,
+    this.setState({   
+      objectDetectionEnabled: false,
       isLoggedIn: false,
       site: '', // full site name used in header
       siteTag: '', // short version of site used for URL
       siteURL: '',
       projects: [],
       eventTypes: [ 'ALL', 
-                    '-----------------',
                     'IMAGES', 
-                    'IMAGE & VEHICLE', 
-                    'IMAGE & PEOPLE',
-                    'IMAGE & BOTH',
-                    '-----------------',
-                    'VIDEOS',
-                    'VIDEO & VEHICLE', 
-                    'VIDEO & PEOPLE',
-                    'VIDEO & BOTH',
+                    'VIDEOS'
                   ],
+      eventTypesWithObj: [  'ALL', 
+                            '-----------------',
+                            'ANY & VEHICLE',
+                            'ANY & PEOPLE',
+                            'ANY & BOTH',
+                            '-----------------',
+                            'IMAGES', 
+                            'IMAGE & VEHICLE', 
+                            'IMAGE & PEOPLE',
+                            'IMAGE & BOTH',
+                            '-----------------',
+                            'VIDEOS',
+                            'VIDEO & VEHICLE', 
+                            'VIDEO & PEOPLE',
+                            'VIDEO & BOTH',
+                          ],
       currentEventType: 'ALL',
       currentEventList: [],
       selectedCam: 0,
@@ -290,7 +306,8 @@ class App extends React.Component {
     } else if ( site == 'daniels' ) {
         this.setState({ site: "Daniel's Ranch",
           siteTag: site,
-          siteURL: 'https://' + site + '.dividia.net/'  
+          siteURL: 'https://' + site + '.dividia.net/',
+          objectDetectionEnabled: true
         }) 
     } else {
       console.log('site not found')
@@ -346,7 +363,7 @@ class App extends React.Component {
       if (!response.ok) {
         throw new Error('Error. Status Code: ' + response.status);
       }
-      this.fetchNewByDate( this.state.date, this.state.currentEventType )
+      this.fetchNewByDate()
       this.fetchDataUsage()
     })
     .catch( error => {
@@ -363,10 +380,6 @@ class App extends React.Component {
       sImageTime: time,
       showFullImage: !this.state.showFullImage,
       showMainNav: false
-    }, () => {
-      console.log(this.state.showFullImage)
-      !this.state.showFullImage && this.switchToPortrait();
-      this.state.showFullImage && this.switchToLandscape();
     })
   }
 
@@ -503,6 +516,21 @@ class App extends React.Component {
           currentEventList: this.state.events
         })
       break;
+      case 'ANY & VEHICLE':
+        this.setState({ 
+          currentEventList: this.state.events.filter( i => i.oTags.indexOf('vehicle') > -1 && i.oTags.indexOf('person') < 0 )
+        })
+      break;
+      case 'ANY & PEOPLE':
+        this.setState({ 
+          currentEventList: this.state.events.filter( i => i.oTags.indexOf('person') > -1 && i.oTags.indexOf('vehicle') < 0 )
+        })
+      break;
+      case 'ANY & BOTH':
+        this.setState({ 
+          currentEventList: this.state.events.filter( i => i.oTags.indexOf('vehicle') > -1 && i.oTags.indexOf('person') > -1 )
+        })
+      break;
       case 'IMAGES':
         this.setState({ 
           currentEventList: this.state.images
@@ -571,7 +599,7 @@ class App extends React.Component {
 
         this.setState({ loading: true })
         setTimeout(() => {
-          this.fetchNewByDate( today, 'IMAGES')
+          this.fetchNewByDate( today, 'ALL')
         }, 4000)
         setTimeout(() => {
           this.setState({ loading: false })
@@ -595,8 +623,11 @@ class App extends React.Component {
 
     if( sFilterType ) { 
       filterType = sFilterType 
+    } else if ( this.state.objectDetectionEnabled ) {
+      filterType = 'ANY & VEHICLE'
     } else { 
-      filterType = 'ALL' }
+      filterType = 'ALL'
+    }
 
       this.setState({
           loading: true,
@@ -622,12 +653,10 @@ class App extends React.Component {
         }, () => {
           this.setCurrentEventList( this.state.currentEventType)
           this.setState({ loading: false })
-        })    
+        }) 
       } else {
-        this.setState({ 
-          loading: false,
-          fetchError: true })
-      } 
+        this.setState({ loading: false })
+      }   
     })
     .catch( err => {
       console.log('Fetch Error: ', err);
@@ -637,8 +666,6 @@ class App extends React.Component {
       })
     })
   }
-  
-
 
   // Set new date and fetch events for new date
   setDate = (selectedDate) => {
@@ -646,7 +673,9 @@ class App extends React.Component {
       date: moment(new Date(selectedDate)).format('MM/DD/YY'),
      }, 
     () => { 
-      this.fetchNewByDate( this.state.date, 'ALL' ) 
+      this.state.objectDetectionEnabled ?
+        this.fetchNewByDate( this.state.date, this.state.currentEventType || 'ANY & VEHICLE' ) :
+        this.fetchNewByDate( this.state.date, this.state.currentEventType || 'ALL' ) 
     })
   }
 
@@ -792,7 +821,9 @@ class App extends React.Component {
                           selectedCam={ this.state.selectedCam }
                           handleCamSelect = { this.handleCamSelect }
                           projects={ this.state.projects }
+                          objectDetectionEnabled={ this.state.objectDetectionEnabled }
                           eventTypes={ this.state.eventTypes }
+                          eventTypesWithObj={ this.state.eventTypesWithObj }
                           updateEventType={ this.updateEventType }
                           currentEventType={ this.state.currentEventType }
                           currentEventList={ this.state.currentEventList }
@@ -820,18 +851,20 @@ class App extends React.Component {
                           mediaDownloadLoading={ this.state.mediaDownloadLoading }
                           mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
                           mediaDownloadFailed={ this.state.mediaDownloadFailed }
+                          orientation={ this.state.orientation }
                            /> :
               null }
 
             { !this.state.isLoggedIn  ? 
-              <LoginScreen setLogin={ this.setLogin } 
+              <LoginScreen  setLogin={ this.setLogin } 
                             setLogout={ this.setLogout }
                             loggedIn={ this.state.isLoggedIn }
                             validateLogin={ this.validateLogin }
                             noInput={ this.state.noInput }
                             error={ this.state.error }
                             checkLogin={ this.checkLogin }
-                            loginLoading={ this.state.loginLoading } /> :
+                            loginLoading={ this.state.loginLoading }
+                            orientation={ this.state.orientation } /> :
               null }    
 
             { this.state.isLoggedIn && this.state.showTimelapse  
@@ -854,7 +887,8 @@ class App extends React.Component {
                                 setTimelapse={ this.setTimelapse }
                                 timelapseStart={ this.state.sTimelapseStart }
                                 timelapseEnd={ this.state.sTimelapseEnd }
-                                downloadVideoEvent={ this.downloadVideoEvent } /> :
+                                downloadVideoEvent={ this.downloadVideoEvent }
+                                orientation={ this.state.orientation } /> :
               null }
 
             {/* <FullScreenImage /> */}
@@ -868,7 +902,7 @@ class App extends React.Component {
                                 mediaDownloadLoading={ this.state.mediaDownloadLoading }
                                 mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
                                 mediaDownloadFailed={ this.state.mediaDownloadFailed }
-                                 /> :
+                                orientation={ this.state.orientation } /> :
               null }
 
               {/* <FullScreenVideo /> */}
@@ -883,7 +917,7 @@ class App extends React.Component {
                                 mediaDownloadLoading={ this.state.mediaDownloadLoading }
                                 mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
                                 mediaDownloadFailed={ this.state.mediaDownloadFailed }
-                                 /> : 
+                                orientation={ this.state.orientation } /> : 
               null }
 
               {/* <FullScreenTimelapse /> */}
@@ -895,11 +929,12 @@ class App extends React.Component {
                                    mediaDownloadLoading={ this.state.mediaDownloadLoading }
                                    mediaDownloadSuccess={ this.state.mediaDownloadSuccess }
                                    mediaDownloadFailed={ this.state.mediaDownloadFailed }
-                                    /> :
+                                   orientation={ this.state.orientation } /> :
               null }
 
             {/* Hide the top status bar on ios */}
-            <StatusBar hidden={ true } style={ styles.statusBar }/>
+            <StatusBar hidden={ true } 
+                       style={ styles.statusBar }/>
 
             <QuickPicker />
 

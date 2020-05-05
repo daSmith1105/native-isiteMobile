@@ -1,6 +1,3 @@
-//TODO: implement navigation for timelapse selection passed to the footer element
-//      implement quickSearch feature on the right hand side of screen
-
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Header from '../components/Header';
@@ -23,7 +20,8 @@ export default class MainScreen extends React.Component {
 {/* ************************************************** */}
           <Header   site={ this.props.site } 
                     dataUsage={ this.props.dataUsage }
-                    maxData={ this.props.maxData} />
+                    maxData={ this.props.maxData}
+                    orientation={ this.props.orientation } />
 
 {/* ************************************************** */}
       {/* Images, Video thumbnail display and quick search by hour */}
@@ -54,7 +52,7 @@ export default class MainScreen extends React.Component {
                             fetchError={ this.props.fetchError }
                             error={ this.props.error }
                             fetchNewByDate={ this.props.fetchNewByDate }
-                            /> 
+                            orientation={ this.props.orientation } /> 
           </View>
 
 {/* ************************************************** */}
@@ -69,18 +67,22 @@ export default class MainScreen extends React.Component {
                      handleCamSelect= { this.props.handleCamSelect }
                      getSnapshot={ this.props.getCurrentImage }
                      doLogout={ this.props.setLogout }
-                     toggleTimelapse={ this.props.toggleTimelapse } /> : 
+                     toggleTimelapse={ this.props.toggleTimelapse }
+                     orientation={ this.props.orientation } /> : 
 
             <View style={{ height: verticalScale(80) }}>
               <Footer toggleMainNav={ this.props.toggleMainNav }
                       currentEventType={ this.props.currentEventType }
+                      objectDetectionEnabled={ this.props.objectDetectionEnabled }
                       eventTypes={ this.props.eventTypes }
+                      eventTypesWithObj={ this.props.eventTypesWithObj }
                       updateEventType={ this.props.updateEventType }
                       date={ this.props.date }
                       setDate={ this.props.setDate }
                       loading={ this.props.loading }
                       toggleloading={ this.props.toggleLoading }
-                      toggleFetchError={ this.toggleFetchError } /> 
+                      toggleFetchError={ this.toggleFetchError }
+                      orientation={ this.props.orientation } /> 
             </View> 
           }
 

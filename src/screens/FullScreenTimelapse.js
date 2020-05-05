@@ -1,11 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, TouchableHighlight, Text, Dimensions, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
+import MediaHeader from '../components/MediaHeader';
 import { Video } from 'expo-av';
-import VideoPlayer from 'expo-video-player';
-import { Ionicons } from '@expo/vector-icons';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import * as ScreenOrientation from 'expo-screen-orientation';
-import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { scale, moderateScale } from 'react-native-size-matters';
 
 export default class FullScreenTimelapse extends React.Component {
 
@@ -13,49 +10,28 @@ export default class FullScreenTimelapse extends React.Component {
     super(props);
 
     this.state = {
-        isPortrait: false,
         isPlaying: true,
         totalDuration: 0,
         currentTime: 0,
         loadingText: 'Building Timelapse ... ',
         rate: .5,
-        rateIndex: 2
+        loaded: false
       };
+
+      this.videoPlayer = React.createRef();
   }
 
   componentDidMount = () => {
-    this.switchToLandscape();
     this.setState({ 
         isPortrait: false,
         isPlaying: true,
         totalDuration: 0,
         currentTime: 0,
-        loadingText: 'Building Timelapse ... '
+        loadingText: 'Building Timelapse ... ',
+        loaded: false
     })
-    setTimeout(() => this.setState({ loadingText: 'Processing Video ... ' }), 1000)
-    setTimeout(() => this.setState({ loadingText: 'Finishing Build ... ' }), 2000)
-  }
-
-  componentWillUnmount = () => {
-     this.switchToPortrait();
-  }
-
-  switchToLandscape = () => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-  }
-
-  switchToPortrait = () => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-  }
-
-  sweepRate = () => {
-    const rates = [ .175, .25, .5, 1 ];
-    let currentRateIndex = this.state.rateIndex;
-    let newRateIndex = currentRateIndex < 3 ? currentRateIndex + 1 : 0;
-    this.setState({
-      rate: rates[newRateIndex],
-      rateIndex: newRateIndex
-    })
+    setTimeout(() => this.setState({ loadingText: 'Processing Video ... ' }), 4000)
+    setTimeout(() => this.setState({ loadingText: 'Finishing Build ... ' }), 10000)
   }
 
   render() {
@@ -71,27 +47,12 @@ export default class FullScreenTimelapse extends React.Component {
             mediaDownloadSuccess,
             mediaDownloadFailed } = this.props;
 
-    const COLOR = '#92DCE5';
-    const icon = (name, size = 36) => () => (
-      <Ionicons
-        name={name}
-        size={size}
-        color={COLOR}
-        style={{ textAlign: 'center' }}
-      />
-    );
-
     return (
         <View style={ styles.container }>
-          <View style={ styles.fullScreenHeader }>
-              <TouchableHighlight onPress={ () => toggleTimelapseVideo() } style={ styles.back }>
-                          <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
-              </TouchableHighlight> 
-              <Text style={ styles.time }>Clip time remaining: { this.state.totalDuration > 0 && this.state.totalDuration !== this.state.currentTime ? ( (this.state.totalDuration - this.state.currentTime) + 1 ).toString() : '0' }s</Text>
-              <TouchableHighlight onPress={ () => downloadVideoEvent( sTimelapse ) } style={ styles.download }>
-                        <Icon name="arrow-circle-down" size={ moderateScale(50) } color="white" />
-            </TouchableHighlight>
-          </View>
+          <MediaHeader    onPressBack={ toggleTimelapseVideo } 
+                          onPressDownload={ () => downloadVideoEvent( sTimelapse ) }
+                          video >
+          </MediaHeader>
 
           <View style={ styles.mediaDownloadStatus }>
               { mediaDownloadLoading && ( !mediaDownloadSuccess || !mediaDownloadFailed ) ? 
@@ -115,56 +76,48 @@ export default class FullScreenTimelapse extends React.Component {
                                                     height: Dimensions.get('window').height,
                                                     width: Dimensions.get('window').width,
                                                     position: 'relative' }}>
-                <VideoPlayer
-                
-                  width={ Dimensions.get('window').width }
-                  style={ styles.videoPlayer }
-                  videoProps={{
-                    shouldPlay: false,
-                    resizeMode: Video.RESIZE_MODE_CONTAIN,
-                    source: {
-                      uri: sTimelapse,
-                    },
-                    isMuted: false,
-                    rate: this.state.rate
-                  }}
-                  playIcon={icon('ios-play')}
-                  pauseIcon={icon('ios-pause')}
-                  fullscreenEnterIcon={icon('ios-expand-outline', 28)}
-                  fullscreenExitIcon={icon('ios-contract-outline', 28)}
-                  trackImage={require('../../assets/images/track.png')}
-                  thumbImage={require('../../assets/images/thumb.png')}
-                  textStyle={{
-                    color: COLOR,
-                    fontSize: moderateScale(12),
-                  }}
-                  showFullscreenButton={ false }
-                  playFromPositionMillis={ 0 }
-                  inFullScreen={true}
-                  fadeInDuration={ 200 }
-                  fadeOutDuration={ 600 }
-                  quickFadeOutDuration={ 200 }
-                  hideControlsTimerDuration={ 3000 }
-                  showControlsOnLoad={ true }
-                  isPortrait={ false }
-                  playbackCallback={ (e) => this.setState({ isPlaying: e.isPlaying, currentTime: Math.floor(e.positionMillis / 1000), totalDuration: Math.floor(e.durationMillis / 1000) }) }
+                 <Video ref={ ref => this.videoPlayer = ref }
+                     shouldPlay={false}
+                     resizeMode="contain"
+                     source={{ uri: sTimelapse }}
+                     isMuted={true}
+                     rate={ 0.5 }
+                     useNativeControls={ true }
+                     onLoad={ () => this.setState({ loaded: true }) }
+                     style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height - scale(20) }}
                 />
-              { this.state.totalDuration < 1 ? 
-                <View style={{ zIndex: 60, height: Dimensions.get('window').width, width: Dimensions.get('window').height, position: 'absolute', top: 0, left: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
-                  <Text style={{ padding: 40, color: 'white', fontSize: scale(20)}}>{this.state.loadingText}</Text> 
+
+              { !this.state.loaded ? 
+                <View style={{ height: Dimensions.get('window').height, width: Dimensions.get('window').width, position: 'absolute', top: 0, left: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
+                  <Text style={{ padding: 40, color: 'white', fontSize: moderateScale(20, .5), textAlign: 'center' }}>This may take a minute depending on length of timelapse and your connection speed.</Text>
+                  <ActivityIndicator size="large" color="dodgerblue" />
+                  <Text style={{ padding: 40, color: 'white', fontSize: moderateScale(20, .5), textAlign: 'left' }}>{this.state.loadingText}</Text> 
                 </View> :
                 null
               }
-               <Text style={{ position: 'absolute', bottom: scale(10), right: scale(10), fontWeight: 'bold', padding: scale(5), color: 'white', backgroundColor: 'rgba(0,0,0,.5)', fontSize: scale(20), borderColor: 'transparent', borderRadius: 10 }}
-                    onPress={ this.sweepRate }>
-                {this.state.rate} X
+
+            </ScrollView> 
+
+            {/* <Text style={{ position: 'absolute', bottom: scale(40), right: scale(130), fontWeight: 'bold', padding: scale(5), color: this.state.rate == 0.1 ? 'goldenrod' : 'white', backgroundColor: 'rgba(0,0,0,.5)', fontSize: moderateScale(20, .2 ), borderColor: 'transparent', borderRadius: 10 }}
+                    onPress={ () => { this.videoPlayer.setRateAsync(0.1); this.setState({ rate: 0.1 }) } }>
+                0.175x
               </Text>
-            </ScrollView>      
+              <Text style={{ position: 'absolute', bottom: scale(40), right: scale(90), fontWeight: 'bold', padding: scale(5), color: this.state.rate == 0.2? 'goldenrod' : 'white', backgroundColor: 'rgba(0,0,0,.5)', fontSize: moderateScale(20, .2 ), borderColor: 'transparent', borderRadius: 10 }}
+                    onPress={ () => { this.videoPlayer.setRateAsync(0.2); this.setState({ rate: 0.2 }) } }>
+                0.25x
+              </Text>
+              <Text style={{ position: 'absolute', bottom: scale(40), right: scale(50), fontWeight: 'bold', padding: scale(5), color: this.state.rate == 0.5 ? 'goldenrod' : 'white', backgroundColor: 'rgba(0,0,0,.5)', fontSize: moderateScale(20, .2 ), borderColor: 'transparent', borderRadius: 10 }}
+                    onPress={ () => { this.videoPlayer.setRateAsync(0.5); this.setState({ rate: 0.5 }) } }>
+                0.5x
+              </Text>
+              <Text style={{ position: 'absolute', bottom: scale(40), right: scale(20), fontWeight: 'bold', padding: scale(5), color: this.state.rate == 1.0 ? 'goldenrod' : 'white', backgroundColor: 'rgba(0,0,0,.5)', fontSize: moderateScale(20, .2 ), borderColor: 'transparent', borderRadius: 10 }}
+                    onPress={ () => { this.videoPlayer.setRateAsync(1.0); this.setState({ rate: 1.0 }) } }>
+                1x
+              </Text>      */}
         </View> 
     );
   }
 }
-
 
 const styles = StyleSheet.create({
   
@@ -174,45 +127,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'black'
   },
-  fullScreenHeader: {
-    zIndex: 5, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-around', 
-    position: 'absolute', 
-    top: 0, 
-    right: 0, 
-    width: '100%', 
-    height: moderateScale(64), 
-    backgroundColor: 'rgba(0,0,0,.4)'
-  },
-  videoPlayer: {
-    height: Dimensions.get('window').width,
-    width: Dimensions.get('window').height,
+  time: {
+    color: 'white',
+    fontSize: moderateScale(16, .2)
   },
   icon: {
     marginTop: scale(15),
     marginBottom: scale(15),
   },
-  time: {
-    color: 'white',
-    fontSize: moderateScale(16, .2),
-  },
-  download: {
-    borderRadius: moderateScale(50),
-    backgroundColor: 'grey',
-    paddingLeft: moderateScale(3),
-    paddingRight: moderateScale(3),
-  },
-  back: {
-    borderRadius: moderateScale(50),
-    backgroundColor: 'grey',
-    paddingLeft: moderateScale(9),
-    paddingRight: moderateScale(11),
-    paddingTop: moderateScale(6),
-    paddingBottom: moderateScale(10),
-    borderWidth: 2,
-    borderColor: 'white'
+  videoPlayer: {
+    resizeMode: 'contain'
   },
   mediaDownloadStatus: {
     position: 'absolute',
@@ -225,10 +149,7 @@ const styles = StyleSheet.create({
   mediaDownloadText: {
     fontSize: moderateScale(24, .2),
     color: 'white',
-    position: 'absolute',
-    top: '50%',
     alignItems: 'center',
-    justifyContent: 'center',
-    margin: 5,
+    justifyContent: 'center'
   }
 });

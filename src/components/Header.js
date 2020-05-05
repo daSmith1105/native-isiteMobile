@@ -1,10 +1,6 @@
-// Contains: Company and Product Logos, Customer/Site name, Data usage information
-
 import React from 'react';
 import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
-
-const width = '100%';
 
 const Header = (props) => {
 
@@ -42,7 +38,7 @@ const styles = StyleSheet.create({
         left: 0, 
         justifyContent: 'center',
         alignItems: 'center',
-        height: verticalScale(70), 
+        height: verticalScale(70),
         backgroundColor: 'white',
         width: Dimensions.get('window').width,
     },

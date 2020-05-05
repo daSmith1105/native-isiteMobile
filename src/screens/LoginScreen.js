@@ -1,10 +1,7 @@
-//TODO: implement navigation for timelapse selection passed to the footer element
-//      implement quickSearch feature on the right hand side of screen
-
 import React from 'react';
 import { StyleSheet, Text, View, TouchableHighlight, TextInput, Image, KeyboardAvoidingView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { verticalScale, moderateScale, scale } from 'react-native-size-matters';
 
 class LoginScreen extends React.Component {
   constructor(props) {
@@ -31,7 +28,6 @@ class LoginScreen extends React.Component {
           <Image source={ require('../../assets/images/i-site.png')}
                  style={ styles.isiteIcon } />
           <View style={ styles.directiveContainer }>
-            <Text style={ styles.directive1 }>Sign in to your viewer</Text>
 
             <View style={ styles.directive2Container }>
               <Text style={ styles.directive2 }>Enter your site's</Text>
@@ -92,13 +88,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   dividiaIcon: {
-    height: verticalScale(60),
-    width: moderateScale(300),
+    height: verticalScale(50),
+    width: moderateScale(240, 1),
     overflow: 'visible',
   },
   isiteIcon: {
-    height: verticalScale(120),
-    width: moderateScale(120),
+    height: verticalScale(100),
+    width: moderateScale(80, 1),
     marginBottom: 10,
     overflow: 'visible',
   },
@@ -106,6 +102,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: moderateScale(18, .2),
     marginBottom: 2,
+    marginTop: verticalScale(10)
   },
   error: {
     fontSize: moderateScale(18, .2),
@@ -130,6 +127,7 @@ const styles = StyleSheet.create({
   directive2: {
     fontSize: moderateScale(16, .2),
     marginRight: 5,
+    marginTop: verticalScale(10)
   },
   inputContainer: {
     flexDirection: 'row',
@@ -141,10 +139,9 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   loginInput: {
-    width: moderateScale(160),
-    height: verticalScale(40),
+    width: moderateScale(160, .4),
     borderWidth: 2,
-    padding: 5,
+    padding: moderateScale(8, .2),
     borderColor: 'grey',
     borderRadius: 5,
     fontSize: moderateScale(24, .2),

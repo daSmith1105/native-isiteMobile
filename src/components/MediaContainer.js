@@ -1,9 +1,5 @@
-//Contains logic to generate media array (elements), holds state of event filter
-
-//TODO: determine how to speed media element load times 
-
 import React from 'react';
-import { StyleSheet, Text, View, TouchableHighlight, Linking, Image, FlatList, Button } from 'react-native';
+import { StyleSheet, Text, View, TouchableHighlight, Linking, Image, FlatList, Button, ActivityIndicator } from 'react-native';
 import MediaElement from './MediaElement';
 import moment from 'moment';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
@@ -14,51 +10,50 @@ class MediaContainer extends React.Component {
     super(props);
 
     this.state = {
-      data: this.props.currentEventList
+      data: this.props.currentEventList,
+      downloadStatus: false,
     }
   }
 
-      _renderItem = ({ item }) => {
-          let imageURL;
-          const year = item.sTimeStamp.slice(0, 4);
-          const month = item.sTimeStamp.slice(4, 6);
-          const day = item.sTimeStamp.slice(6, 8);
-          let hour = item.sTimeStamp.slice(8, 10);
-          const minute = item.sTimeStamp.slice(10, 12);
-          const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
-          if( hour > 12 ) { hour = hour - 12 }
-          const date = month + '/' + day + '/' + year;
-          const time = hour + ':' + minute + ' ' + dayNight;
+  componentDidMount = () => {
+    this.setState({ 
+      downloadStatus: false
+    })
+  }
 
-          if( item.sType == 'STILL' && item.sThumbnailM != null ) {  
-            imageURL = 'https://' + this.props.siteTag + '.dividia.net/' + item.sThumbnailM;
-          } else {
-            imageURL = 'https://' + this.props.siteTag + '.dividia.net/thumbnail.php?&size=m&img=' + item.sImage;
-          }
+  setDownloadStatus = status => {
+    let boolean = false;
+    if(status){
+      boolean = true
+    };
+    this.setState({ downloadStatus: boolean });
+  }
 
-          return (
-            <MediaElement 
-              sTimeStamp={ item.sTimeStamp }
-              date={ date }
-              time={ time }
-              image={ imageURL }
-              siteTag={ this.props.siteTag }
-              siteURL={ this.props.siteURL }
-              downloadImageEvent={ this.props.downloadImageEvent }
-              toggleImage={ this.props.toggleImage } 
-              sImage={ item.sImage }
-              duration={ item.bDuration }
-              sType={ item.sType }
-              cached={ item.fCached }
-              cachedProgress={ parseInt( item.dCacheProgress ) }
-              requestVideo={ this.props.requestVideo }
-              videoLoading={ this.props.videoLoading }
-              videoReady={ this.props.videoReady }
-              playVideo={ this.props.playVideo }
-              bID={ item.bID }
-              tags={ item.oTags || [] } />           
-          ) 
-    }
+  checkDownloadStatus = () => {
+    return this.state.downloadStatus;
+  }
+
+  _renderItem = ({ item }) => 
+        <MediaElement 
+          sTimeStamp={ item.sTimeStamp }
+          thumbnail={ item.sThumbnailM }
+          sImage={ item.sImage }
+          siteTag={ this.props.siteTag }
+          siteURL={ this.props.siteURL }
+          downloadImageEvent={ this.props.downloadImageEvent }
+          toggleImage={ this.props.toggleImage } 
+          sImage={ item.sImage }
+          duration={ item.bDuration }
+          sType={ item.sType }
+          cached={ item.fCached }
+          cachedProgress={ parseInt( item.dCacheProgress ) }
+          videoLoading={ this.props.videoLoading }
+          videoReady={ this.props.videoReady }
+          playVideo={ this.props.playVideo }
+          bID={ item.bID }
+          tags={ item.oTags || [] }
+          setDownloadStatus={ this.setDownloadStatus }
+          checkDownloadStatus={ this.checkDownloadStatus } />           
 
   keyExtractor (item) {
     return item.bID;
@@ -89,7 +84,6 @@ class MediaContainer extends React.Component {
     )
   }
 
-
   render() {
 
     const { currentEventList } = this.props;
@@ -100,9 +94,8 @@ class MediaContainer extends React.Component {
             { this.props.loading && !this.props.fetchError ? 
                 <View style={ styles.loader }>
                   <View style={ styles.loaderContainer }>
+                    <ActivityIndicator size="large" color="dodgerblue" />
                     <Text style={ styles.loaderText }>Loading Events</Text>
-                    <Image source={ require('../../assets/images/loader-small.gif') }
-                          style={ styles.loaderIcon } />
                   </View>
                 </View> : 
                 null 
@@ -127,13 +120,13 @@ class MediaContainer extends React.Component {
 
             { !this.props.loading && !this.props.fetchError  ? 
                 <FlatList style={ styles.eventList }
-                  data={ currentEventList }
-                  renderItem={ this._renderItem }
-                  inverted={ currentEventList.length > 0 ? true : false }
-                  keyExtractor={ this.keyExtractor }
-                  keyboardShouldPersistTaps='always'
-                  ListEmptyComponent={this._listEmptyComponent}
-                  />
+                          data={ currentEventList }
+                          renderItem={ this._renderItem }
+                          inverted={ currentEventList.length > 0 ? true : false }
+                          keyExtractor={ this.keyExtractor }
+                          keyboardShouldPersistTaps='always'
+                          ListEmptyComponent={this._listEmptyComponent}
+                          />
                 :
                 null
             }
@@ -213,6 +206,7 @@ const styles = StyleSheet.create({
     marginTop: moderateScale(20),
     width: '100%',
     paddingBottom: moderateScale(10),
+    paddingTop: moderateScale(10),
   },
   loaderText: {
     fontSize: moderateScale(28, .2),

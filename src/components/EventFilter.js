@@ -33,7 +33,7 @@ class EventFilter extends React.Component {
 
     _onPress = () => {
         QuickPicker.open({ 
-            items: this.props.eventTypes, 
+            items: this.props.objectDetectionEnabled ? this.props.eventTypesWithObj : this.props.eventTypes, 
             textStyle: { fontSize: moderateScale(26, .3) },
             topRow: <PickerTopRow   pickerTitle={'Select Filter'} 
                                     pickerConfirm={'SELECT'}

@@ -39,7 +39,9 @@ function Footer (props) {
                 <Hamburger call={ toggleMainNav } />
                 <EventFilter style={ styles.eventFilter}
                             currentEventType={ currentEventType }
-                            eventTypes={ eventTypes }
+                            objectDetectionEnabled={ props.objectDetectionEnabled }
+                            eventTypes={ props.eventTypes }
+                            eventTypesWithObj={ props.eventTypesWithObj }
                             updateEventType={ updateEventType } 
                             loading={ loading }
                             toggleLoading={ toggleLoading } />       

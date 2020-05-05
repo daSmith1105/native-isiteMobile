@@ -1,8 +1,7 @@
 import React from 'react';
-import { StyleSheet, View, Image, TouchableHighlight, Text, Dimensions, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import * as ScreenOrientation from 'expo-screen-orientation';
-import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { StyleSheet, View, Image, Text, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
+import MediaHeader from '../components/MediaHeader';
+import { scale, moderateScale } from 'react-native-size-matters';
 
 
 export default class FullScreenImage extends React.Component {
@@ -10,12 +9,19 @@ export default class FullScreenImage extends React.Component {
     super(props);
 
     this.state = {
-        isPortrait: false,
+      loaded: false
       };
   }
 
-    render() {
+  componentDidMount = () => {
+    setTimeout( () => this.setState({ loaded: true }), 1000)
+  }
 
+  componentWillUnMount = () => {
+    this.setState({ loaded: false })
+  }
+
+    render() {
       const { siteURL, 
               sImage, 
               sImageDate, 
@@ -32,19 +38,10 @@ export default class FullScreenImage extends React.Component {
         return (
           <View style={ styles.container }>
 
-            <View style={ styles.fullScreenHeader }>
-              <TouchableHighlight onPress={ () => { toggleImage() }} style={ styles.back}>
-                <Icon name="arrow-left" size={ moderateScale(30) } color="white" />             
-              </TouchableHighlight>
-
-              <Text style={ styles.timestamp }>{ timeStamp }</Text>
-
-              <TouchableHighlight onPress={ () => downloadImageEvent( URL )  } style={ styles.download}>
-                <Icon name="arrow-circle-down" size={ moderateScale(50) } color="white" />
-              </TouchableHighlight>
-
-            </View>
-
+            <MediaHeader  timeStamp={ timeStamp }
+                          onPressBack={ toggleImage } 
+                          onPressDownload={ () => downloadImageEvent( URL ) } />
+           
             <View style={ styles.mediaDownloadStatus }>
                 { mediaDownloadLoading && ( !mediaDownloadSuccess || !mediaDownloadFailed ) ? 
                 <Text style={ styles.mediaDownloadText }>Download in progress...</Text> :
@@ -70,6 +67,14 @@ export default class FullScreenImage extends React.Component {
                       source={{ uri: URL }}
                       width={ Dimensions.get('window').width }
                       height={ Dimensions.get('window').height } />
+
+              { !this.state.loaded ? 
+                <View style={{ height: Dimensions.get('window').height, width: Dimensions.get('window').width, position: 'absolute', top: 0, left: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
+                  <ActivityIndicator size="large" color="goldenrod" />
+                  <Text style={{ padding: 40, color: 'white', fontSize: scale(20), textAlign: 'left' }}>Loading Image ... </Text> 
+                </View> :
+                null
+              }
             </ScrollView>
     </View>
         );
@@ -85,45 +90,14 @@ export default class FullScreenImage extends React.Component {
       justifyContent: 'center',
       backgroundColor: 'black'
     },
-    fullScreenHeader: {
-      zIndex: 5, 
-      flexDirection: 'row', 
-      alignItems: 'center', 
-      justifyContent: 'space-around', 
-      position: 'absolute', 
-      top: 0, 
-      right: 0, 
-      width: '100%', 
-      height: moderateScale(64), 
-      backgroundColor: 'rgba(0,0,0,.4)'
-    },
-    timestamp: {
-      color: 'white',
-      fontSize: moderateScale(16, .2)
-    },
     image: {
       flex: 1,
       zIndex: 1,
+      resizeMode: 'contain'
     },
     icon: {
       marginTop: moderateScale(15),
       marginBottom: moderateScale(15),
-    },
-    download: {
-      borderRadius: 50,
-      backgroundColor: 'grey',
-      paddingLeft: moderateScale(3),
-      paddingRight: moderateScale(3),
-    },
-    back: {
-      borderRadius: 50,
-      backgroundColor: 'grey',
-      paddingLeft: moderateScale(9),
-      paddingRight: moderateScale(11),
-      paddingTop: moderateScale(6),
-      paddingBottom: moderateScale(10),
-      borderWidth: 2,
-      borderColor: 'white'
     },
     mediaDownloadStatus: {
       position: 'absolute',

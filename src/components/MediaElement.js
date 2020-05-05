@@ -1,7 +1,3 @@
-//TODO: Element for static image or video images on main screen
-//Includes: Media date, Media timestamp, Download Button, Full screen/Enlarge Button, 
-//Video overlay image (if video)
-
 import React from 'react';
 import { StyleSheet, View, TouchableHighlight, TouchableOpacity, Image, ImageBackground, Text, ActivityIndicator } from 'react-native';
 import MediaElementHeader from './MediaElementHeader';
@@ -10,6 +6,8 @@ import Icon5 from 'react-native-vector-icons/FontAwesome5';
 import AnimatedBar from './AnimatedBar';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
+let imageURL;
+let count = 1;
 export default class MediaElement extends React.Component {
   constructor(props) {
     super(props);
@@ -20,21 +18,22 @@ export default class MediaElement extends React.Component {
       }
     }
 
-    componentWillUnmount = () => {
-      this.setState({
-        progressBar: 0,
+    componentDidMount = () => {
+      count = 1;
+      this.setState({ 
         downloadError: false,
         downloadingVideo: false
       })
     }
 
-    setCached() {
-      this.setState({ progressBar: 100, downloadingVideo: false })
-    }
-
-    requestVideo = (siteURL, bID) => {
-      this.setState({ downloadingVideo: true })
-        fetch( siteURL + 'ajax.php?action=requestVideo&id=' + bID )
+    requestVideo = (bID) => {
+      // console.log(this.props.checkDownloadStatus())
+      if( !this.state.downloadingVideo && !this.props.checkDownloadStatus() ) {
+        this.props.setDownloadStatus('true');
+        this.setState({ downloadingVideo: true, progressBar: 0, downloadError: false },
+        () => {
+          count = 1;
+          fetch( this.props.siteURL + 'ajax.php?action=requestVideo&id=' + bID )
           .then( response => {
             if (!response.ok) {
               throw new Error('Error. Status Code: ' + response.status);
@@ -42,64 +41,81 @@ export default class MediaElement extends React.Component {
             return response.json()
           })
           .then( data => {
-            if (data.status == 0 ) {
-              const pollProgress = 
-                setTimeout(() => {
-                  if( this.state.progressBar === 0 ) {
-                    this.setState({ downloadError: true })
-                    clearInterval(this.pollProgress); 
-                  }
-                }, 10000)
-
-                setInterval( () => {
-                  fetch( siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
-                    .then( response => {
-                      if(!response.ok) {
-                        throw new Error('could not get event cache progress')
-                      }
-                      return response.json()
-                    })
-                    .then( data => {
-                      if (parseInt(data.dCacheProgress) == 100){  
-                        this.setCached();
-                        clearInterval(this.pollProgress); 
-                      } 
-
-                      this.setState({ progressBar: parseInt( data.dCacheProgress ) })
-                    })
-                    .catch( error => {
-                      throw new Error( error )
-                    })
-                }, 500 )
-              } else {
-                throw new Error('cache progress error')
-              }
+            if(data.status === 0) {
+              this.getDownloadProgress(bID);
+            }
+            else {
+              throw new Error( 'could not get requested video')
+            }
           })
           .catch ( error => {
-            console.log('Regest video error: ', error)
-            clearInterval(this.pollProgress); 
+            console.log('Error: ', error)
+            this.setState({ downloadError: true });
           })
+        })
+      }
     }
+  
+      setCached() {
+        this.props.setDownloadStatus();
+        this.setState({ progressBar: 100, downloadingVideo: false, downloadError: false })
+      }
+  
+      getDownloadProgress = (bID) => {
+        const id = bID;
+        fetch( this.props.siteURL + 'ajax.php?action=getEventCacheProgress&id=' + bID)
+        .then( response => {
+          if(!response.ok) {
+            throw new Error('could not get event cache progress')
+          }
+          return response.json()
+        })
+        .then( data => {
+          // count += 1
+          // console.log(`${count} - progress: `, data.dCacheProgress)
+          if (parseInt(data.dCacheProgress) === 100){  
+            // console.log('done')
+            this.setCached();
+            return;
+          } 
+          
+          this.setState({ progressBar: data.dCacheProgress },
+          () => {
+            setTimeout(() => this.getDownloadProgress(id), 500)
+          })
+        })
+        .catch( error => {
+          throw new Error( error )
+        })
+      }
 
       render() {
           const { 
-            date, 
-            time, 
             toggleImage, 
             siteTag,
-            image, 
             sType, 
             sImage,
+            duration, 
             cachedProgress,
             bID,
             playVideo,
-            sTimeStamp,
-            siteURL } = this.props;
- 
+            sTimeStamp } = this.props;
 
-          let timeStamp = sTimeStamp;
-          let URL= siteURL + sImage;
-          const duration = Math.floor(this.props.duration / 60) + 'm ' + this.props.duration % 60 + 's';
+            const year = this.props.sTimeStamp.slice(0, 4);
+            const month = this.props.sTimeStamp.slice(4, 6);
+            const day = this.props.sTimeStamp.slice(6, 8);
+            let hour = this.props.sTimeStamp.slice(8, 10);
+            const minute = this.props.sTimeStamp.slice(10, 12);
+            const dayNight = parseInt(hour) > 11 ? 'PM' : 'AM';
+            if( hour > 12 ) { hour = hour - 12 }
+            const date = month + '/' + day + '/' + year;
+            const time = hour + ':' + minute + ' ' + dayNight;
+  
+            if( this.props.sType == 'STILL' && this.props.sThumbnailM != null ) {  
+              imageURL = 'https://' + this.props.siteTag + '.dividia.net/' + this.props.sThumbnailM;
+            } else {
+              imageURL = 'https://' + this.props.siteTag + '.dividia.net/thumbnail.php?&size=m&img=' + this.props.sImage;
+            }
 
                 return (
 
@@ -118,7 +134,7 @@ export default class MediaElement extends React.Component {
                                   </TouchableOpacity> :
                               // progress bar is = 0
                                   parseInt( cachedProgress ) === 0 && this.state.progressBar !== 100 ? 
-                                    <TouchableOpacity onPress={ () => !this.state.downloadingVideo && this.requestVideo('https://' + siteTag + '.dividia.net/', bID) }
+                                    <TouchableOpacity onPress={ () => this.requestVideo(bID) }
                                                       style={ styles.mediaContainerStyle }>
                                       <View style={ styles.mediaButtonStyle }>
                                         <Icon name="cloud-download" size={ moderateScale(20, .2) } color="white" /> 
@@ -139,7 +155,7 @@ export default class MediaElement extends React.Component {
                               { this.state.downloadingVideo ? 
                                 <AnimatedBar
                                         style={ styles.progress }
-                                        progress={ cachedProgress == 100 || this.state.progressBar / 100  ? 1 : this.state.progressBar / 100} 
+                                        progress={ this.state.progressBar / 100 } 
                                         height={moderateScale(12, .25)}
                                         barColor="green"
                                         borderRadius={5} /> :
@@ -148,7 +164,7 @@ export default class MediaElement extends React.Component {
 
                             {/* Show video duration for type 'VIDEO' */}
                               <Text style={ styles.duration }>
-                                { duration }
+                                { duration }s
                               </Text>
 
                               { this.state.downloadError ?
@@ -162,10 +178,11 @@ export default class MediaElement extends React.Component {
                     {/* Show image background if type is 'STILL' */}
                       { sType == 'STILL' ?
                         <TouchableHighlight onPress={ () => toggleImage( sImage, date, time ) } 
-                          style={ styles.imageBackground }>
-                          <ImageBackground source={ require('../../assets/images/imageLoading.gif') } style={ styles.imageLoading } >
-                          <Image source={{ uri: image }} style={ styles.image } />
-                          </ImageBackground>
+                                            style={ styles.imageBackground }>
+                          <View style={ styles.imageLoading } >
+                            <ActivityIndicator size="large" color="dodgerblue" style={{ position: 'absolute', top: '45%', left: 0, right: 0, margin: 'auto', zIndex: 1 }} />
+                            <Image source={{ uri: imageURL }} style={ styles.image } />
+                          </View>
                         </TouchableHighlight> :
                         null
                       }
@@ -269,7 +286,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: '100%',
     height: verticalScale(200),
-    zIndex: 1,
+    zIndex: 2,
   },
   imageBackground: {
     borderRadius: 5,
@@ -281,6 +298,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imageLoading: {
+    position: 'relative',
     width: '100%',
     height: verticalScale(200),
     justifyContent: 'center',
